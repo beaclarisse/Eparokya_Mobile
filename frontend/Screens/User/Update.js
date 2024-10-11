@@ -181,7 +181,6 @@ const UpdateProfile = () => {
           />
         </View>
 
-        {/* Preference Dropdown */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Preference</Text>
           <RNPickerSelect

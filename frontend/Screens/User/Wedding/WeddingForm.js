@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import Input from "../../../Shared/Form/Input";
 import FormContainer from "../../../Shared/Form/FormContainer";
@@ -9,6 +9,7 @@ import axios from "axios";
 import SyncStorage from "sync-storage";
 import Toast from "react-native-toast-message";
 import baseURL from "../../../assets/common/baseUrl";
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const Wedding = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -32,6 +33,7 @@ const Wedding = ({ navigation }) => {
     weddingDate: "",
   });
 
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const handleChange = (name, value) => {
     if (name.includes("address1") || name.includes("address2")) {
       const [addressKey, subKey] = name.split(".");
@@ -47,6 +49,11 @@ const Wedding = ({ navigation }) => {
     }
   };
 
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || formData.weddingDate;
+    setShowDatePicker(false);
+    setFormData({ ...formData, weddingDate: currentDate.toISOString().split('T')[0] });
+  };
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
@@ -95,11 +102,39 @@ const Wedding = ({ navigation }) => {
     }
   };
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      setFormData({
+        name1: "",
+        address1: { state: "", zip: "", country: "" },
+        age1: "",
+        gender1: "",
+        phoneNumber1: "",
+        name2: "",
+        address2: { state: "", zip: "", country: "" },
+        age2: "",
+        gender2: "",
+        phoneNumber2: "",
+        familyNameRelative1: "",
+        relationship1: "",
+        familyNameRelative2: "",
+        relationship2: "",
+        attendees: "",
+        flowerGirl: "",
+        ringBearer: "",
+        weddingDate: "",
+      });
+    });
+
+    return unsubscribe; // Cleanup the listener on unmount
+  }, [navigation]);
+
+
   return (
     <FormContainer style={styles.container}>
       {/* Bride */}
       <View style={styles.inputContainer}>
-        <Input placeholder="Name 1"
+        <Input placeholder="Bride"
           value={formData.name1}
           onChangeText={(text) => handleChange("name1", text)} />
       </View>
@@ -119,12 +154,12 @@ const Wedding = ({ navigation }) => {
           onChangeText={(text) => handleChange("address1.country", text)} />
       </View>
       <View style={styles.inputContainer}>
-        <Input placeholder="Age 1"
+        <Input placeholder="Bride Age"
           value={formData.age1}
           onChangeText={(text) => handleChange("age1", text)} keyboardType="numeric" />
       </View>
       <View style={styles.inputContainer}>
-        <Input placeholder="Gender 1"
+        <Input placeholder="Bride Gender"
           value={formData.gender1}
           onChangeText={(text) => handleChange("gender1", text)} />
       </View>
@@ -136,7 +171,7 @@ const Wedding = ({ navigation }) => {
 
       {/* Groom */}
       <View style={styles.inputContainer}>
-        <Input placeholder="Name 2"
+        <Input placeholder="Groom"
           value={formData.name2}
           onChangeText={(text) => handleChange("name2", text)} />
       </View>
@@ -156,7 +191,7 @@ const Wedding = ({ navigation }) => {
           onChangeText={(text) => handleChange("address2.country", text)} />
       </View>
       <View style={styles.inputContainer}>
-        <Input placeholder="Age 2"
+        <Input placeholder="Groom Age"
           value={formData.age2}
           onChangeText={(text) => handleChange("age2", text)} keyboardType="numeric" />
       </View>
@@ -208,11 +243,27 @@ const Wedding = ({ navigation }) => {
           value={formData.ringBearer}
           onChangeText={(text) => handleChange("ringBearer", text)} />
       </View>
+
       <View style={styles.inputContainer}>
-        <Input placeholder="Wedding Date"
-          value={formData.weddingDate}
-          onChangeText={(text) => handleChange("weddingDate", text)} />
+        <Button onPress={() => setShowDatePicker(true)}>
+          <Text style={styles.buttonText}>Select Wedding Date</Text>
+        </Button>
+        {formData.weddingDate ? (
+          <Text>{formData.weddingDate}</Text>
+        ) : (
+          <Text style={styles.placeholderText}>No date selected</Text>
+        )}
       </View>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={new Date(formData.weddingDate || Date.now())}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+        />
+      )}
+
 
       {error && <Error message={error} />}
       <View style={styles.buttonContainer}>

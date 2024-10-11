@@ -28,7 +28,7 @@ const getIcon = (screenName) => {
       return "home";
     case "Wedding":
       return "archive";
-    case "Admin Dashboard":
+    case "Home":
       return "Admin Dashboard";
     case "Profile":
       return "account";

@@ -25,9 +25,7 @@ const weddingRoutes = require("./routes/wedding");
 
 app.use(`/api/v1/users`, usersRoutes);
 app.use(`/api/v1/wedding`, weddingRoutes);
-// app.use(`/api/v1/products`, productsRoutes);
-// app.use(`/api/v1/orders`, orderRoutes);
-// app.use(`/api/v1/reviews`, reviewRoutes);
+
 
 
 module.exports = app;

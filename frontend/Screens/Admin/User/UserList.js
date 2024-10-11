@@ -20,44 +20,30 @@ const Item = ({ item, navigation, deleteUser }) => {
   return (
     <View style={styles.item}>
       <View style={styles.textContainer}>
-        <Text style={styles.label}>Category:</Text>
+        {/* <Text style={styles.label}>Category:</Text> */}
         <Text style={styles.name}>Name: {item.name.substring(0, 11)}</Text>
         <Text style={styles.email}>Email: {item.email.substring(0, 11)}</Text>
+        <Text style={styles.label}>Role: {item.isAdmin ? 'Admin' : 'User'}</Text> 
       </View>
-
-      <View style={styles.roleContainer}>
-        <Text style={styles.roleLabel}>Role:</Text>
-        <RNPickerSelect
-          placeholder={{ label: 'Select Role', value: item.role }}
-          onValueChange={(value) => console.log("Role updated to:", value)}
-          items={[
-            { label: 'Admin', value: 'Admin' },
-            { label: 'User', value: 'User' }
-          ]}
-          style={pickerSelectStyles}
-          value={item.role}
-        />
-
-        <View style={styles.buttonContainer}>
-          <EasyButton
-            primary
-            medium
-            onPress={() =>
-              navigation.navigate("UpdateUser", { userId: item._id })
-            }
-            style={[styles.button, { backgroundColor: '#00a651' }]}
-          >
-            <MaterialIcons name="edit" size={16} color="white" />
-          </EasyButton>
-          <EasyButton
-            danger
-            medium
-            onPress={() => deleteUser(item._id)}
-            style={[styles.button, { backgroundColor: '#26562e' }]}
-          >
-            <MaterialIcons name="delete" size={16} color="white" />
-          </EasyButton>
-        </View>
+      <View style={styles.buttonContainer}>
+        <EasyButton
+          primary
+          medium
+          onPress={() =>
+            navigation.navigate("UpdateUser", { userId: item._id })
+          }
+          style={[styles.button, { backgroundColor: '#00a651' }]}
+        >
+          <MaterialIcons name="edit" size={16} color="white" />
+        </EasyButton>
+        <EasyButton
+          danger
+          medium
+          onPress={() => deleteUser(item._id)}
+          style={[styles.button, { backgroundColor: '#26562e' }]}
+        >
+          <MaterialIcons name="delete" size={16} color="white" />
+        </EasyButton>
       </View>
     </View>
   );
@@ -89,7 +75,6 @@ const UserList = ({ navigation }) => {
     };
   }, []);
 
-  // Use `useFocusEffect` to reload users when the screen comes into focus
   useFocusEffect(
     useCallback(() => {
       loadUsers();
@@ -160,10 +145,6 @@ const styles = StyleSheet.create({
   roleContainer: {
     flex: 1,
     alignItems: "center",
-  },
-  roleLabel: {
-    color: "gray",
-    marginBottom: 5,
   },
   buttonContainer: {
     flexDirection: 'row',

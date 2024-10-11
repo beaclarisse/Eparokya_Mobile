@@ -24,7 +24,7 @@ const AdminWedding = ({ navigation }) => {
         });
         setWeddingForms(response.data);
       } catch (error) {
-        console.error("Error fetching wedding forms:", error.response ? error.response.data : error.message);
+        console.log(`Fetching wedding details from: ${baseURL}/wedding/${weddingId}`);
         Alert.alert("Error", "Unable to fetch wedding forms.");
       } finally {
         setLoading(false);
@@ -41,7 +41,7 @@ const AdminWedding = ({ navigation }) => {
         headers: { Authorization: `${token}` },
       });
       Alert.alert("Success", "Wedding confirmed.");
-      fetchWeddingForms();  
+      fetchWeddingForms();
     } catch (error) {
       Alert.alert("Error", "Failed to confirm the wedding.");
     }
@@ -54,29 +54,42 @@ const AdminWedding = ({ navigation }) => {
         headers: { Authorization: `${token}` },
       });
       Alert.alert("Success", "Wedding declined.");
-      fetchWeddingForms();  
+      fetchWeddingForms();
     } catch (error) {
       Alert.alert("Error", "Failed to decline the wedding.");
     }
   };
 
+  const handleCardPress = (item) => {
+    navigation.navigate("WeddingDetails", { weddingId: item._id });
+  };
+
   const renderWeddingForm = ({ item }) => {
     return (
+      <TouchableOpacity onPress={() => handleCardPress(item)}>
       <Card style={styles.card}>
         <VStack space={2}>
-          <Heading size="md">{item.name1} & {item.name2}</Heading>
+          <Heading size="md">
+            {item.name1} {item.name2 ? `& ${item.name2}` : ""}
+          </Heading>
           <Text>Wedding Date: {new Date(item.weddingDate).toLocaleDateString()}</Text>
           <Text>Status: {item.status}</Text>
+          
           {item.status === "pending" && (
             <View style={styles.buttonContainer}>
-              <Button colorScheme="green" onPress={() => handleConfirm(item._id)}>Confirm</Button>
-              <Button colorScheme="red" onPress={() => handleDecline(item._id)}>Cancel</Button>
+              <Button colorScheme="green" onPress={() => handleConfirm(item._id)} style={styles.button}>
+                Confirm
+              </Button>
+              <Button colorScheme="red" onPress={() => handleDecline(item._id)} style={styles.button}>
+                Cancel
+              </Button>
             </View>
           )}
         </VStack>
       </Card>
-    );
-  };
+    </TouchableOpacity>
+  );
+};
 
   const handleUserListNavigation = () => {
     navigation.navigate("UserList");
@@ -102,31 +115,22 @@ const AdminWedding = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: "#f5f5f5",
-  },
-  heading: {
-    marginBottom: 10,
-    fontSize: 20,
-    textAlign: "center",
-  },
   card: {
     backgroundColor: "#fff",
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
     elevation: 2,
+    height: 180,
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 10,
   },
-  iconContainer: {
-    alignItems: "flex-end",
-    marginBottom: 10,
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
   },
 });
 

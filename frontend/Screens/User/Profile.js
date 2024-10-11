@@ -156,8 +156,8 @@ const UserProfile = ({ navigation }) => {
             onPress={() => setModalVisible(true)}
             style={styles.changeProfileButton}
           >
-            <Text style={styles.changeProfileText}>Change Profile</Text>
-          </TouchableOpacity>
+             <Text style={styles.changeProfileText}>Change Profile</Text>
+          </TouchableOpacity> 
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity

@@ -17,18 +17,18 @@ exports.getAllWeddings = async (req, res) => {
 };
 
 exports.getWeddingById = async (req, res) => {
-    try {
-        const wedding = await Wedding.findById(req.params.id);
-
-        if (!wedding) {
-            return res.status(404).json({ message: 'The wedding with the given ID was not found.' });
-        }
-
-        res.status(200).send(wedding);
-    } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
-    }
+  console.log("Request ID:", req.params.id); 
+  try {
+      const wedding = await Wedding.findById(req.params.id);
+      if (!wedding) {
+          return res.status(404).json({ message: 'The wedding with the given ID was not found.' });
+      }
+      res.status(200).send(wedding);
+  } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+  }
 };
+
 
 exports.submitWeddingForm = async (req, res) => {
     const { userId, weddingData } = req.body;
