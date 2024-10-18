@@ -25,13 +25,13 @@ const UpdateProfile = () => {
   const [phone, setPhone] = useState("");
   const [age, setAge] = useState("");
   const [preference, setPreference] = useState("");
-  const [baranggay, setBaranggay] = useState("");
+  const [barangay, setBarangay] = useState("");
   const [city, setCity] = useState("");
   const [zip, setZip] = useState("");
   const [country, setCountry] = useState("");
 
   const [avatar, setAvatar] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState("default_avatar.jpg");
+  const [avatarPreview, setAvatarPreview] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -56,8 +56,16 @@ const UpdateProfile = () => {
       console.log(data);
       setName(data.user.name);
       setEmail(data.user.email);
+      setPhone(data.user.phone);
+      setAge(data.user.age);
+      setPreference(data.user.preference);
+      setBarangay(data.user.barangay);
+      setCity(data.user.city);
+      setZip(data.user.zip);
+      setCountry(data.user.country);
       setAvatarPreview(data.user.image);
       setLoading(false);
+
     } catch (error) {
       console.error("Error fetching profile:", error);
       setLoading(false);
@@ -84,28 +92,26 @@ const UpdateProfile = () => {
         }
       );
       setIsUpdated(true);
-      // Handle success response
     } catch (error) {
       console.error(error.response.data);
       setError("Error updating profile");
-      // Handle error response
     }
   };
 
-  const handleUpdateProfile = (e) => {
+  const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    console.log(name, email);
     if (!name || !email) {
-      Alert.alert("Validation Error", "Name and Email are required");
-      return;
+        Alert.alert("Validation Error", "Name and Email are required");
+        return;
     }
+
     const formData = new FormData();
     formData.append("name", name);
     formData.append("email", email);
     formData.append("phone", phone);
     formData.append("age", age);
     formData.append("preference", preference);
-    formData.append("baranggay", baranggay);
+    formData.append("barangay", barangay);
     formData.append("city", city);
     formData.append("zip", zip);
     formData.append("country", country);
@@ -114,6 +120,7 @@ const UpdateProfile = () => {
     updateProfile(formData);
     navigation.navigate("UserProfile");
   };
+
 
   const handleChooseAvatar = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -124,18 +131,20 @@ const UpdateProfile = () => {
       );
       return;
     }
+    
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
-
-    if (!result.cancelled) {
-      setAvatar(result.uri);
-      setAvatarPreview(result.uri);
+  
+    if (!result.canceled) {
+      setAvatar(result.uri); 
+      setAvatarPreview(result.uri); 
     }
   };
+
   useEffect(() => {
     getProfile();
   }, []);
@@ -179,6 +188,12 @@ const UpdateProfile = () => {
             style={pickerSelectStyles}
             value={age}
           />
+          <TextInput
+            style={styles.input}
+            placeholder="Age"
+            value={age ? String(age) : ""}
+            editable={false}
+          />
         </View>
 
         <View style={styles.inputContainer}>
@@ -194,13 +209,19 @@ const UpdateProfile = () => {
             style={pickerSelectStyles}
             value={preference}
           />
+          <TextInput
+            style={styles.input}
+            placeholder="Preference"
+            value={preference || ""}
+            editable={false} 
+          />
         </View>
 
         <TextInput
           style={styles.input}
-          placeholder="Baranggay"
-          value={baranggay}
-          onChangeText={setBaranggay}
+          placeholder="Barangay"
+          value={barangay}
+          onChangeText={setBarangay}
         />
         <TextInput
           style={styles.input}

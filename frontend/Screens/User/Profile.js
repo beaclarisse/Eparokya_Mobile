@@ -27,8 +27,6 @@ const UserProfile = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const dispatch = useDispatch();
 
-  const defaultImage = "https://rb.gy/hnb4yc";
-
   const getProfile = async () => {
     const token = await SyncStorage.get("jwt");
     if (!token) {
@@ -43,7 +41,6 @@ const UserProfile = ({ navigation }) => {
         },
       };
       const { data } = await axios.get(`${baseURL}/users/profile`, config);
-      setLoading(false);
       setUserProfile(data.user);
     } catch (error) {
       console.error(error);
@@ -73,41 +70,12 @@ const UserProfile = ({ navigation }) => {
     }
   };
 
-  const handleImagePick = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
 
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-  };
-
-  const handleTakePhoto = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-  };
-
-  const handleRemoveProfile = () => {
-    setSelectedImage(null);
-    setModalVisible(false);
-  };
 
   return (
     <FormContainer>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <>
-          {/* User Image and Name Section */}
           <View style={styles.profileSection}>
             {selectedImage ? (
               <Image
@@ -127,7 +95,8 @@ const UserProfile = ({ navigation }) => {
               </Text>
             </View>
           </View>
-
+  
+          {/* User Info */}
           <View style={styles.infoContainer}>
             <MaterialIcons name="email" size={24} color="#333" />
             <Text style={styles.infoText}>{userProfile?.email}</Text>
@@ -147,18 +116,11 @@ const UserProfile = ({ navigation }) => {
           <View style={styles.infoContainer}>
             <MaterialIcons name="home" size={24} color="#333" />
             <Text style={styles.infoText}>
-              {userProfile?.city}, {userProfile?.baranggay}, {userProfile?.zip},{" "}
+              {userProfile?.city}, {userProfile?.barangay}, {userProfile?.zip},{" "}
               {userProfile?.country}
             </Text>
           </View>
-
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}
-            style={styles.changeProfileButton}
-          >
-             <Text style={styles.changeProfileText}>Change Profile</Text>
-          </TouchableOpacity> 
-
+  
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               onPress={() => navigation.navigate("UpdateProfile")}
@@ -166,7 +128,7 @@ const UserProfile = ({ navigation }) => {
             >
               <MaterialIcons name="app-registration" size={24} color="white" />
             </TouchableOpacity>
-
+  
             <TouchableOpacity
               onPress={handleLogout}
               style={styles.actionButton}
@@ -176,37 +138,6 @@ const UserProfile = ({ navigation }) => {
           </View>
         </>
       </ScrollView>
-
-      {/* Modal for selecting image */}
-      {/* <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Profile Picture</Text>
-            <TouchableOpacity onPress={handleImagePick} style={styles.modalButton}>
-              <Text style={styles.modalButtonText}>Choose from Gallery</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleTakePhoto} style={styles.modalButton}>
-              <Text style={styles.modalButtonText}>Take a Photo</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleRemoveProfile} style={styles.modalButton}>
-              <Text style={styles.modalButtonText}>Remove Profile Picture</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.modalCloseButton}
-            >
-              <Text style={styles.modalButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal> */}
     </FormContainer>
   );
 };

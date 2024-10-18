@@ -49,7 +49,7 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    baranggay: {
+    barangay: {
         type: String,
         default: ''
     },
