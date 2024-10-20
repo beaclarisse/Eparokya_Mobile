@@ -27,6 +27,8 @@ const UserProfile = ({ navigation }) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const dispatch = useDispatch();
 
+  const defaultImage = "https://rb.gy/hnb4yc";
+
   const getProfile = async () => {
     const token = await SyncStorage.get("jwt");
     if (!token) {

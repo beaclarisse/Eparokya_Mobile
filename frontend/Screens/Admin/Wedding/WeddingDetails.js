@@ -6,7 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const WeddingDetails = ({ route, navigation }) => {
   const { weddingId } = route.params;  
-  console.log({ weddingId });
   const [weddingDetails, setWeddingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -38,12 +37,12 @@ const WeddingDetails = ({ route, navigation }) => {
         headers: { Authorization: `${token}` },
       });
       Alert.alert("Success", "Wedding confirmed.");
-      navigation.goBack(); // Go back after confirmation
+      navigation.goBack(); 
     } catch (error) {
-      Alert.alert("Error", "Failed to confirm the wedding.");
+      Alert.alert("Error", error.response?.data?.message || "Failed to confirm the wedding.");
     }
   };
-
+  
   const handleDecline = async () => {
     const token = await AsyncStorage.getItem("jwt");
     try {
@@ -92,6 +91,7 @@ const WeddingDetails = ({ route, navigation }) => {
       <Text style={styles.label}>Phone Number: {weddingDetails.phoneNumber2}</Text>
 
       <Text style={styles.label}>Wedding Date: {new Date(weddingDetails.weddingDate).toLocaleDateString()}</Text>
+      <Text style={styles.label}>Status: {weddingDetails.weddingStatus}</Text>
 
       <View style={styles.buttonContainer}>
         <Button title="Confirm" onPress={handleConfirm} color="#1C5739" />

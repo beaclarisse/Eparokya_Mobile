@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, Alert } from "react-native";
 import { Card, Box, Heading, VStack } from "native-base";
 import axios from "axios";
 import baseURL from "../../../assets/common/baseUrl";
@@ -15,7 +15,7 @@ const ConfirmedWedding = () => {
       Alert.alert("Error", "Token is missing. Please log in again.");
       return;
     }
-
+  
     try {
       const response = await axios.get(`${baseURL}/wedding/confirmed`, {
         headers: { Authorization: `${token}` },
@@ -38,6 +38,7 @@ const ConfirmedWedding = () => {
       <VStack space={2}>
         <Heading size="md">{item.name1} & {item.name2}</Heading>
         <Text>Wedding Date: {new Date(item.weddingDate).toLocaleDateString()}</Text>
+        <Text>Status: {item.weddingStatus}</Text>
       </VStack>
     </Card>
   );

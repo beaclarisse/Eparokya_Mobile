@@ -41,7 +41,7 @@ const AdminWedding = ({ navigation }) => {
         headers: { Authorization: `${token}` },
       });
       Alert.alert("Success", "Wedding confirmed.");
-      fetchWeddingForms();
+      fetchWeddingForms(); 
     } catch (error) {
       Alert.alert("Error", "Failed to confirm the wedding.");
     }
@@ -64,6 +64,10 @@ const AdminWedding = ({ navigation }) => {
     navigation.navigate("WeddingDetails", { weddingId: item._id });
   };
 
+  const handleConfirmedWeddingsNavigation = () => {
+    navigation.navigate("ConfirmedWedding"); 
+  };
+
   const renderWeddingForm = ({ item }) => {
     return (
       <TouchableOpacity onPress={() => handleCardPress(item)}>
@@ -73,7 +77,7 @@ const AdminWedding = ({ navigation }) => {
             {item.name1} {item.name2 ? `& ${item.name2}` : ""}
           </Heading>
           <Text>Wedding Date: {new Date(item.weddingDate).toLocaleDateString()}</Text>
-          <Text>Status: {item.status}</Text>
+          <Text>Status: {item.weddingStatus}</Text>
           
           {item.status === "pending" && (
             <View style={styles.buttonContainer}>
@@ -99,6 +103,9 @@ const AdminWedding = ({ navigation }) => {
     <Box style={styles.container}>
       <TouchableOpacity onPress={handleUserListNavigation} style={styles.iconContainer}>
         <Icon as={MaterialIcons} name="group" size={6} color="black" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={handleConfirmedWeddingsNavigation} style={styles.iconContainer}>
+        <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
       </TouchableOpacity>
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>
       {loading ? (

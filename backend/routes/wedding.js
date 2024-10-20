@@ -4,7 +4,8 @@ const WeddingFormController = require('../controllers/WeddingFormController');
 const { isAuthenticated, isAuthorized } = require('../middlewares/Auth');
 
 router.post('/submit',  WeddingFormController.submitWeddingForm);
-router.post('/confirmed',  WeddingFormController.confirmWedding);
+router.patch('/:id/confirm', WeddingFormController.confirmWedding);
+router.get('/confirmed', WeddingFormController.getConfirmedWeddings);
 router.post('/decline',  WeddingFormController.declineWedding);
 
 router.get('/', WeddingFormController.getAllWeddings);

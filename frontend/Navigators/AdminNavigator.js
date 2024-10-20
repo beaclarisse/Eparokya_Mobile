@@ -5,6 +5,7 @@ import UserList from "../Screens/Admin/User/UserList";
 import UpdateUser from "../Screens/Admin/User/UpdateUser";
 import WeddingForm from "../Screens/Admin/Wedding/AdminWedding";
 import WeddingDetails from "../Screens/Admin/Wedding/WeddingDetails";
+import ConfirmedWedding from "../Screens/Admin/Wedding/ConfirmedWedding";
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,12 @@ const AdminNavigator = () => {
               <Stack.Screen 
                 name="WeddingDetails"
                 component={WeddingDetails}
+                options={{ headerShown: false }}
+            />
+
+            <Stack.Screen 
+                name="ConfirmedWedding"
+                component={ConfirmedWedding}
                 options={{ headerShown: false }}
             />
 

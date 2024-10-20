@@ -54,6 +54,7 @@ const Wedding = ({ navigation }) => {
     setShowDatePicker(false);
     setFormData({ ...formData, weddingDate: currentDate.toISOString().split('T')[0] });
   };
+
   const [error, setError] = useState("");
 
   const handleSubmit = async () => {
@@ -129,119 +130,87 @@ const Wedding = ({ navigation }) => {
     return unsubscribe; // Cleanup the listener on unmount
   }, [navigation]);
 
-
   return (
     <FormContainer style={styles.container}>
-      {/* Bride */}
-      <View style={styles.inputContainer}>
-        <Input placeholder="Bride"
-          value={formData.name1}
-          onChangeText={(text) => handleChange("name1", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="State"
-          value={formData.address1.state}
-          onChangeText={(text) => handleChange("address1.state", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Zip"
-          value={formData.address1.zip}
-          onChangeText={(text) => handleChange("address1.zip", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Country"
-          value={formData.address1.country}
-          onChangeText={(text) => handleChange("address1.country", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Bride Age"
-          value={formData.age1}
-          onChangeText={(text) => handleChange("age1", text)} keyboardType="numeric" />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Bride Gender"
-          value={formData.gender1}
-          onChangeText={(text) => handleChange("gender1", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Phone Number 1"
-          value={formData.phoneNumber1}
-          onChangeText={(text) => handleChange("phoneNumber1", text)} />
+      <View style={styles.row}>
+        {/* Bride Inputs */}
+        <View style={styles.column}>
+          <Input placeholder="Bride"
+            value={formData.name1}
+            onChangeText={(text) => handleChange("name1", text)} />
+          <Input placeholder="State"
+            value={formData.address1.state}
+            onChangeText={(text) => handleChange("address1.state", text)} />
+          <Input placeholder="Zip"
+            value={formData.address1.zip}
+            onChangeText={(text) => handleChange("address1.zip", text)} />
+          <Input placeholder="Country"
+            value={formData.address1.country}
+            onChangeText={(text) => handleChange("address1.country", text)} />
+          <Input placeholder="Bride Age"
+            value={formData.age1}
+            onChangeText={(text) => handleChange("age1", text)} keyboardType="numeric" />
+          <Input placeholder="Bride Gender"
+            value={formData.gender1}
+            onChangeText={(text) => handleChange("gender1", text)} />
+          <Input placeholder="Phone Number 1"
+            value={formData.phoneNumber1}
+            onChangeText={(text) => handleChange("phoneNumber1", text)} />
+        </View>
+
+        {/* Groom Inputs */}
+        <View style={styles.column}>
+          <Input placeholder="Groom"
+            value={formData.name2}
+            onChangeText={(text) => handleChange("name2", text)} />
+          <Input placeholder="State"
+            value={formData.address2.state}
+            onChangeText={(text) => handleChange("address2.state", text)} />
+          <Input placeholder="Zip"
+            value={formData.address2.zip}
+            onChangeText={(text) => handleChange("address2.zip", text)} />
+          <Input placeholder="Country"
+            value={formData.address2.country}
+            onChangeText={(text) => handleChange("address2.country", text)} />
+          <Input placeholder="Groom Age"
+            value={formData.age2}
+            onChangeText={(text) => handleChange("age2", text)} keyboardType="numeric" />
+          <Input placeholder="Gender 2"
+            value={formData.gender2}
+            onChangeText={(text) => handleChange("gender2", text)} />
+          <Input placeholder="Phone Number 2"
+            value={formData.phoneNumber2}
+            onChangeText={(text) => handleChange("phoneNumber2", text)} />
+        </View>
       </View>
 
-      {/* Groom */}
-      <View style={styles.inputContainer}>
-        <Input placeholder="Groom"
-          value={formData.name2}
-          onChangeText={(text) => handleChange("name2", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="State"
-          value={formData.address2.state}
-          onChangeText={(text) => handleChange("address2.state", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Zip"
-          value={formData.address2.zip}
-          onChangeText={(text) => handleChange("address2.zip", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Country"
-          value={formData.address2.country}
-          onChangeText={(text) => handleChange("address2.country", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Groom Age"
-          value={formData.age2}
-          onChangeText={(text) => handleChange("age2", text)} keyboardType="numeric" />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Gender 2"
-          value={formData.gender2}
-          onChangeText={(text) => handleChange("gender2", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Phone Number 2"
-          value={formData.phoneNumber2}
-          onChangeText={(text) => handleChange("phoneNumber2", text)} />
-      </View>
-
-      {/* Detais pa */}
-
-      <View style={styles.inputContainer}>
-        <Input placeholder="Family Name Relative 1"
-          value={formData.familyNameRelative1}
-          onChangeText={(text) => handleChange("familyNameRelative1", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Relationship 1"
-          value={formData.relationship1}
-          onChangeText={(text) => handleChange("relationship1", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Family Name Relative 2"
-          value={formData.familyNameRelative2}
-          onChangeText={(text) => handleChange("familyNameRelative2", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Relationship 2"
-          value={formData.relationship2}
-          onChangeText={(text) => handleChange("relationship2", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Attendees"
-          value={formData.attendees}
-          onChangeText={(text) => handleChange("attendees", text)} keyboardType="numeric" />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Flower Girl"
-          value={formData.flowerGirl}
-          onChangeText={(text) => handleChange("flowerGirl", text)} />
-      </View>
-      <View style={styles.inputContainer}>
-        <Input placeholder="Ring Bearer"
-          value={formData.ringBearer}
-          onChangeText={(text) => handleChange("ringBearer", text)} />
+      {/* Details */}
+      <View style={styles.row}>
+        <View style={styles.column}>
+          <Input placeholder="Family Name Relative 1"
+            value={formData.familyNameRelative1}
+            onChangeText={(text) => handleChange("familyNameRelative1", text)} />
+          <Input placeholder="Relationship 1"
+            value={formData.relationship1}
+            onChangeText={(text) => handleChange("relationship1", text)} />
+          <Input placeholder="Attendees"
+            value={formData.attendees}
+            onChangeText={(text) => handleChange("attendees", text)} keyboardType="numeric" />
+          <Input placeholder="Flower Girl"
+            value={formData.flowerGirl}
+            onChangeText={(text) => handleChange("flowerGirl", text)} />
+        </View>
+        <View style={styles.column}>
+          <Input placeholder="Family Name Relative 2"
+            value={formData.familyNameRelative2}
+            onChangeText={(text) => handleChange("familyNameRelative2", text)} />
+          <Input placeholder="Relationship 2"
+            value={formData.relationship2}
+            onChangeText={(text) => handleChange("relationship2", text)} />
+          <Input placeholder="Ring Bearer"
+            value={formData.ringBearer}
+            onChangeText={(text) => handleChange("ringBearer", text)} />
+        </View>
       </View>
 
       <View style={styles.inputContainer}>
@@ -263,7 +232,6 @@ const Wedding = ({ navigation }) => {
           onChange={handleDateChange}
         />
       )}
-
 
       {error && <Error message={error} />}
       <View style={styles.buttonContainer}>
@@ -287,6 +255,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 10,
     paddingBottom: 60,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginVertical: 10,
+  },
+  column: {
+    width: "48%", // Adjust width to fit two columns
   },
   inputContainer: {
     width: "90%",
@@ -350,6 +327,6 @@ const pickerSelectStyles = StyleSheet.create({
     color: 'black',
     width: '100%',
   },
-});
+}); 
 
 export default Wedding;

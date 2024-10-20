@@ -52,19 +52,31 @@ exports.submitWeddingForm = async (req, res) => {
 };
 
 exports.confirmWedding = async (req, res) => {
-    try {
-      const wedding = await Wedding.findById(req.params.id);
-      if (!wedding) {
-        return res.status(404).json({ message: 'Wedding not found' });
-      }
-      wedding.status = "confirmed";
-      await wedding.save();
-      res.status(200).json({ message: 'Wedding confirmed' });
-    } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+  try {
+    const wedding = await Wedding.findById(req.params.id);
+    if (!wedding) {
+      return res.status(404).json({ message: 'Wedding not found' });
     }
-  };
-  
+
+    wedding.weddingStatus = "Confirmed";
+    wedding.confirmedAt = new Date();
+    await wedding.save();
+
+    res.status(200).json({ message: 'Wedding confirmed', wedding });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.getConfirmedWeddings = async (req, res) => {
+  try {
+    const confirmedWeddings = await Wedding.find({ weddingStatus: 'Confirmed' });
+    res.status(200).json(confirmedWeddings);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
   exports.declineWedding = async (req, res) => {
     try {
       const wedding = await Wedding.findById(req.params.id);
