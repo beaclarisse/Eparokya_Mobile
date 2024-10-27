@@ -19,6 +19,10 @@ import Login from "../Screens/User/Login";
 import Main from "./Main";
 import AdminNavigator from "./AdminNavigator";
 import { useDispatch, useSelector } from "react-redux";
+import UserNavigator from "./UserNavigator";
+import CalendarComponent from "../Screens/User/Calendar";
+import Wedding from "../Screens/User/Wedding/WeddingForm";
+
 
 const Drawer = createDrawerNavigator();
 
@@ -26,6 +30,8 @@ const getIcon = (screenName) => {
   switch (screenName) {
     case "Home":
       return "home";
+    case "Calendar":
+      return "archive";
     case "Wedding":
       return "archive";
     case "Home":
@@ -57,11 +63,7 @@ function CustomDrawerContent(props) {
                 px="5"
                 py="3"
                 rounded="md"
-                bg={
-                  index === props.state.index
-                    ? "#b3cf99"
-                    : "transparent"
-                }
+                bg={index === props.state.index ? "#b3cf99" : "transparent"}
                 onPress={() => {
                   props.navigation.navigate(name);
                 }}
@@ -154,10 +156,17 @@ const DrawerNavigator = () => {
           component={Main}
         />
         <Drawer.Screen
-          name="Wedding"
-          component={Main}
-          initialParams={{ screen: "Wedding" }}
+          name="Calendar"
+          options={{
+            drawerLabel: "Calendar",
+          }}
+          component={CalendarComponent}
         />
+         <Drawer.Screen
+        name="Wedding"
+        component={Wedding}
+        initialParams={{ screen: "Wedding" }} // Initial params can be accessed in Main if needed
+      />
         {userInfo?.isAdmin && (
           <Drawer.Screen
             name="Admin Dashboard"
@@ -165,10 +174,7 @@ const DrawerNavigator = () => {
             initialParams={{ screen: "Admin" }}
           />
         )}
-        <Drawer.Screen
-          name="Profile"
-          component={Main} 
-        />
+        <Drawer.Screen name="Profile" component={Main} />
       </Drawer.Navigator>
     </Box>
   );

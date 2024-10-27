@@ -7,6 +7,7 @@ import Register2 from "../Screens/User/Register2";
 import UserProfile from "../Screens/User/Profile";
 import UpdateProfile from "../Screens/User/Update";
 import WeddingForm from "../Screens/User/Wedding/WeddingForm";
+import Calendar from "../Screens/User/Calendar";
 
 const Stack = createStackNavigator();
 
@@ -48,6 +49,14 @@ const UserNavigator = (props) => {
       <Stack.Screen
         name="WeddingForm"
         component={WeddingForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="Calendar"
+        component={Calendar}
         options={{
           headerShown: false,
         }}

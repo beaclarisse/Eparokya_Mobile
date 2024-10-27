@@ -68,6 +68,15 @@ const AdminWedding = ({ navigation }) => {
     navigation.navigate("ConfirmedWedding"); 
   };
 
+  const handleWeddingDates = () => {
+    navigation.navigate("AdminAvailableDates"); 
+  };
+
+  const handleUserListNavigation = () => {
+    navigation.navigate("UserList");
+  };
+
+
   const renderWeddingForm = ({ item }) => {
     return (
       <TouchableOpacity onPress={() => handleCardPress(item)}>
@@ -95,18 +104,20 @@ const AdminWedding = ({ navigation }) => {
   );
 };
 
-  const handleUserListNavigation = () => {
-    navigation.navigate("UserList");
-  };
-
   return (
     <Box style={styles.container}>
       <TouchableOpacity onPress={handleUserListNavigation} style={styles.iconContainer}>
         <Icon as={MaterialIcons} name="group" size={6} color="black" />
       </TouchableOpacity>
+
       <TouchableOpacity onPress={handleConfirmedWeddingsNavigation} style={styles.iconContainer}>
         <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
       </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleWeddingDates} style={styles.iconContainer}>
+        <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
+      </TouchableOpacity>
+
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>
       {loading ? (
         <Text>Loading...</Text>

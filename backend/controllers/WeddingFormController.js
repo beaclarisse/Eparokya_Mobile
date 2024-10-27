@@ -89,7 +89,55 @@ exports.getConfirmedWeddings = async (req, res) => {
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
     }
-  };
+};
+
+//Dates
+
+exports.getAvailableDates = async (req, res) => {
+  try {
+    const bookedDates = await Wedding.find({ isBooked: true }).select('date');
+    res.status(200).json(bookedDates);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.bookDate = async (req, res) => {
+  const { date, userId } = req.body;
+  try {
+    const weddingDate = await Wedding.findOneAndUpdate(
+      { date },
+      { isBooked: true, userId: mongoose.Types.ObjectId(userId) },
+      { new: true, upsert: true } // Creates the document if it doesn't exist
+    );
+    res.status(200).json({ message: 'Date booked successfully', weddingDate });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+//AdminDates
+exports.addAvailableDate = async (req, res) => {
+  const { weddingDate } = req.body;
+  try {
+      const newDate = new Wedding({ weddingDate });
+      await newDate.save();
+      res.status(201).json({ message: 'Date added successfully', weddingDate: newDate });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+exports.removeAvailableDate = async (req, res) => {
+  const { id } = req.params;
+  try {
+      await Wedding.findByIdAndDelete(id);
+      res.json({ message: 'Date removed successfully' });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
   
 
 

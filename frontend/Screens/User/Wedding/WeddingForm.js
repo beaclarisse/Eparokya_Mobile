@@ -34,6 +34,37 @@ const Wedding = ({ navigation }) => {
   });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [availableDates, setAvailableDates] = useState([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchAvailableDates = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/wedding/available-dates`);
+        setAvailableDates(response.data.dates); // Adjust according to your API response
+      } catch (error) {
+        console.error("Failed to fetch available dates:", error.message);
+      }
+    };
+
+    fetchAvailableDates();
+  }, []);
+
+  const isDateAvailable = (date) => {
+    return availableDates.includes(date.toISOString().split('T')[0]);
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || formData.weddingDate;
+
+    if (event.type === "set" && isDateAvailable(currentDate)) {
+      setFormData({ ...formData, weddingDate: currentDate.toISOString().split('T')[0] });
+    } else {
+      Alert.alert("Error", "Selected date is not available.");
+    }
+    setShowDatePicker(false);
+  };
+
   const handleChange = (name, value) => {
     if (name.includes("address1") || name.includes("address2")) {
       const [addressKey, subKey] = name.split(".");
@@ -48,14 +79,6 @@ const Wedding = ({ navigation }) => {
       setFormData({ ...formData, [name]: value });
     }
   };
-
-  const handleDateChange = (event, selectedDate) => {
-    const currentDate = selectedDate || formData.weddingDate;
-    setShowDatePicker(false);
-    setFormData({ ...formData, weddingDate: currentDate.toISOString().split('T')[0] });
-  };
-
-  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
     const token = await SyncStorage.get("jwt");
@@ -102,33 +125,6 @@ const Wedding = ({ navigation }) => {
       });
     }
   };
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
-      setFormData({
-        name1: "",
-        address1: { state: "", zip: "", country: "" },
-        age1: "",
-        gender1: "",
-        phoneNumber1: "",
-        name2: "",
-        address2: { state: "", zip: "", country: "" },
-        age2: "",
-        gender2: "",
-        phoneNumber2: "",
-        familyNameRelative1: "",
-        relationship1: "",
-        familyNameRelative2: "",
-        relationship2: "",
-        attendees: "",
-        flowerGirl: "",
-        ringBearer: "",
-        weddingDate: "",
-      });
-    });
-
-    return unsubscribe; // Cleanup the listener on unmount
-  }, [navigation]);
 
   return (
     <FormContainer style={styles.container}>
