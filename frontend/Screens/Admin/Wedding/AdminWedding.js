@@ -76,6 +76,10 @@ const AdminWedding = ({ navigation }) => {
     navigation.navigate("UserList");
   };
 
+  const handleministryCatgeoryNavigation = () => {
+    navigation.navigate("ministryCategory");
+  };
+
 
   const renderWeddingForm = ({ item }) => {
     return (
@@ -116,6 +120,10 @@ const AdminWedding = ({ navigation }) => {
 
       <TouchableOpacity onPress={handleWeddingDates} style={styles.iconContainer}>
         <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={handleministryCatgeoryNavigation} style={styles.iconContainer}>
+        <Icon as={MaterialIcons} name="group" size={6} color="green" />
       </TouchableOpacity>
 
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>
