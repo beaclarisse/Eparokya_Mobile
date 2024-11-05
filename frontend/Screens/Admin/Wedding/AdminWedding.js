@@ -72,60 +72,70 @@ const AdminWedding = ({ navigation }) => {
     navigation.navigate("AdminAvailableDates"); 
   };
 
-  
   const handleUserListNavigation = () => {
     navigation.navigate("UserList");
   };
 
-  const handleministryCatgeoryNavigation = () => {
+  const handleMinistryCategoryNavigation = () => {
     navigation.navigate("ministryCategory");
   };
 
+  const handleMinistryListNavigation = () => {
+    navigation.navigate("ministryList");
+  };
 
   const renderWeddingForm = ({ item }) => {
     return (
       <TouchableOpacity onPress={() => handleCardPress(item)}>
-      <Card style={styles.card}>
-        <VStack space={2}>
-          <Heading size="md">
-            {item.name1} {item.name2 ? `& ${item.name2}` : ""}
-          </Heading>
-          <Text>Wedding Date: {new Date(item.weddingDate).toLocaleDateString()}</Text>
-          <Text>Status: {item.weddingStatus}</Text>
-          
-          {item.status === "pending" && (
-            <View style={styles.buttonContainer}>
-              <Button colorScheme="green" onPress={() => handleConfirm(item._id)} style={styles.button}>
-                Confirm
-              </Button>
-              <Button colorScheme="red" onPress={() => handleDecline(item._id)} style={styles.button}>
-                Cancel
-              </Button>
-            </View>
-          )}
-        </VStack>
-      </Card>
-    </TouchableOpacity>
-  );
-};
+        <Card style={styles.card}>
+          <VStack space={2}>
+            <Heading size="md">
+              {item.name1} {item.name2 ? `& ${item.name2}` : ""}
+            </Heading>
+            <Text>Wedding Date: {new Date(item.weddingDate).toLocaleDateString()}</Text>
+            <Text>Status: {item.weddingStatus}</Text>
+            
+            {item.status === "pending" && (
+              <View style={styles.buttonContainer}>
+                <Button colorScheme="green" onPress={() => handleConfirm(item._id)} style={styles.button}>
+                  Confirm
+                </Button>
+                <Button colorScheme="red" onPress={() => handleDecline(item._id)} style={styles.button}>
+                  Cancel
+                </Button>
+              </View>
+            )}
+          </VStack>
+        </Card>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Box style={styles.container}>
-      <TouchableOpacity onPress={handleUserListNavigation} style={styles.iconContainer}>
-        <Icon as={MaterialIcons} name="group" size={6} color="black" />
-      </TouchableOpacity>
+      {/* Icons in horizontal layout */}
+      <View style={styles.iconRow}>
+        <TouchableOpacity onPress={handleUserListNavigation} style={styles.iconContainer}>
+          <Icon as={MaterialIcons} name="group" size={6} color="black" />
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleConfirmedWeddingsNavigation} style={styles.iconContainer}>
-        <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
-      </TouchableOpacity>
+        <TouchableOpacity onPress={handleConfirmedWeddingsNavigation} style={styles.iconContainer}>
+          <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleWeddingDates} style={styles.iconContainer}>
-        <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
-      </TouchableOpacity>
+        <TouchableOpacity onPress={handleWeddingDates} style={styles.iconContainer}>
+          <Icon as={MaterialIcons} name="date-range" size={6} color="green" />
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleministryCatgeoryNavigation} style={styles.iconContainer}>
-        <Icon as={MaterialIcons} name="group" size={6} color="green" />
-      </TouchableOpacity>
+        <TouchableOpacity onPress={handleMinistryCategoryNavigation} style={styles.iconContainer}>
+          <Icon as={MaterialIcons} name="group" size={6} color="green" />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleMinistryListNavigation} style={styles.iconContainer}>
+          <Icon as={MaterialIcons} name="group" size={6} color="green" />
+        </TouchableOpacity>
+
+      </View>
 
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>
       {loading ? (
@@ -158,6 +168,21 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5,
+  },
+  iconRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start', 
+    alignItems: 'center', 
+    marginVertical: 10, 
+    paddingHorizontal: 10, 
+  },
+  iconContainer: {
+    marginRight: 20, 
+  },
+  heading: {
+    marginBottom: 10,
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
 

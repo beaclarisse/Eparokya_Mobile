@@ -1,17 +1,13 @@
 const mongoose = require('mongoose');
 
-const ministryCatgeorySchema = mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
- 
-}, {});
+const ministryCategorySchema = new mongoose.Schema({
+    name: { 
+      type: String, 
+      required: true },
+    description: { 
+      type: String, 
+      required: true },
+});
 
-
-
-exports.ministryCatgeory = mongoose.model('ministryCategory', ministryCatgeorySchema);
+const ministryCategory = mongoose.model('ministryCategory', ministryCategorySchema);
+module.exports = { ministryCategory };

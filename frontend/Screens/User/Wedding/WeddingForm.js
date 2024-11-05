@@ -106,9 +106,7 @@ const Wedding = ({ navigation }) => {
     }
 
     try {
-      const response = await axios.post(
-        `${baseURL}/wedding/submit`,
-        weddingData,
+      const response = await axios.post(`${baseURL}/wedding/submit`, weddingData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       Toast.show({ topOffset: 60, type: "success", text1: response.data.message });

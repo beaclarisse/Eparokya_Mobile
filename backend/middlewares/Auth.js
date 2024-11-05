@@ -25,3 +25,17 @@ exports.isAuthorized = (...roles) => {
         next()
     }
 }
+
+// exports.refreshToken = async (req, res) => {
+//     const { token } = req.body; 
+//     if (!token) return res.sendStatus(401);
+
+//     try {
+//         const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+//         const user = await User.findById(decoded.id);
+//         const newAccessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+//         res.json({ accessToken: newAccessToken });
+//     } catch (error) {
+//         return res.sendStatus(403);
+//     }
+// };
