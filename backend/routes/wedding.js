@@ -8,7 +8,7 @@ router.post('/submit',  WeddingFormController.submitWeddingForm);
 router.patch('/:id/confirm', WeddingFormController.confirmWedding);
 router.get('/confirmed', WeddingFormController.getConfirmedWeddings);
 router.post('/decline',  WeddingFormController.declineWedding);
-
+router.post('/:weddingId/admin/addComment', WeddingFormController.addComment);
 //WeddingDates
 router.get('/weddingDate',  WeddingFormController.getAvailableDates);
 router.post('/book/date',  WeddingFormController.bookDate);

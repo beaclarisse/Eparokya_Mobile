@@ -91,6 +91,28 @@ exports.getConfirmedWeddings = async (req, res) => {
     }
 };
 
+exports.addComment = async (req, res) => {
+  try {
+    const wedding = await Wedding.findById(req.params.weddingId);
+    if (!wedding) return res.status(404).send('Wedding not found.');
+
+    const newComment = {
+      priest: req.body.priest,
+      scheduledDate: req.body.scheduledDate,
+      selectedComment: req.body.selectedComment,
+      additionalComment: req.body.additionalComment,
+    };
+
+    wedding.comments.push(newComment);
+    await wedding.save();
+
+    res.status(201).json(wedding.comments); 
+  } catch (error) {
+    res.status(500).send('Server error');
+  }
+};
+
+
 //Dates
 
 exports.getAvailableDates = async (req, res) => {

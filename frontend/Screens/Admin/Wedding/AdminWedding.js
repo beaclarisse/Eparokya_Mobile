@@ -72,6 +72,7 @@ const AdminWedding = ({ navigation }) => {
     navigation.navigate("AdminAvailableDates"); 
   };
 
+  
   const handleUserListNavigation = () => {
     navigation.navigate("UserList");
   };

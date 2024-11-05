@@ -1,56 +1,100 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Alert } from 'react-native';
-import { Calendar } from 'react-native-calendars'; 
+import * as Calendar from 'expo-calendar';
+import { Calendar as RNCalendar } from 'react-native-calendars';
 import axios from 'axios';
 import SyncStorage from 'sync-storage';
 import baseURL from '../../assets/common/baseUrl';
 
 const CalendarComponent = () => {
     const [confirmedWeddings, setConfirmedWeddings] = useState([]);
-    const [selectedDate, setSelectedDate] = useState('');
+    const [markedDates, setMarkedDates] = useState({});
+    const [selectedDate, setSelectedDate] = useState(null);
 
-    const fetchConfirmedWeddings = async (date) => {
+    useEffect(() => {
+        (async () => {
+            const { status } = await Calendar.requestCalendarPermissionsAsync();
+            if (status === 'granted') {
+                const calendarId = await createCalendar();
+                await fetchConfirmedWeddingDates(calendarId);
+            } else {
+                Alert.alert('Permission denied', 'Calendar access is required to create events.');
+            }
+        })();
+    }, []);
+
+    const createCalendar = async () => {
+        const calendars = await Calendar.getCalendarsAsync();
+        const existingCalendar = calendars.find(cal => cal.title === 'Wedding Calendar');
+        if (existingCalendar) {
+            return existingCalendar.id;
+        }
+        const newCalendarId = await Calendar.createCalendarAsync({
+            title: 'Wedding Calendar',
+            color: '#FF0000',
+            entityType: Calendar.EntityTypes.EVENT,
+            sourceId: calendars[0].source.id,
+            source: calendars[0].source,
+            name: 'Wedding Calendar',
+            ownerAccount: calendars[0].source.name,
+            accessLevel: Calendar.CalendarAccessLevel.OWNER,
+        });
+        return newCalendarId;
+    };
+
+    const fetchConfirmedWeddingDates = async (calendarId) => {
         try {
             const token = await SyncStorage.get('jwt');
             const response = await axios.get(`${baseURL}/wedding/confirmed`, {
                 headers: { Authorization: `${token}` },
             });
+            setConfirmedWeddings(response.data);
 
-            const weddingsOnDate = response.data.filter(wedding => {
-                try {
-                    const weddingDate = new Date(wedding.weddingDate).toISOString().split('T')[0]; // format: YYYY-MM-DD
-                    return weddingDate === date;
-                } catch (error) {
-                    console.warn('Invalid date encountered:', wedding.weddingDate);
-                    return false;
-                }
+            const dates = {};
+            response.data.forEach(async (wedding) => {
+                const date = new Date(wedding.weddingDate).toISOString().split('T')[0];
+                dates[date] = {
+                    marked: true,
+                    dotColor: 'red',
+                };
+                await Calendar.createEventAsync(calendarId, {
+                    title: `${wedding.name1} & ${wedding.name2} Wedding`,
+                    startDate: new Date(wedding.weddingDate),
+                    endDate: new Date(new Date(wedding.weddingDate).getTime() + 2 * 60 * 60 * 1000),
+                    timeZone: 'GMT',
+                    location: `${wedding.address1.state}, ${wedding.address1.country}`,
+                    notes: `Attendees: ${wedding.attendees}, Flower Girl: ${wedding.flowerGirl}, Ring Bearer: ${wedding.ringBearer}`,
+                });
             });
 
-            setConfirmedWeddings(weddingsOnDate);
+            setMarkedDates(dates);
         } catch (error) {
             console.error('Error fetching confirmed weddings:', error);
             Alert.alert('Error', 'Failed to fetch confirmed weddings.');
         }
     };
 
-    const onDayPress = (day) => {
+    const handleDayPress = (day) => {
         const selectedDay = day.dateString;
         setSelectedDate(selectedDay);
-        fetchConfirmedWeddings(selectedDay);
+        const weddingsOnDate = confirmedWeddings.filter(wedding => 
+            new Date(wedding.weddingDate).toISOString().split('T')[0] === selectedDay
+        );
+        setConfirmedWeddings(weddingsOnDate);
     };
 
     return (
         <View>
-            <Calendar
-                onDayPress={onDayPress}
-                markedDates={{
-                    [selectedDate]: { selected: true, marked: true },
-                }}
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginTop: 10 }}>Wedding Calendar</Text>
+            <RNCalendar
+                markedDates={markedDates}
+                markingType={'dot'}
+                onDayPress={handleDayPress}
             />
             {selectedDate && (
-                <View>
+                <>
                     <Text style={{ fontWeight: 'bold', fontSize: 16, marginTop: 10 }}>
-                        Confirmed Weddings on {selectedDate}:
+                         Weddings on {selectedDate}:
                     </Text>
                     <FlatList
                         data={confirmedWeddings}
@@ -69,7 +113,7 @@ const CalendarComponent = () => {
                             </View>
                         )}
                     />
-                </View>
+                </>
             )}
         </View>
     );

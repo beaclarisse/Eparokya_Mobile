@@ -80,6 +80,14 @@ const weddingSchema = mongoose.Schema({
     required: true,
     default: 'Pending',
   },
+  comments: [
+    {
+      priest: String,
+      scheduledDate: Date,
+      selectedComment: String,
+      additionalComment: String,
+    },
+  ],
   confirmedAt: {
     type: Date,
   },

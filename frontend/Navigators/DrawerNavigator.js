@@ -3,6 +3,7 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
 } from "@react-navigation/drawer";
+import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   NativeBaseProvider,
@@ -54,8 +55,8 @@ function CustomDrawerContent(props) {
 
   return (
     <DrawerContentScrollView {...props} safeArea>
-      <VStack space="1" my="0" mx="0" bg="#154314">
-        <VStack divider={<Divider />} space="4">
+      <VStack space="0" my="0" mx="0" bg="#154314">
+        <VStack divider={<Divider />} space="0">
           <VStack space="3">
             {props.state.routeNames.map((name, index) => (
               <Pressable
@@ -85,7 +86,6 @@ function CustomDrawerContent(props) {
                 </HStack>
               </Pressable>
             ))}
-
             <Pressable
               px="5"
               py="3"
@@ -109,7 +109,6 @@ function CustomDrawerContent(props) {
                 </Text>
               </HStack>
             </Pressable>
-
             <Pressable
               px="5"
               py="3"
@@ -140,13 +139,29 @@ function CustomDrawerContent(props) {
   );
 }
 
+
 const DrawerNavigator = () => {
   const { userInfo } = useSelector((state) => state.user);
 
   return (
-    <Box safeArea flex={1}>
+    <Box safeArea flex={1}
+      bg="#154314"
+      paddingTop={StatusBar.currentHeight || 0} >
+      <StatusBar backgroundColor="#154314" style="light" />
       <Drawer.Navigator
         drawerContent={(props) => <CustomDrawerContent {...props} />}
+        screenOptions={({ navigation }) => ({
+          headerShown: true,
+          headerLeft: () => (
+            <Button onPress={() => navigation.toggleDrawer()} colorScheme="white">
+              <MaterialCommunityIcons name="menu" size={24} color="black" />
+            </Button>
+          ),
+          drawerStyle: {
+            backgroundColor: '#154314',
+            width: '80%',
+          },
+        })}
       >
         <Drawer.Screen
           name="Home"
@@ -162,11 +177,11 @@ const DrawerNavigator = () => {
           }}
           component={CalendarComponent}
         />
-         <Drawer.Screen
-        name="Wedding"
-        component={Wedding}
-        initialParams={{ screen: "Wedding" }} // Initial params can be accessed in Main if needed
-      />
+        <Drawer.Screen
+          name="Wedding"
+          component={Wedding}
+          initialParams={{ screen: "Wedding" }}
+        />
         {userInfo?.isAdmin && (
           <Drawer.Screen
             name="Admin Dashboard"
@@ -179,5 +194,7 @@ const DrawerNavigator = () => {
     </Box>
   );
 };
+
+
 
 export default DrawerNavigator;
