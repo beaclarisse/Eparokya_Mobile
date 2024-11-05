@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
-import Input from "../../../Shared/Form/Input"; // Assuming you have a reusable Input component
+import Input from "../../../Shared/Form/Input";
 import FormContainer from "../../../Shared/Form/FormContainer";
 import { Button } from "native-base";
 import Toast from "react-native-toast-message";
@@ -20,7 +20,6 @@ const MinistryCategory = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    // Ensure both fields are filled
     if (!formData.name || !formData.description) {
       Alert.alert("Error", "Both name and description are required.");
       return;

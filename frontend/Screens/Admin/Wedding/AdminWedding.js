@@ -84,6 +84,14 @@ const AdminWedding = ({ navigation }) => {
     navigation.navigate("ministryList");
   };
 
+  const handleannouncementCategoryNavigation = () => {
+    navigation.navigate("announcementCategory");
+  };
+
+  const handleannouncementCategoryListNavigation = () => {
+    navigation.navigate("announcementCategoryList");
+  };
+
   const renderWeddingForm = ({ item }) => {
     return (
       <TouchableOpacity onPress={() => handleCardPress(item)}>
@@ -134,6 +142,15 @@ const AdminWedding = ({ navigation }) => {
         <TouchableOpacity onPress={handleMinistryListNavigation} style={styles.iconContainer}>
           <Icon as={MaterialIcons} name="group" size={6} color="green" />
         </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleannouncementCategoryNavigation} style={styles.iconContainer}>
+          <Icon as={MaterialIcons} name="group" size={6} color="green" />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleannouncementCategoryListNavigation} style={styles.iconContainer}>
+          <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
+        </TouchableOpacity>
+
 
       </View>
 

@@ -9,6 +9,8 @@ import ConfirmedWedding from "../Screens/Admin/Wedding/ConfirmedWedding";
 import AdminAvailableDates from "../Screens/Admin/Wedding/AdminAvailableDates";
 import ministryCategory from "../Screens/Admin/Ministries/CreateMinistry";
 import ministryList from "../Screens/Admin/Ministries/MinistryList";
+import announcementCategory from "../Screens/Admin/Announcement/AnnouncementCategory";
+import announcementCategoryList from "../Screens/Admin/Announcement/AnnouncementCategoryList";
 
 const Stack = createStackNavigator();
 
@@ -53,10 +55,19 @@ const AdminNavigator = () => {
         component={ministryCategory}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="ministryList"
         component={ministryList}
+        options={{ headerShown: true }}
+      />
+      <Stack.Screen
+        name="announcementCategory"
+        component={announcementCategory}
+        options={{ headerShown: true }}
+      />
+      <Stack.Screen
+        name="announcementCategoryList"
+        component={announcementCategoryList}
         options={{ headerShown: true }}
       />
     </Stack.Navigator>

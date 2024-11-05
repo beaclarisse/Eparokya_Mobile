@@ -124,10 +124,12 @@ const MinistryList = ({ navigation }) => {
         setMinistryCategories(updatedCategories);
         setModalVisible(false);
         Toast.show({
-          text1: 'Updated!',
-          text2: 'Ministry category updated successfully.',
           type: 'success',
-        });
+          text1: 'Action Successful!',
+          position: 'bottom',
+          visibilityTime: 4000,
+          autoHide: true,
+      });
       })
       .catch((error) => Alert.alert("Error updating ministry category"));
   };

@@ -20,10 +20,12 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 const usersRoutes = require("./routes/user");
 const weddingRoutes = require("./routes/wedding");
 const ministryCatgeoryRoutes = require("./routes/ministryCategory");
+const announcementCatgeoryRoutes = require("./routes/announcementCategory");
 
 app.use(`/api/v1/users`, usersRoutes);
 app.use(`/api/v1/wedding`, weddingRoutes);
 app.use(`/api/v1/ministryCategory`, ministryCatgeoryRoutes);
+app.use(`/api/v1/announcementCategory`, announcementCatgeoryRoutes);
 
 module.exports = app;
 

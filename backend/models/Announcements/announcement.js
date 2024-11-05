@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const AUPageSchema = mongoose.Schema({
+const announcementSchema = mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -20,29 +20,10 @@ const AUPageSchema = mongoose.Schema({
     images: [{
         type: String
     }],
-    brand: {
+    announcementCategory: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Brand',
+        ref: 'announcementCategory',
         required:true
-    },
-    price : {
-        type: Number,
-        default:0
-    },
-    
-    countInStock: {
-        type: Number,
-        required: true,
-        min: 0,
-        max: 255
-    },
-    rating: {
-        type: Number,
-        default: 0,
-    },
-    numReviews: {
-        type: Number,
-        default: 0,
     },
     isFeatured: {
         type: Boolean,
@@ -54,13 +35,13 @@ const AUPageSchema = mongoose.Schema({
     },
 })
 
-productSchema.virtual('id').get(function () {
+announcementSchema.virtual('id').get(function () {
     return this._id.toHexString();
 });
 
-productSchema.set('toJSON', {
+announcementSchema.set('toJSON', {
     virtuals: true,
 });
 
 
-exports.Product = mongoose.model('Product', productSchema);
+exports.Announcement = mongoose.model('Announcement', announcementSchema);
