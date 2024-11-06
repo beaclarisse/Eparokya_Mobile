@@ -8,17 +8,22 @@ exports.createAnnouncementCategory = async (req, res) => {
         if (!name || !description || !image) {
             return res.status(400).json({ error: 'All fields are required.' });
         }
+        const imageUrl = image.includes('http') ? image : `http://localhost:5000/public/uploads/${image}`;
+
         const newCategory = new announcementCategory({
             name,
             description,
-            image 
+            image: imageUrl, 
         });
+
         await newCategory.save();
         res.status(201).json(newCategory);
     } catch (error) {
         res.status(500).json({ error: 'Error creating announcement category', details: error.message });
     }
 };
+
+
 
 // Get all announcement categories
 exports.getAnnouncementCategories = async (req, res) => {
