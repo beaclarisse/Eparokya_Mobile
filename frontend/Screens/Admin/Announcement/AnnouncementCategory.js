@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 import baseURL from "../../../assets/common/baseUrl";
 import Toast from "react-native-toast-message";
+import mime from "mime"; 
 
 const AnnouncementCategory = () => {
   const [category, setCategory] = useState({
@@ -20,7 +21,7 @@ const AnnouncementCategory = () => {
 
   const handleImagePick = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
+    if (!permissionResult.granted) {
       console.log('Permission to access camera roll is required!');
       return;
     }
@@ -44,32 +45,34 @@ const AnnouncementCategory = () => {
     formData.append('name', category.name);
     formData.append('description', category.description);
 
-    // Make sure the 'image' key matches the backend field
-    category.images.forEach((image, index) => {
-      formData.append('image', {
-        uri: image.uri,
-        type: 'image/jpeg',
-        name: `image_${index}.jpg`,
-      });
-    });
+    console.log('Form Data:', formData);
+
+    if (category.images[0]) {
+        formData.append('image', {
+            uri: category.images[0].uri,
+            type: mime.getType(category.images[0].uri) || 'image/jpeg',
+            name: category.images[0].uri.split('/').pop(),
+        });
+    }
 
     try {
-      await axios.post(`${baseURL}/announcementCategory/create`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      Toast.show({ text1: 'Announcement Category Created Successfully!' });
-      setCategory({ name: '', description: '', images: [] });
-      setImagesPreview([]);
+        const response = await axios.post(`${baseURL}/announcementCategory/create`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        console.log('Response:', response.data);  
+        Toast.show({ text1: 'Announcement Category Created Successfully!' });
+        setCategory({ name: '', description: '', images: [] });
+        setImagesPreview([]);
     } catch (error) {
-      Toast.show({
-        text1: 'Error uploading image',
-        text2: error.message,
-      });
+        console.error('Error uploading image', error);  
+        Toast.show({
+            text1: 'Error uploading image',
+            text2: error.message,
+        });
     }
-  };
-
+};
 
   return (
     <View style={{ padding: 20 }}>
