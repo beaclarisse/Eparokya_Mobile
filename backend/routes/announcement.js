@@ -13,7 +13,7 @@ router.post('/create', upload.fields([
 ]), announcementController.createAnnouncement);
 
 router.get('/', announcementController.getAnnouncements);
-router.get('/:id', announcementController.getAnnouncementById );
+router.get('/:announcementId', announcementController.getAnnouncementById );
 router.put('/update/:id', announcementController.updateAnnouncement );
 router.delete('/delete/:id', announcementController.deleteAnnouncement);
 
@@ -22,6 +22,6 @@ router.put('/announcementId/comment/update/:commentId', announcementController.u
 router.delete('/announcementId/comment/delete/:commentId', announcementController.deleteComment);
 
 router.put('/like/:announcementId', isAuthenticated, announcementController.likeAnnouncement);
-router.post('/unlike', announcementController.unlikeAnnouncement);
+router.post('/unlike/announcementId', announcementController.unlikeAnnouncement);
 
 module.exports = router;

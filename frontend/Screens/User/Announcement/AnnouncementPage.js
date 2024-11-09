@@ -1,17 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import baseURL from "../../../assets/common/baseUrl";
 import SyncStorage from "sync-storage";
 
-const AnnouncementPage = () => {
+const AnnouncementPage = ({ navigation }) => {
   const [announcements, setAnnouncements] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [error, setError] = useState('');
   const [commentText, setCommentText] = useState('');
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
 
   useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/announcementCategory/`);
+        setCategories(response.data);
+      } catch (err) {
+        console.error("Error fetching categories:", err);
+      }
+    };
+
     const fetchAnnouncements = async () => {
       try {
         const response = await axios.get(`${baseURL}/announcement/`);
@@ -22,8 +33,16 @@ const AnnouncementPage = () => {
         console.log('Error:', err);
       }
     };
+
+    fetchCategories();
     fetchAnnouncements();
   }, []);
+
+  const filteredAnnouncements = selectedCategory
+    ? announcements.filter(announcement =>
+        announcement.announcementCategory && announcement.announcementCategory._id === selectedCategory
+      )
+    : announcements;
 
   const handleLike = async (announcementId) => {
     const token = await SyncStorage.get("jwt");
@@ -94,79 +113,109 @@ const AnnouncementPage = () => {
       {error ? (
         <Text>{error}</Text>
       ) : (
-        <FlatList
-          data={announcements}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.title}>{item.name || 'No title available'}</Text>
-              <Text>{item.description || 'No description available'}</Text>
-              {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
-              {item.video && (
-                <Text style={styles.media}>Video: {item.video}</Text>
-              )}
+        <>
+          <ScrollView horizontal style={styles.categoryContainer}>
+            {categories.map(category => (
+              <TouchableOpacity
+                key={category._id}
+                style={[
+                  styles.categoryIcon,
+                  selectedCategory === category._id && styles.selectedCategory,
+                ]}
+                onPress={() => setSelectedCategory(category._id)}
+              >
+                {category.image && (
+                  <Image source={{ uri: category.image }} style={styles.categoryImage} />
+                )}
+                <Text style={styles.categoryText}>{category.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
-              {item.tags && item.tags.length > 0 ? (
-                <View style={styles.tagContainer}>
-                  {item.tags.map((tag, index) => (
-                    <Text key={index} style={styles.tag}>
-                      {tag || 'No tag available'}
-                    </Text>
-                  ))}
-                </View>
-              ) : (
-                <Text>No tags available</Text>
-              )}
+          <FlatList
+            data={filteredAnnouncements}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <Text style={styles.title}>{item.name || 'No title available'}</Text>
+                <Text>{item.description || 'No description available'}</Text>
+                {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
+                {item.video && (
+                  <Text style={styles.media}>Video: {item.video}</Text>
+                )}
 
-              <View style={styles.interactionContainer}>
-                <TouchableOpacity onPress={() => handleLike(item._id)}>
-                  <MaterialIcons
-                    name="thumb-up"
-                    size={24}
-                    color={item.liked ? 'green' : 'gray'}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.countText}>{item.likes || 0}</Text>
-
-                <TouchableOpacity onPress={() => setSelectedAnnouncement(item._id)}>
-                  <MaterialIcons
-                    name="comment"
-                    size={24}
-                    color="gray"
-                    style={styles.commentIcon}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.countText}>{item.comments ? item.comments.length : 0}</Text>
-              </View>
-
-              {selectedAnnouncement === item._id && (
-                <View style={styles.commentSection}>
-                  <TextInput
-                    style={styles.commentInput}
-                    placeholder="Add a comment"
-                    value={commentText}
-                    onChangeText={setCommentText}
-                  />
-                  <TouchableOpacity onPress={() => handleComment(item._id)}>
-                    <MaterialIcons name="send" size={24} color="blue" />
-                  </TouchableOpacity>
-                </View>
-              )}
-
-              {/* Render Comments */}
-              {item.comments && Array.isArray(item.comments) && item.comments.length > 0 ? (
-                item.comments.map((comment, index) => (
-                  <View key={index} style={styles.comment}>
-                    <Text>{comment.text ? comment.text : 'No text available'}</Text>
-                    <Text>{comment.dateCreated ? comment.dateCreated : 'No date available'}</Text>
+                {item.tags && item.tags.length > 0 ? (
+                  <View style={styles.tagContainer}>
+                    {item.tags.map((tag, index) => (
+                      <Text key={index} style={styles.tag}>
+                        {tag || 'No tag available'}
+                      </Text>
+                    ))}
                   </View>
-                ))
-              ) : (
-                <Text>No comments yet</Text>
-              )}
-            </View>
-          )}
-          keyExtractor={item => item._id}
-        />
+                ) : (
+                  <Text>No tags available</Text>
+                )}
+
+                <TouchableOpacity
+                  onPress={() => {
+                    console.log("Navigating with announcementId:", item._id);  
+                    navigation.navigate('AnnouncementDetail', { announcementId: item._id });
+                  }}
+                >
+                  <Text>View Details</Text>
+                </TouchableOpacity>
+
+                <View style={styles.interactionContainer}>
+                  <TouchableOpacity onPress={() => handleLike(item._id)}>
+                    <MaterialIcons
+                      name="thumb-up"
+                      size={24}
+                      color={item.liked ? 'green' : 'gray'}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.countText}>{item.likes || 0}</Text>
+
+                  <TouchableOpacity onPress={() => setSelectedAnnouncement(item._id)}>
+                    <MaterialIcons
+                      name="comment"
+                      size={24}
+                      color="gray"
+                      style={styles.commentIcon}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.countText}>{item.comments ? item.comments.length : 0}</Text>
+                </View>
+
+                {/* Comment section */}
+                {selectedAnnouncement === item._id && (
+                  <View style={styles.commentSection}>
+                    <TextInput
+                      style={styles.commentInput}
+                      placeholder="Add a comment"
+                      value={commentText}
+                      onChangeText={setCommentText}
+                    />
+                    <TouchableOpacity onPress={() => handleComment(item._id)}>
+                      <MaterialIcons name="send" size={24} color="blue" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+
+                {/* Render Comments */}
+                {item.comments && Array.isArray(item.comments) && item.comments.length > 0 ? (
+                  item.comments.map((comment, index) => (
+                    <View key={index} style={styles.comment}>
+                      <Text>{comment.text ? comment.text : 'No text available'}</Text>
+                      <Text>{comment.dateCreated ? comment.dateCreated : 'No date available'}</Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text>No comments yet</Text>
+                )}
+              </View>
+            )}
+            keyExtractor={item => item._id}
+          />
+        </>
       )}
     </View>
   );
@@ -176,6 +225,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    marginBottom: 1,
+  },
+  categoryIcon: {
+    alignItems: 'center',
+    marginHorizontal: 10,
+  },
+  selectedCategory: {
+    borderWidth: 2,
+    borderColor: '#000',
+  },
+  categoryImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  categoryText: {
+    marginTop: 5,
+    fontSize: 12,
   },
   card: {
     marginBottom: 20,
@@ -197,19 +267,6 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 8,
     marginBottom: 10,
-  },
-  tagContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10,
-  },
-  tag: {
-    backgroundColor: '#e0e0e0',
-    borderRadius: 15,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 5,
-    marginBottom: 5,
   },
   interactionContainer: {
     flexDirection: 'row',

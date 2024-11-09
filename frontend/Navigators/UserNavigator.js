@@ -9,7 +9,7 @@ import UpdateProfile from "../Screens/User/Update";
 import WeddingForm from "../Screens/User/Wedding/WeddingForm";
 import Calendar from "../Screens/User/Calendar";
 import Announcement from "../Screens/User/Announcement/AnnouncementPage";
-// import AnnouncementDetail from "../Screens/User/Announcement/AnnouncementDetail";
+import AnnouncementDetail from "../Screens/User/Announcement/AnnouncementDetail";
 
 const Stack = createStackNavigator();
 
@@ -72,13 +72,13 @@ const UserNavigator = (props) => {
         }}
       />
 
-      {/* <Stack.Screen
+      <Stack.Screen
         name="AnnouncementDetail"
         component={AnnouncementDetail}
         options={{
           headerShown: false,
         }}
-      /> */}
+      />
 
       <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
     </Stack.Navigator>

@@ -55,9 +55,9 @@ exports.getAnnouncementById = async (req, res) => {
 
     try {
         const announcement = await Announcement.findById(announcementId)
-            .populate('announcementCategory')   // Populate the category
-            .populate('comments.user', 'name')  // Populate user details for comments
-            .populate('likedBy', 'name')        // Populate likedBy user names
+            .populate('announcementCategory')   
+            .populate('comments.user', 'name')  
+            .populate('likedBy', 'name')        
             .exec();
 
         if (!announcement) {
