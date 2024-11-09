@@ -51,21 +51,20 @@ exports.deleteMinistry = async (req, res) => {
 };
 
 exports.updateMinistryCategory = async (req, res) => {
-    const { id } = req.params; // Get the ID from the URL parameters
-    const { name, description } = req.body; // Get the updated data from the request body
+    const { id } = req.params; 
+    const { name, description } = req.body; 
     try {
-      // Find the ministry category by ID and update it
       const updatedCategory = await ministryCategory.findByIdAndUpdate(
         id,
         { name, description },
-        { new: true, runValidators: true } // Return the updated document
+        { new: true, runValidators: true } 
       );
   
       if (!updatedCategory) {
         return res.status(404).json({ message: "Ministry category not found." });
       }
   
-      res.status(200).json(updatedCategory); // Respond with the updated category
+      res.status(200).json(updatedCategory); 
     } catch (error) {
       console.error("Error updating ministry category:", error);
       res.status(500).json({ message: "Error updating ministry category." });

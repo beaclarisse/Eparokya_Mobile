@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import UserNavigator from "./UserNavigator";
 import CalendarComponent from "../Screens/User/Calendar";
 import Wedding from "../Screens/User/Wedding/WeddingForm";
+import Announcement from "../Screens/User/Announcement/AnnouncementPage";
 
 
 const Drawer = createDrawerNavigator();

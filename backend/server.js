@@ -19,7 +19,7 @@ const app = require('./app');
 dotenv.config();
 
 // Log all environment variables to check
-console.log("Loaded Environment Variables:", process.env);
+//console.log("Loaded Environment Variables:", process.env);
 
 connectDatabase();
 

@@ -3,6 +3,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 //import EventContainer from "../Screens/Events/EventContainer";
 // import SingleProduct from '../Screens/Product/SingleProduct';
+import AnnouncementPage from "../Screens/User/Announcement/AnnouncementPage";
 
 const Stack = createStackNavigator();
 
@@ -10,8 +11,8 @@ function MyStack() {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name='Home'
-        component={EventContainer}
+        name='AnnouncementPage'
+        component={AnnouncementPage}
         options={{
           headerShown: false,
         }}

@@ -11,8 +11,8 @@ export const authenticate = async (data) => {
 export const getUser = () => {
     
     const user = AsyncStorage.getItem('user');
-   
     return user ? user : null
+    
 }
 
 export const getToken = () => {

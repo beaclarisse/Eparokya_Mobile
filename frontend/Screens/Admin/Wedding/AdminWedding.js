@@ -92,6 +92,10 @@ const AdminWedding = ({ navigation }) => {
     navigation.navigate("announcementCategoryList");
   };
 
+  const handleannouncementNavigation = () => {
+    navigation.navigate("announcement");
+  };
+
   const renderWeddingForm = ({ item }) => {
     return (
       <TouchableOpacity onPress={() => handleCardPress(item)}>
@@ -149,6 +153,10 @@ const AdminWedding = ({ navigation }) => {
 
         <TouchableOpacity onPress={handleannouncementCategoryListNavigation} style={styles.iconContainer}>
           <Icon as={MaterialIcons} name="check-circle" size={6} color="green" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity onPress={handleannouncementNavigation} style={styles.iconContainer}>
+          <Icon as={MaterialIcons} name="group" size={6} color="green" />
         </TouchableOpacity>
 
 

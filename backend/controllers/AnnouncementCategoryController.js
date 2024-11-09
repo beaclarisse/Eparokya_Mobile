@@ -5,27 +5,23 @@ const cloudinary = require('cloudinary').v2;
 
 exports.createAnnouncementCategory = async (req, res) => {
     try {
-        // Log the received request
         console.log('Received request body:', req.body);
-        console.log('Received image:', req.file);  // Use `req.file` since it's a single image upload
+        console.log('Received image:', req.file);  
 
         const { name, description } = req.body;
 
-        // Check if required fields are present
         if (!name || !description || !req.file) {
             return res.status(400).json({ error: 'All fields are required, including an image.' });
         }
 
-        // Upload image to Cloudinary
         const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'EParokya_Images', // Optional: to organize in a specific folder
+            folder: 'EParokya_Images', 
         });
 
-        // Save new category to database
         const newCategory = new announcementCategory({
             name,
             description,
-            image: result.secure_url, // Save Cloudinary URL in the database
+            image: result.secure_url, 
         });
 
         await newCategory.save();
@@ -33,7 +29,7 @@ exports.createAnnouncementCategory = async (req, res) => {
         // Send success response
         res.status(201).json(newCategory);
     } catch (error) {
-        console.error('Error creating announcement category:', error);  // Log error details
+        console.error('Error creating announcement category:', error);  
         res.status(500).json({ error: 'Error creating announcement category', details: error.message });
     }
 };

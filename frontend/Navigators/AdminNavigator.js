@@ -11,6 +11,7 @@ import ministryCategory from "../Screens/Admin/Ministries/CreateMinistry";
 import ministryList from "../Screens/Admin/Ministries/MinistryList";
 import announcementCategory from "../Screens/Admin/Announcement/AnnouncementCategory";
 import announcementCategoryList from "../Screens/Admin/Announcement/AnnouncementCategoryList";
+import announcement from "../Screens/Admin/Announcement/Announcement";
 
 const Stack = createStackNavigator();
 
@@ -70,6 +71,12 @@ const AdminNavigator = () => {
         component={announcementCategoryList}
         options={{ headerShown: true }}
       />
+      <Stack.Screen
+        name="announcement"
+        component={announcement}
+        options={{ headerShown: true }}
+      />
+
     </Stack.Navigator>
   );
 };

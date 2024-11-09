@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { User } = require('./../user');
 
 const announcementSchema = mongoose.Schema({
     name: {
@@ -11,7 +12,8 @@ const announcementSchema = mongoose.Schema({
     },
     richDescription: {
         type: String,
-        default: ''
+        default: '',
+        required: true
     },
     image: {
         type: String,
@@ -20,11 +22,26 @@ const announcementSchema = mongoose.Schema({
     images: [{
         type: String
     }],
+    videos: [{
+        type: String, 
+    }],
     announcementCategory: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'announcementCategory',
-        required:true
     },
+    tags: [{
+        type: String, 
+        required: true
+    }],
+    comments: [{
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        text: { type: String, required: true },
+        dateCreated: { type: Date, default: Date.now }
+    }],  
+    likedBy: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' 
+    }],
     isFeatured: {
         type: Boolean,
         default: false,
@@ -33,7 +50,7 @@ const announcementSchema = mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-})
+});
 
 announcementSchema.virtual('id').get(function () {
     return this._id.toHexString();
@@ -42,6 +59,5 @@ announcementSchema.virtual('id').get(function () {
 announcementSchema.set('toJSON', {
     virtuals: true,
 });
-
 
 exports.Announcement = mongoose.model('Announcement', announcementSchema);

@@ -3,7 +3,8 @@ const multer = require('multer');
 const FILE_TYPE_MAP = {
     'image/png': 'png',
     'image/jpeg': 'jpeg',
-    'image/jpg': 'jpg'
+    'image/jpg': 'jpg',
+    'video/mp4': 'mp4'
 };
 
 const storage = multer.diskStorage({

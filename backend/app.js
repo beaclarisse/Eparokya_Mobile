@@ -21,11 +21,13 @@ const usersRoutes = require("./routes/user");
 const weddingRoutes = require("./routes/wedding");
 const ministryCatgeoryRoutes = require("./routes/ministryCategory");
 const announcementCatgeoryRoutes = require("./routes/announcementCategory");
+const announcementRoutes = require("./routes/announcement");
 
 app.use(`/api/v1/users`, usersRoutes);
 app.use(`/api/v1/wedding`, weddingRoutes);
 app.use(`/api/v1/ministryCategory`, ministryCatgeoryRoutes);
 app.use(`/api/v1/announcementCategory`, announcementCatgeoryRoutes);
+app.use(`/api/v1/announcement`, announcementRoutes);
 
 module.exports = app;
 

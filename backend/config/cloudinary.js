@@ -18,10 +18,15 @@ cloudinary.config({
 });
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
-    params: {
-        folder: 'EParokya_Images', 
-        allowedFormats: ['jpg', 'jpeg', 'png'],  
-    },
+    params: async (req, file) => {
+        const fileFormat = file.mimetype.split('/')[1];
+        const isVideo = ['mp4', 'mov', 'avi'].includes(fileFormat);
+        return {
+            folder: 'EParokya_Images',
+            resource_type: isVideo ? 'video' : 'image', 
+            allowedFormats: ['jpg', 'jpeg', 'png', 'mp4', 'mov', 'avi'], 
+        };
+    }
 });
 
 const upload = multer({ storage: storage });
