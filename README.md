@@ -1,1 +1,1 @@
-# Eparokya_Mobile
+# Eparokya Mobile Application - Capstone
