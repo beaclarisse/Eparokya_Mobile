@@ -1,6 +1,11 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import WeddingForm from "../Screens/User/Wedding/WeddingForm";
+import WeddingForm2 from "../Screens/User/Wedding/WeddingForm2";
+import WeddingForm3 from "../Screens/User/Wedding/WeddingForm3";
+import WeddingForm4 from "../Screens/User/Wedding/WeddingForm4";
+import WeddingForm5 from "../Screens/User/Wedding/WeddingForm5";
+
 import ConfirmedWedding from "../Screens/Admin/Wedding/ConfirmedWedding";
 import AdminAvailableDates from "../Screens/Admin/Wedding/AdminAvailableDates";
 
@@ -19,6 +24,26 @@ const WeddingNavigator = () => {
         component={WeddingForm}
         options={{ title: "Wedding Form" }}
       />
+      <Stack.Screen
+        name="WeddingForm2"
+        component={WeddingForm2}
+        options={{ title: "Wedding Form 2" }}
+      />
+        <Stack.Screen
+        name="WeddingForm3"
+        component={WeddingForm3}
+        options={{ title: "Wedding Form 3" }}
+      />
+        <Stack.Screen
+        name="WeddingForm4"
+        component={WeddingForm4}
+        options={{ title: "Wedding Form 4" }}
+      />
+        <Stack.Screen
+        name="WeddingForm5"
+        component={WeddingForm5}
+        options={{ title: "Wedding Form 5" }}
+      />
 
       <Stack.Screen
         name="ConfirmedWedding"
@@ -31,7 +56,6 @@ const WeddingNavigator = () => {
         component={AdminAvailableDates}
         options={{ title: "Admin Available Dates" }}
       />
-
     </Stack.Navigator>
   );
 };

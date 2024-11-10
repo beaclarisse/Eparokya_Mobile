@@ -114,7 +114,7 @@ const AnnouncementPage = ({ navigation }) => {
         <Text>{error}</Text>
       ) : (
         <>
-          <ScrollView horizontal style={styles.categoryContainer}>
+          {/* <ScrollView horizontal style={styles.categoryContainer}>
             {categories.map(category => (
               <TouchableOpacity
                 key={category._id}
@@ -130,7 +130,7 @@ const AnnouncementPage = ({ navigation }) => {
                 <Text style={styles.categoryText}>{category.name}</Text>
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </ScrollView> */}
 
           <FlatList
             data={filteredAnnouncements}

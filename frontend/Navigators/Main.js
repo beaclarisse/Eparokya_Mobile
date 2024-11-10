@@ -1,84 +1,77 @@
-// Example using React Navigation Stack Navigator
-import { createStackNavigator } from "@react-navigation/stack";
-// import Mains from '../Screens/Mains';
-import HomeNavigator from "./Home";
-import UserNavigator from "./UserNavigator";
-import AdminNavigator from "./AdminNavigator";
-import WeddingNavigator from "./WeddingNavigator";
-import Register from "../Screens/User/Register";
-import { View, Text, TouchableOpacity } from "react-native";
+import React from "react";
+import { Animated, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/FontAwesome";
+import UserNavigator from "./UserNavigator";
+import HomeNavigator from "./Home";
+import WeddingNavigator from "./WeddingNavigator";
 
-const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-const Main = () => {
+const TabBarIcon = ({ name, color, size, style, focused }) => {
+  const scale = new Animated.Value(1);
+
+  React.useEffect(() => {
+    Animated.timing(scale, {
+      toValue: focused ? 1.5 : 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [focused]);
+
   return (
-    <Tab.Navigator
-      initialRouteName="Profile"
-      screenOptions={{
-        tabBarHideOnKeyboard: true,
-        tabBarShowLabel: false,
-        tabBarActiveTintColor: "black",
-        headerShown: false,
-      }}
+    <Animated.View
+      style={[
+        style,
+        {
+          transform: [{ scale }],
+          justifyContent: "center",
+          alignItems: "center",
+          borderWidth: focused ? 2 : 0,
+          borderColor: color,
+          borderRadius: 70,
+          padding: 5,
+        },
+      ]}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomeNavigator}
-        options={{
-          tabBarIcon: ({ color }) => {
-            return (
-              <Icon
-                name="home"
-                style={{ position: "relative" }}
-                color={color}
-                size={30}
-              />
-            );
-          },
-        }}
-      />
-
-      <Tab.Screen
-        name="Wedding Form"
-        component={WeddingNavigator}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Icon name="heart" color={color} size={30} />
-          ),
-        }}
-      />
-
-      <Tab.Screen
-        name="Calendar"
-        component={UserNavigator}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Icon name="heart" color={color} size={30} />
-          ),
-        }}
-      />
-
-      <Tab.Screen
-        name="Profile"
-        component={UserNavigator}
-        options={{
-          tabBarIcon: ({ color }) => {
-            return (
-              <Icon
-                name="user"
-                style={{ position: "relative" }}
-                color={color}
-                size={30}
-              />
-            );
-          },
-        }}
-      />
-    </Tab.Navigator>
+      <Icon name={name} color={color} size={size} />
+    </Animated.View>
   );
 };
+
+const Main = () => (
+  <Tab.Navigator
+    initialRouteName="Home"
+    screenOptions={({ route }) => ({
+      tabBarIcon: ({ color, size, focused }) => (
+        <TabBarIcon
+          name={route.name === "Home" ? "home" : "user"}
+          color={color}
+          size={size}
+          focused={focused}
+        />
+      ),
+      tabBarShowLabel: false,
+    })}
+  >
+    <Tab.Screen
+      name="Home"
+      component={HomeNavigator}
+      options={{ headerShown: false }}
+    />
+
+    <Tab.Screen
+      name="Forms"
+      component={WeddingNavigator}
+      options={{ headerShown: false }}
+    />
+
+    <Tab.Screen
+      name="Profile"
+      component={UserNavigator}
+      options={{ headerShown: false }}
+    />
+  </Tab.Navigator>
+);
 
 export default Main;

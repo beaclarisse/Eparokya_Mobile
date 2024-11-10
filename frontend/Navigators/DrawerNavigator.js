@@ -5,6 +5,7 @@ import {
 } from "@react-navigation/drawer";
 import { StatusBar } from 'expo-status-bar';
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+//import { MaterialCommunityIcons } from 'react-native-vector-icons';
 import {
   NativeBaseProvider,
   Button,
@@ -33,9 +34,9 @@ const getIcon = (screenName) => {
     case "Home":
       return "home";
     case "Calendar":
-      return "archive";
+      return "calendar";
     case "Wedding":
-      return "archive";
+      return "file-document";
     case "Home":
       return "Admin Dashboard";
     case "Profile":
@@ -61,7 +62,7 @@ function CustomDrawerContent(props) {
           <VStack space="3">
             {props.state.routeNames.map((name, index) => (
               <Pressable
-                key={index}
+                key={index} 
                 px="5"
                 py="3"
                 rounded="md"
@@ -145,9 +146,7 @@ const DrawerNavigator = () => {
   const { userInfo } = useSelector((state) => state.user);
 
   return (
-    <Box safeArea flex={1}
-      bg="#154314"
-      paddingTop={StatusBar.currentHeight || 0} >
+    <Box safeArea flex={1} bg="#154314" paddingTop={StatusBar.currentHeight || 0}>
       <StatusBar backgroundColor="#154314" style="light" />
       <Drawer.Navigator
         drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -155,7 +154,7 @@ const DrawerNavigator = () => {
           headerShown: true,
           headerLeft: () => (
             <Button onPress={() => navigation.toggleDrawer()} colorScheme="white">
-              <MaterialCommunityIcons name="menu" size={24} color="black" />
+              <MaterialCommunityIcons name="menu-open" size={24} color="black" />
             </Button>
           ),
           drawerStyle: {
@@ -195,6 +194,7 @@ const DrawerNavigator = () => {
     </Box>
   );
 };
+
 
 
 

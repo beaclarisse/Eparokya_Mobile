@@ -13,7 +13,7 @@ const AnnouncementDetail = ({ route }) => {
   const [commentText, setCommentText] = useState('');
   const [likes, setLikes] = useState(0);
 
-  useEffect(() => {
+  useEffect(() => { 
     if (!announcementId) {
       setError('No announcement ID provided');
       setLoading(false);

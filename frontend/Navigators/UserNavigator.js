@@ -55,6 +55,7 @@ const UserNavigator = (props) => {
           headerShown: false,
         }}
       />
+      
 
       <Stack.Screen
         name="Calendar"
@@ -80,7 +81,13 @@ const UserNavigator = (props) => {
         }}
       />
 
-      <Stack.Screen name="UpdateProfile" component={UpdateProfile} />
+      <Stack.Screen
+        name="UpdateProfile"
+        component={UpdateProfile}
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack.Navigator>
   );
 };
