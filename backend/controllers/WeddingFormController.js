@@ -1,12 +1,10 @@
 const { Wedding } = require('../models/wedding');
 const mongoose = require('mongoose'); 
 const { User } = require('../models/user'); 
-const cloudinary = require('cloudinary').v2;
 
-// Fetch all weddings with basic info
 exports.getAllWeddings = async (req, res) => {
     try {
-        const weddingList = await Wedding.find({}, 'bride weddingDate userId');
+        const weddingList = await Wedding.find({}, 'name1 weddingDate user');
 
         if (!weddingList) {
             return res.status(500).json({ success: false });
@@ -18,21 +16,23 @@ exports.getAllWeddings = async (req, res) => {
     }
 };
 
-// Fetch a wedding by ID
 exports.getWeddingById = async (req, res) => {
   console.log("Request ID:", req.params.id); 
   try {
-      const wedding = await Wedding.findById(req.params.id);
+      const wedding = await Wedding.findById(req.params.id).populate('userId');
+
       if (!wedding) {
           return res.status(404).json({ message: 'The wedding with the given ID was not found.' });
       }
-      res.status(200).send(wedding);
+
+      res.status(200).json(wedding); 
   } catch (error) {
+      console.error("Error fetching wedding by ID:", error);
       res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// Submit a new wedding form
+
 
 exports.submitWeddingForm = async (req, res) => {
     const { userId, weddingData } = req.body;
@@ -41,31 +41,13 @@ exports.submitWeddingForm = async (req, res) => {
     }
 
     try {
-        // Validate ObjectId
-        const validUserId = mongoose.Types.ObjectId(userId);
+        const validUserId = mongoose.Types.ObjectId(userId); 
 
-        let imageUrls = {};
-        if (req.files) {
-            if (req.files.birthCertificateBride) {
-                const result = await cloudinary.uploader.upload(req.files.birthCertificateBride[0].path, { folder: 'WeddingImages' });
-                imageUrls.birthCertificateBride = result.secure_url;
-            }
-            if (req.files.birthCertificateGroom) {
-                const result = await cloudinary.uploader.upload(req.files.birthCertificateGroom[0].path, { folder: 'WeddingImages' });
-                imageUrls.birthCertificateGroom = result.secure_url;
-            }
-            // Handle other images similarly...
-        }
-
-        // Create a new wedding form document
         const newWedding = new Wedding({
-            userId: validUserId,
-            ...weddingData,
-            images: imageUrls,
+            userId: validUserId, 
+            ...weddingData, 
         });
-
-        // Save the wedding form in the database
-        await newWedding.save();
+        await newWedding.save(); 
         return res.status(201).json({ message: "Wedding form submitted successfully!", wedding: newWedding });
     } catch (error) {
         console.error("Error saving wedding form:", error);
@@ -73,8 +55,6 @@ exports.submitWeddingForm = async (req, res) => {
     }
 };
 
-
-// Confirm a wedding
 exports.confirmWedding = async (req, res) => {
   try {
     const wedding = await Wedding.findById(req.params.id);
@@ -92,7 +72,6 @@ exports.confirmWedding = async (req, res) => {
   }
 };
 
-// Get all confirmed weddings
 exports.getConfirmedWeddings = async (req, res) => {
   try {
     const confirmedWeddings = await Wedding.find({ weddingStatus: 'Confirmed' });
@@ -102,8 +81,7 @@ exports.getConfirmedWeddings = async (req, res) => {
   }
 };
 
-// Decline a wedding
-exports.declineWedding = async (req, res) => {
+  exports.declineWedding = async (req, res) => {
     try {
       const wedding = await Wedding.findById(req.params.id);
       if (!wedding) {
@@ -117,7 +95,6 @@ exports.declineWedding = async (req, res) => {
     }
 };
 
-// Add a comment to a wedding
 exports.addComment = async (req, res) => {
   try {
     const wedding = await Wedding.findById(req.params.weddingId);
@@ -139,22 +116,23 @@ exports.addComment = async (req, res) => {
   }
 };
 
-// Get available dates for weddings
+
+//Dates
+
 exports.getAvailableDates = async (req, res) => {
   try {
-    const bookedDates = await Wedding.find({ isBooked: true }).select('weddingDate');
+    const bookedDates = await Wedding.find({ isBooked: true }).select('date');
     res.status(200).json(bookedDates);
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// Book a wedding date
 exports.bookDate = async (req, res) => {
   const { date, userId } = req.body;
   try {
     const weddingDate = await Wedding.findOneAndUpdate(
-      { weddingDate: date },
+      { date },
       { isBooked: true, userId: mongoose.Types.ObjectId(userId) },
       { new: true, upsert: true } // Creates the document if it doesn't exist
     );
@@ -164,7 +142,7 @@ exports.bookDate = async (req, res) => {
   }
 };
 
-// Admin add available date
+//AdminDates
 exports.addAvailableDate = async (req, res) => {
   const { weddingDate } = req.body;
   try {
@@ -176,7 +154,6 @@ exports.addAvailableDate = async (req, res) => {
   }
 };
 
-// Remove an available date
 exports.removeAvailableDate = async (req, res) => {
   const { id } = req.params;
   try {

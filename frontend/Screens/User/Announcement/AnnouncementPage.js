@@ -114,7 +114,7 @@ const AnnouncementPage = ({ navigation }) => {
         <Text>{error}</Text>
       ) : (
         <>
-          {/* <ScrollView horizontal style={styles.categoryContainer}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
             {categories.map(category => (
               <TouchableOpacity
                 key={category._id}
@@ -130,7 +130,7 @@ const AnnouncementPage = ({ navigation }) => {
                 <Text style={styles.categoryText}>{category.name}</Text>
               </TouchableOpacity>
             ))}
-          </ScrollView> */}
+          </ScrollView>
 
           <FlatList
             data={filteredAnnouncements}
@@ -228,24 +228,29 @@ const styles = StyleSheet.create({
   },
   categoryContainer: {
     flexDirection: 'row',
-    marginBottom: 1,
+    marginBottom: 10,
   },
   categoryIcon: {
     alignItems: 'center',
     marginHorizontal: 10,
+    backgroundColor: '#FFF',
+    padding: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#DDD',
   },
   selectedCategory: {
-    borderWidth: 2,
-    borderColor: '#000',
+    backgroundColor: '#FFB400',
   },
   categoryImage: {
     width: 50,
     height: 50,
-    borderRadius: 25,
+    borderRadius: 8,
+    marginBottom: 5,
   },
   categoryText: {
-    marginTop: 5,
     fontSize: 12,
+    textAlign: 'center',
   },
   card: {
     marginBottom: 20,

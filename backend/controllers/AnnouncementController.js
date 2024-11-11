@@ -43,12 +43,18 @@ exports.createAnnouncement = async (req, res) => {
 
 exports.getAnnouncements = async (req, res) => {
     try {
-        const announcements = await Announcement.find().populate('announcementCategory').populate('comments.user');
-        res.status(200).json(announcements);
+        const announcements = await Announcement.find()
+            .populate('comments.user', 'name')  // Populate the user's name
+            .exec();
+
+        return res.status(200).json(announcements);
     } catch (error) {
-        res.status(500).json({ error: 'Error fetching announcements', details: error.message });
+        console.error('Error:', error);
+        return res.status(500).json({ message: 'Server error' });
     }
 };
+
+
 
 exports.getAnnouncementById = async (req, res) => {
     const { announcementId } = req.params;
@@ -209,7 +215,7 @@ exports.unlikeAnnouncement = async (req, res) => {
 
 exports.addComment = async (req, res) => {
     const { announcementId } = req.params;
-    const { text, userId } = req.body;
+    const { text, userId } = req.body;  // Ensure userId is being extracted from the body
 
     try {
         const announcement = await Announcement.findById(announcementId);
@@ -221,10 +227,10 @@ exports.addComment = async (req, res) => {
             return res.status(400).json({ message: "Comment text is required" });
         }
 
-        // Push the comment
+        // Push the comment with the userId
         announcement.comments.push({
-            user: userId, 
-            text: text || "No text provided",  // Use a default value if text is missing
+            user: userId,  // Use userId to associate the comment with the user
+            text: text || "No text provided",
             dateCreated: new Date()
         });
 
@@ -236,7 +242,6 @@ exports.addComment = async (req, res) => {
         return res.status(500).json({ message: 'Server error' });
     }
 };
-
 
 
 

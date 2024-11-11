@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, Alert } from 'react-native';
+import { View, Text, FlatList, Alert, StyleSheet, TouchableOpacity } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import { Calendar as RNCalendar } from 'react-native-calendars';
 import axios from 'axios';
@@ -77,31 +77,47 @@ const CalendarComponent = () => {
     const handleDayPress = (day) => {
         const selectedDay = day.dateString;
         setSelectedDate(selectedDay);
-        const weddingsOnDate = confirmedWeddings.filter(wedding => 
+        const weddingsOnDate = confirmedWeddings.filter(wedding =>
             new Date(wedding.weddingDate).toISOString().split('T')[0] === selectedDay
         );
         setConfirmedWeddings(weddingsOnDate);
     };
 
     return (
-        <View>
-            <Text style={{ fontWeight: 'bold', fontSize: 16, marginTop: 10 }}>Wedding Calendar</Text>
+        <View style={styles.container}>
+            <Text style={styles.title}>Wedding Calendar</Text>
             <RNCalendar
                 markedDates={markedDates}
                 markingType={'dot'}
                 onDayPress={handleDayPress}
+                theme={{
+                    calendarBackground: '#ffffff',
+                    textSectionTitleColor: '#b6c1cd',
+                    selectedDayBackgroundColor: '#ff6347',
+                    todayTextColor: '#ff6347',
+                    dayTextColor: '#2d4150',
+                    dotColor: '#ff6347',
+                    selectedDotColor: '#ffffff',
+                    arrowColor: 'orange',
+                    monthTextColor: 'black',
+                    indicatorColor: 'blue',
+                    textDayFontWeight: '300',
+                    textMonthFontWeight: 'bold',
+                    textDayHeaderFontWeight: '500',
+                    textDayFontSize: 16,
+                    textMonthFontSize: 18,
+                    textDayHeaderFontSize: 14,
+                }}
             />
             {selectedDate && (
                 <>
-                    <Text style={{ fontWeight: 'bold', fontSize: 16, marginTop: 10 }}>
-                         Weddings on {selectedDate}:
-                    </Text>
+                    <Text style={styles.dateText}>Weddings on {selectedDate}:</Text>
                     <FlatList
                         data={confirmedWeddings}
                         keyExtractor={(item) => item._id}
                         renderItem={({ item }) => (
-                            <View style={{ padding: 10, marginVertical: 5, borderColor: 'gray', borderWidth: 1, borderRadius: 5 }}>
-                                <Text style={{ fontWeight: 'bold' }}>{item.name1} & {item.name2}</Text>
+                            <View style={styles.card}>
+                                <Text style={styles.cardTitle}>{item.name1} & {item.name2}</Text>
                                 <Text>Phone 1: {item.phoneNumber1}</Text>
                                 <Text>Phone 2: {item.phoneNumber2}</Text>
                                 <Text>Attendees: {item.attendees}</Text>
@@ -115,8 +131,64 @@ const CalendarComponent = () => {
                     />
                 </>
             )}
+            <TouchableOpacity style={styles.addButton}>
+                <Text style={styles.addButtonText}>+</Text>
+            </TouchableOpacity>
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#b3cf99', // Updated background color
+        padding: 16,
+    },
+    title: {
+        fontWeight: 'bold',
+        fontSize: 24,
+        color: '#333',
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    dateText: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        marginTop: 15,
+        color: '#333',
+        textAlign: 'center',
+    },
+    card: {
+        backgroundColor: '#FFFFFF',
+        padding: 16,
+        marginVertical: 8,
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+    },
+    cardTitle: {
+        fontWeight: 'bold',
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 5,
+    },
+    addButton: {
+        backgroundColor: '#FF6347',
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+    },
+    addButtonText: {
+        color: '#FFFFFF',
+        fontSize: 24,
+    },
+});
 
 export default CalendarComponent;

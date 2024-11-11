@@ -27,33 +27,39 @@ const WeddingDetails = ({ route, navigation }) => {
 
   useEffect(() => {
     const fetchWeddingDetails = async () => {
-        const token = await AsyncStorage.getItem("jwt");
-        try {
-            const response = await axios.get(`${baseURL}/wedding/${weddingId}`, {
-                headers: { Authorization: `${token}` },
-            });
-            setWeddingDetails(response.data);
-            setSelectedDate(new Date(response.data.weddingDate));
-            
-            const parsedComments = response.data.comments.map(comment => {
-                const scheduledDate = comment.scheduledDate ? new Date(comment.scheduledDate) : null;
-                console.log('Original scheduledDate:', comment.scheduledDate, 'Parsed Date:', scheduledDate);
-                return {
-                    ...comment,
-                    scheduledDate,
-                };
-            });
-            setComments(parsedComments);
-        } catch (err) {
-            console.error(err);
-            setError('Failed to fetch wedding details');
-            Alert.alert("Error", "Could not retrieve wedding details.");
-        } finally {
-            setLoading(false);
-        }
+      const token = await AsyncStorage.getItem("jwt");
+      try {
+        const response = await axios.get(`${baseURL}/wedding/${weddingId}`, {
+          headers: { Authorization: `${token}` },
+        });
+
+        setWeddingDetails(response.data);
+        setSelectedDate(new Date(response.data.weddingDate));
+
+        // Check if `comments` exists and is an array
+        const parsedComments = Array.isArray(response.data.comments)
+          ? response.data.comments.map(comment => {
+            const scheduledDate = comment.scheduledDate ? new Date(comment.scheduledDate) : null;
+            console.log('Original scheduledDate:', comment.scheduledDate, 'Parsed Date:', scheduledDate);
+            return {
+              ...comment,
+              scheduledDate,
+            };
+          })
+          : [];  // If not, set an empty array
+
+        setComments(parsedComments);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to fetch wedding details');
+        Alert.alert("Error", "Could not retrieve wedding details.");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchWeddingDetails();
-}, [weddingId]);
+  }, [weddingId]);
+
 
 
 
@@ -191,7 +197,7 @@ const WeddingDetails = ({ route, navigation }) => {
         {/* Display Submitted Comments */}
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>Comments:</Text>
-          {comments.length > 0 ? (
+          {Array.isArray(comments) && comments.length > 0 ? (
             comments.map((comment, index) => (
               <View key={index} style={styles.commentContainer}>
                 <Text style={styles.commentText}>Priest: {comment.priest}</Text>
@@ -205,6 +211,7 @@ const WeddingDetails = ({ route, navigation }) => {
           ) : (
             <Text>No comments yet.</Text>
           )}
+
         </View>
 
         <View style={styles.buttonContainer}>

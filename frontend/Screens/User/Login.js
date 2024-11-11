@@ -28,16 +28,19 @@ const Login = ({ navigation }) => {
         type: "success",
         text1: data.message,
       });
-      // authenticate(data)
-      console.log(data);
-      // setLoader(false)
+      console.log(data);  // Logs the entire response
+  
+      // Save JWT token and user information
       SyncStorage.set("jwt", data.token);
       SyncStorage.set("user", JSON.stringify(data.user));
-
+  
+      // Save userId separately for easy access
+      SyncStorage.set("userId", data.user._id);  // Save the user ID correctly here
+      console.log('Stored userId:', SyncStorage.get("userId"));  // Log the userId to verify it's saved correctly
+  
       navigation.navigate("UserProfile");
     } catch (err) {
       console.log(err);
-      // setLoader(false)
       Alert.alert("Login Error", "Wrong username and password");
       Toast.show({
         position: "bottom",
@@ -47,6 +50,9 @@ const Login = ({ navigation }) => {
       });
     }
   };
+  
+  
+  
 
   const handleSubmit = () => {
     const values = { email: email, password: password };
