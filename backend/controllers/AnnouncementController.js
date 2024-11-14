@@ -2,6 +2,7 @@ const { Announcement } = require('../models/Announcements/announcement');
 const { User } = require('../models/user');
 const cloudinary = require('cloudinary').v2;
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 exports.createAnnouncement = async (req, res) => {
     try {
@@ -44,9 +45,10 @@ exports.createAnnouncement = async (req, res) => {
 exports.getAnnouncements = async (req, res) => {
     try {
         const announcements = await Announcement.find()
-            .populate('comments.user', 'name')  // Populate the user's name
+            .populate('comments.user', 'name')
             .exec();
 
+        console.log(announcements);
         return res.status(200).json(announcements);
     } catch (error) {
         console.error('Error:', error);
@@ -61,9 +63,9 @@ exports.getAnnouncementById = async (req, res) => {
 
     try {
         const announcement = await Announcement.findById(announcementId)
-            .populate('announcementCategory')   
-            .populate('comments.user', 'name')  
-            .populate('likedBy', 'name')        
+            .populate('announcementCategory')
+            .populate('comments.user', 'name')
+            .populate('likedBy', 'name')
             .exec();
 
         if (!announcement) {
@@ -169,27 +171,27 @@ exports.deleteComment = async (req, res) => {
 
 exports.likeAnnouncement = async (req, res) => {
     try {
-      const announcementId = req.params.announcementId; 
-      const userId = req.user.id; 
-      console.log("Announcement ID:", announcementId);
-      console.log("User ID:", userId);
-  
-      const announcement = await Announcement.findById(announcementId);
-      if (!announcement) {
-        return res.status(404).json({ error: 'Announcement not found' });
-      }
+        const announcementId = req.params.announcementId;
+        const userId = req.user.id;
+        console.log("Announcement ID:", announcementId);
+        console.log("User ID:", userId);
+
+        const announcement = await Announcement.findById(announcementId);
+        if (!announcement) {
+            return res.status(404).json({ error: 'Announcement not found' });
+        }
         console.log("Current likedBy array:", announcement.likedBy);
         if (announcement.likedBy.includes(userId)) {
-        console.log("User has already liked this announcement");
-        return res.status(400).json({ error: 'You have already liked this announcement' });
-      }
+            console.log("User has already liked this announcement");
+            return res.status(400).json({ error: 'You have already liked this announcement' });
+        }
         announcement.likedBy.push(userId);
         await announcement.save();
         const updatedLikesCount = announcement.likedBy.length;
         res.status(200).json({ success: true, likes: updatedLikesCount });
     } catch (error) {
-      console.error("Error in liking announcement:", error);
-      res.status(500).json({ error: "Failed to like announcement" });
+        console.error("Error in liking announcement:", error);
+        res.status(500).json({ error: "Failed to like announcement" });
     }
 };
 
@@ -215,28 +217,46 @@ exports.unlikeAnnouncement = async (req, res) => {
 
 exports.addComment = async (req, res) => {
     const { announcementId } = req.params;
-    const { text, userId } = req.body;  // Ensure userId is being extracted from the body
+    const { text } = req.body;
+
+    const token = req.header('Authorization').replace('Bearer ', '');
+
+    if (!token) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
 
     try {
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        const userId = decodedToken.id;
         const announcement = await Announcement.findById(announcementId);
         if (!announcement) {
             return res.status(404).json({ message: 'Announcement not found' });
         }
+        const newComment = {
+            user: userId,
+            text,
+            dateCreated: new Date(),
+        };
 
-        if (!text) {
-            return res.status(400).json({ message: "Comment text is required" });
-        }
-
-        // Push the comment with the userId
-        announcement.comments.push({
-            user: userId,  // Use userId to associate the comment with the user
-            text: text || "No text provided",
-            dateCreated: new Date()
-        });
-
+        announcement.comments.push(newComment);
         await announcement.save();
 
-        return res.status(200).json({ message: 'Comment added successfully', comments: announcement.comments });
+        res.status(201).json(announcement);
+    } catch (error) {
+        console.error("Error posting comment:", error);
+        res.status(500).json({ message: 'Error posting comment' });
+    }
+};
+
+exports.getAnnouncementComments = async (req, res) => {
+    const { announcementId } = req.params;
+
+    try {
+        const announcement = await Announcement.findById(announcementId).populate('comments.user', 'name');
+        if (!announcement) {
+            return res.status(404).json({ message: 'Announcement not found' });
+        }
+        return res.status(200).json({ comments: announcement.comments });
     } catch (error) {
         console.error('Error:', error);
         return res.status(500).json({ message: 'Server error' });

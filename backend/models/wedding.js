@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 
 const weddingSchema = mongoose.Schema({
-
   name1: {
     type: String,
     required: true,
@@ -85,17 +84,26 @@ const weddingSchema = mongoose.Schema({
   confirmedAt: {
     type: Date,
   },
+  comments: [
+    {
+      priest: String,
+      scheduledDate: Date,
+      selectedComment: String,
+      additionalComment: String,
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 }, { timestamps: true });
 
 weddingSchema.virtual('id').get(function () {
-  return this._id.toHexString();
   return this._id.toHexString();
 });
 
 weddingSchema.set('toJSON', {
   virtuals: true,
-  virtuals: true,
 });
 
-exports.Wedding = mongoose.model('Wedding', weddingSchema);
 exports.Wedding = mongoose.model('Wedding', weddingSchema);

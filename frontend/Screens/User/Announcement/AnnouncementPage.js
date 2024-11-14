@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
+import { View, 
+  Text, 
+  StyleSheet, 
+  FlatList, 
+  TouchableOpacity, 
+  TextInput, 
+  Image, 
+  ScrollView } from 'react-native';
+import Toast from 'react-native-toast-message'; 
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import baseURL from "../../../assets/common/baseUrl";
@@ -40,8 +48,8 @@ const AnnouncementPage = ({ navigation }) => {
 
   const filteredAnnouncements = selectedCategory
     ? announcements.filter(announcement =>
-        announcement.announcementCategory && announcement.announcementCategory._id === selectedCategory
-      )
+      announcement.announcementCategory && announcement.announcementCategory._id === selectedCategory
+    )
     : announcements;
 
   const handleLike = async (announcementId) => {
@@ -76,14 +84,14 @@ const AnnouncementPage = ({ navigation }) => {
       console.error("Error liking announcement:", error);
     }
   };
-
+  
   const handleComment = async (announcementId) => {
     const token = await SyncStorage.get("jwt");
     if (!token) {
       console.error('No token found');
       return;
     }
-
+  
     try {
       await axios.post(
         `${baseURL}/announcement/comment/${announcementId}`,
@@ -94,22 +102,45 @@ const AnnouncementPage = ({ navigation }) => {
           },
         }
       );
+  
       setAnnouncements(prevAnnouncements =>
         prevAnnouncements.map(item =>
           item._id === announcementId
-            ? { ...item, comments: item.comments + 1 }
-            : item
-        )
-      );
-      setCommentText('');
-      setSelectedAnnouncement(null);
+          ? updatedAnnouncement 
+          : item
+      )
+    );
+      setCommentText(''); 
+      setSelectedAnnouncement(null); 
+  
+      Toast.show({
+        type: 'success',
+        position: 'top',
+        topOffset: 50,
+        rightOffset: 20,
+        text1: 'Comment Posted',
+        text2: 'Your comment has been successfully posted!',
+        visibilityTime: 3000,
+        autoHide: true,
+      });
     } catch (error) {
       console.error("Error commenting on announcement:", error);
+      Toast.show({
+        type: 'error',
+        position: 'top',
+        topOffset: 50,
+        rightOffset: 20,
+        text1: 'Error Posting Comment',
+        text2: 'There was an issue posting your comment. Please try again.',
+        visibilityTime: 3000,
+        autoHide: true,
+      });
     }
   };
+  
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {error ? (
         <Text>{error}</Text>
       ) : (
@@ -131,18 +162,22 @@ const AnnouncementPage = ({ navigation }) => {
               </TouchableOpacity>
             ))}
           </ScrollView>
-
+  
           <FlatList
             data={filteredAnnouncements}
             renderItem={({ item }) => (
-              <View style={styles.card}>
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() => {
+                  console.log("Navigating with announcementId:", item._id);
+                  navigation.navigate('AnnouncementDetail', { announcementId: item._id });
+                }}
+              >
                 <Text style={styles.title}>{item.name || 'No title available'}</Text>
                 <Text>{item.description || 'No description available'}</Text>
                 {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
-                {item.video && (
-                  <Text style={styles.media}>Video: {item.video}</Text>
-                )}
-
+                {item.video && <Text style={styles.media}>Video: {item.video}</Text>}
+  
                 {item.tags && item.tags.length > 0 ? (
                   <View style={styles.tagContainer}>
                     {item.tags.map((tag, index) => (
@@ -154,16 +189,7 @@ const AnnouncementPage = ({ navigation }) => {
                 ) : (
                   <Text>No tags available</Text>
                 )}
-
-                <TouchableOpacity
-                  onPress={() => {
-                    console.log("Navigating with announcementId:", item._id);  
-                    navigation.navigate('AnnouncementDetail', { announcementId: item._id });
-                  }}
-                >
-                  <Text>View Details</Text>
-                </TouchableOpacity>
-
+  
                 <View style={styles.interactionContainer}>
                   <TouchableOpacity onPress={() => handleLike(item._id)}>
                     <MaterialIcons
@@ -173,7 +199,7 @@ const AnnouncementPage = ({ navigation }) => {
                     />
                   </TouchableOpacity>
                   <Text style={styles.countText}>{item.likes || 0}</Text>
-
+  
                   <TouchableOpacity onPress={() => setSelectedAnnouncement(item._id)}>
                     <MaterialIcons
                       name="comment"
@@ -184,7 +210,7 @@ const AnnouncementPage = ({ navigation }) => {
                   </TouchableOpacity>
                   <Text style={styles.countText}>{item.comments ? item.comments.length : 0}</Text>
                 </View>
-
+  
                 {/* Comment section */}
                 {selectedAnnouncement === item._id && (
                   <View style={styles.commentSection}>
@@ -199,11 +225,14 @@ const AnnouncementPage = ({ navigation }) => {
                     </TouchableOpacity>
                   </View>
                 )}
-
+  
                 {/* Render Comments */}
                 {item.comments && Array.isArray(item.comments) && item.comments.length > 0 ? (
                   item.comments.map((comment, index) => (
                     <View key={index} style={styles.comment}>
+                      <Text style={styles.commentUser}>
+                        {comment.user && comment.user.name ? comment.user.name : 'Anonymous User'}
+                      </Text>
                       <Text>{comment.text ? comment.text : 'No text available'}</Text>
                       <Text>{comment.dateCreated ? comment.dateCreated : 'No date available'}</Text>
                     </View>
@@ -211,14 +240,16 @@ const AnnouncementPage = ({ navigation }) => {
                 ) : (
                   <Text>No comments yet</Text>
                 )}
-              </View>
+              </TouchableOpacity>
             )}
             keyExtractor={item => item._id}
           />
         </>
       )}
-    </View>
+       <Toast />
+    </ScrollView>
   );
+  
 };
 
 const styles = StyleSheet.create({
@@ -229,6 +260,8 @@ const styles = StyleSheet.create({
   categoryContainer: {
     flexDirection: 'row',
     marginBottom: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
   },
   categoryIcon: {
     alignItems: 'center',

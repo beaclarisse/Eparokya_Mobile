@@ -25,7 +25,7 @@ import UserNavigator from "./UserNavigator";
 import CalendarComponent from "../Screens/User/Calendar";
 import Wedding from "../Screens/User/Wedding/WeddingForm";
 import Announcement from "../Screens/User/Announcement/AnnouncementPage";
-
+import Profile from "../Screens/User/Profile";
 
 const Drawer = createDrawerNavigator();
 
@@ -93,7 +93,7 @@ function CustomDrawerContent(props) {
               py="3"
               rounded="md"
               bg="transparent"
-              onPress={() => props.navigation.navigate("Profile")}
+              onPress={() => props.navigation.navigate("Login")}
             >
               <HStack space="7" alignItems="center">
                 <Icon
@@ -107,10 +107,11 @@ function CustomDrawerContent(props) {
                   fontFamily="Roboto"
                   fontSize="md"
                 >
-                  Profile
+                  Login
                 </Text>
               </HStack>
             </Pressable>
+
             <Pressable
               px="5"
               py="3"
@@ -189,7 +190,7 @@ const DrawerNavigator = () => {
             initialParams={{ screen: "Admin" }}
           />
         )}
-        <Drawer.Screen name="Profile" component={Main} />
+        <Drawer.Screen name="Profile" component={Profile} />
       </Drawer.Navigator>
     </Box>
   );

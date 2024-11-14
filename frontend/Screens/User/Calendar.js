@@ -8,6 +8,7 @@ import baseURL from '../../assets/common/baseUrl';
 
 const CalendarComponent = () => {
     const [confirmedWeddings, setConfirmedWeddings] = useState([]);
+    const [filteredWeddings, setFilteredWeddings] = useState([]);
     const [markedDates, setMarkedDates] = useState({});
     const [selectedDate, setSelectedDate] = useState(null);
 
@@ -80,7 +81,7 @@ const CalendarComponent = () => {
         const weddingsOnDate = confirmedWeddings.filter(wedding =>
             new Date(wedding.weddingDate).toISOString().split('T')[0] === selectedDay
         );
-        setConfirmedWeddings(weddingsOnDate);
+        setFilteredWeddings(weddingsOnDate);  // Update only the filtered weddings for the selected date
     };
 
     return (
@@ -113,7 +114,7 @@ const CalendarComponent = () => {
                 <>
                     <Text style={styles.dateText}>Weddings on {selectedDate}:</Text>
                     <FlatList
-                        data={confirmedWeddings}
+                        data={filteredWeddings}
                         keyExtractor={(item) => item._id}
                         renderItem={({ item }) => (
                             <View style={styles.card}>
@@ -137,7 +138,6 @@ const CalendarComponent = () => {
         </View>
     );
 };
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -190,5 +190,6 @@ const styles = StyleSheet.create({
         fontSize: 24,
     },
 });
+
 
 export default CalendarComponent;
