@@ -73,3 +73,40 @@ export const clearErrors = () => async (dispatch) => {
     }, 5000)
 
 }
+
+export const postCommentAction = (announcementId, commentText) => async (dispatch) => {
+    try {
+        // Get token from storage
+        const token = SyncStorage.get('token');
+        if (!token) {
+            throw new Error("No token found");
+        }
+
+        dispatch({
+            type: userAction.REQUEST_ACTION,
+            payload: 'Posting comment...',
+        });
+
+        // Make the API call to post the comment
+        const { data } = await axios.post(
+            `${baseURL}/announcement/comment/${announcementId}`,
+            { text: commentText },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            }
+        );
+
+        dispatch({
+            type: userAction.POST_COMMENT_SUCCESS,
+            payload: data,
+        });
+    } catch (error) {
+        dispatch({
+            type: userAction.REQUEST_FAIL,
+            payload: error.response?.data?.message || 'Failed to post comment.',
+        });
+        console.error("Error posting comment:", error);
+    }
+};

@@ -6,16 +6,18 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' }); 
 const cloudinary = require('../config/cloudinary');
 
-router.post('/submit', upload.fields([
-    { name: 'birthCertificateBride', maxCount: 1 },
-    { name: 'birthCertificateGroom', maxCount: 1 },
-    { name: 'pictureBride', maxCount: 1 },
-    { name: 'pictureGroom', maxCount: 1 },
-    { name: 'ceremonyPicture', maxCount: 1 },
-    { name: 'baptismalCertificateBride', maxCount: 1 },
-    { name: 'baptismalCertificateGroom', maxCount: 1 }
-]), WeddingFormController.submitWeddingForm);
+// router.post('/submit', upload.fields([
+//     { name: 'birthCertificateBride', maxCount: 1 },
+//     { name: 'birthCertificateGroom', maxCount: 1 },
+//     { name: 'pictureBride', maxCount: 1 },
+//     { name: 'pictureGroom', maxCount: 1 },
+//     { name: 'ceremonyPicture', maxCount: 1 },
+//     { name: 'baptismalCertificateBride', maxCount: 1 },
+//     { name: 'baptismalCertificateGroom', maxCount: 1 }
+// ]), WeddingFormController.submitWeddingForm);
 
+
+router.post('/submit', isAuthenticated, WeddingFormController.submitWeddingForm);
 router.post('/:id/confirm', WeddingFormController.confirmWedding);
 router.get('/confirmed', WeddingFormController.getConfirmedWeddings);
 router.post('/decline', WeddingFormController.declineWedding);

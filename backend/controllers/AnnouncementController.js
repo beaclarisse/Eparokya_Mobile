@@ -215,38 +215,43 @@ exports.unlikeAnnouncement = async (req, res) => {
     }
 };
 
+//wor
 exports.addComment = async (req, res) => {
     const { announcementId } = req.params;
     const { text } = req.body;
-
+  
     const token = req.header('Authorization').replace('Bearer ', '');
-
+  
     if (!token) {
-        return res.status(401).json({ message: 'Authentication required' });
+      return res.status(401).json({ message: 'Authentication required' });
     }
-
+  
     try {
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-        const userId = decodedToken.id;
-        const announcement = await Announcement.findById(announcementId);
-        if (!announcement) {
-            return res.status(404).json({ message: 'Announcement not found' });
-        }
-        const newComment = {
-            user: userId,
-            text,
-            dateCreated: new Date(),
-        };
-
-        announcement.comments.push(newComment);
-        await announcement.save();
-
-        res.status(201).json(announcement);
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      const userId = decodedToken.id;
+  
+      const announcement = await Announcement.findById(announcementId);
+      if (!announcement) {
+        return res.status(404).json({ message: 'Announcement not found' });
+      }
+  
+      const newComment = {
+        user: userId,
+        text,
+        dateCreated: new Date(),
+      };
+  
+      // Add the new comment to the announcement
+      announcement.comments.push(newComment);
+      await announcement.save();
+  
+      // Return the updated announcement with the new comment
+      res.status(201).json({ updatedAnnouncement: announcement });
     } catch (error) {
-        console.error("Error posting comment:", error);
-        res.status(500).json({ message: 'Error posting comment' });
+      console.error("Error posting comment:", error);
+      res.status(500).json({ message: 'Error posting comment' });
     }
-};
+  };
 
 exports.getAnnouncementComments = async (req, res) => {
     const { announcementId } = req.params;

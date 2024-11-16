@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import axios from 'axios';
 import baseURL from "../../../assets/common/baseUrl";
 import SyncStorage from 'sync-storage';
 import { MaterialIcons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message'; // Import Toast
 
 const AnnouncementDetail = ({ route }) => {
   const { announcementId } = route.params;
@@ -11,20 +12,12 @@ const AnnouncementDetail = ({ route }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
-  const [likes, setLikes] = useState(0);
 
-  useEffect(() => { 
-    if (!announcementId) {
-      setError('No announcement ID provided');
-      setLoading(false);
-      return;
-    }
-
+  useEffect(() => {
     const fetchAnnouncement = async () => {
       try {
         const response = await axios.get(`${baseURL}/announcement/${announcementId}`);
         setAnnouncement(response.data);
-        setLikes(response.data.likes || 0);  // Set initial likes count
         setLoading(false);
       } catch (err) {
         setError('Failed to fetch announcement');
@@ -52,7 +45,7 @@ const AnnouncementDetail = ({ route }) => {
           },
         }
       );
-      setLikes(prevLikes => prevLikes + 1); // Increment likes count
+      setAnnouncement(prevAnnouncement => ({ ...prevAnnouncement, likes: prevAnnouncement.likes + 1 }));
     } catch (err) {
       console.error('Error liking announcement:', err);
     }
@@ -65,12 +58,8 @@ const AnnouncementDetail = ({ route }) => {
       return;
     }
 
-    if (!commentText.trim()) {
-      return; // Prevent empty comments
-    }
-
     try {
-      await axios.post(
+      const response = await axios.post(
         `${baseURL}/announcement/comment/${announcementId}`,
         { text: commentText },
         {
@@ -79,17 +68,23 @@ const AnnouncementDetail = ({ route }) => {
           },
         }
       );
-      // Add comment to local state
       setAnnouncement(prevAnnouncement => ({
         ...prevAnnouncement,
-        comments: [
-          ...prevAnnouncement.comments,
-          { text: commentText, dateCreated: new Date() },
-        ],
+        comments: [...prevAnnouncement.comments, response.data]
       }));
-      setCommentText(''); // Clear comment input
-    } catch (err) {
-      console.error('Error commenting on announcement:', err);
+
+      Toast.show({
+        type: 'success',
+        position: 'top',
+        text1: 'Comment Added!',
+        text2: 'Your comment was successfully posted.',
+        visibilityTime: 3000, 
+        autoHide: true,
+        topOffset: 50, 
+      });
+      setCommentText('');
+    } catch (error) {
+      console.error("Error posting comment:", error);
     }
   };
 
@@ -98,123 +93,92 @@ const AnnouncementDetail = ({ route }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {error ? (
         <Text>{error}</Text>
       ) : (
-        <>
+        <View>
+          {/* Announcement Details */}
           <Text style={styles.title}>{announcement.name}</Text>
-          <Text style={styles.description}>{announcement.description}</Text>
-          <Text style={styles.richDescription}>{announcement.richDescription}</Text>
+          <Text>{announcement.description}</Text>
+          {announcement.image && <Image source={{ uri: announcement.image }} style={styles.image} />}
+          {announcement.video && <Text>Video: {announcement.video}</Text>}
 
-          {announcement.image && <Image source={{ uri: announcement.image }} style={styles.media} />}
-          {announcement.images && announcement.images.length > 0 && (
-            <View style={styles.imagesContainer}>
-              {announcement.images.map((image, index) => (
-                <Image key={index} source={{ uri: image }} style={styles.media} />
-              ))}
+          {/* User Information (Author of the Announcement) */}
+          {announcement.user && (
+            <View style={styles.userContainer}>
+              <Image source={{ uri: announcement.user.profilePicture }} style={styles.userImage} />
+              <Text style={styles.userName}>{announcement.user.name}</Text>
             </View>
           )}
-          {announcement.videos && announcement.videos.length > 0 && (
-            <Text style={styles.media}>Videos: {announcement.videos.join(', ')}</Text>
-          )}
 
+          {/* Interaction (Like/Comment Count) */}
           <View style={styles.interactionContainer}>
-            <TouchableOpacity onPress={handleLike} style={styles.likeButton}>
+            <TouchableOpacity onPress={handleLike}>
               <MaterialIcons
                 name="thumb-up"
                 size={24}
-                color="gray"
+                color={announcement.liked ? 'green' : 'gray'}
               />
-              <Text>{likes} Likes</Text>
             </TouchableOpacity>
+            <Text style={styles.countText}>{announcement.likes}</Text>
+
+            <MaterialIcons name="comment" size={24} color="gray" style={styles.commentIcon} />
+            <Text style={styles.countText}>{announcement.comments.length}</Text>
           </View>
 
           {/* Comment Section */}
-          <View style={styles.commentSection}>
-            <TextInput
-              style={styles.commentInput}
-              placeholder="Add a comment"
-              value={commentText}
-              onChangeText={setCommentText}
-            />
-            <TouchableOpacity onPress={handleComment}>
-              <MaterialIcons name="send" size={24} color="blue" />
-            </TouchableOpacity>
-          </View>
+          <TextInput
+            value={commentText}
+            onChangeText={setCommentText}
+            placeholder="Add a comment..."
+            style={styles.commentInput}
+          />
+          <TouchableOpacity onPress={handleComment} style={styles.commentButton}>
+            <Text style={styles.commentButtonText}>Submit</Text>
+          </TouchableOpacity>
 
-          {/* Comments */}
-          {announcement.comments && announcement.comments.length > 0 ? (
-            announcement.comments.map((comment, index) => (
-              <View key={index} style={styles.comment}>
-                <Text>{comment.user ? comment.user.name : 'Anonymous'}: {comment.text}</Text>
-                <Text>{new Date(comment.dateCreated).toLocaleString()}</Text>
-              </View>
-            ))
-          ) : (
-            <Text>No comments yet</Text>
-          )}
-        </>
+          {/* Displaying Comments */}
+          {announcement.comments.map((comment, index) => (
+            <View key={index} style={styles.comment}>
+              {/* Comment User Info */}
+              {comment.user && (
+                <View style={styles.commentUserContainer}>
+                  <Text style={styles.commentUserName}>{comment.user.name}:</Text>
+                  <Text style={styles.commentText}>{comment.text}</Text>
+
+                  {/* Format date using dateCreated */}
+                  <Text style={styles.commentDate}>
+                    {new Date(comment.dateCreated).toLocaleString() || 'Invalid Date'}
+                  </Text>
+                </View>
+              )}
+            </View>
+          ))}
+        </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  description: {
-    marginTop: 10,
-    fontSize: 16,
-  },
-  richDescription: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#555',
-  },
-  media: {
-    width: '100%',
-    height: 200,
-    borderRadius: 8,
-    marginVertical: 10,
-  },
-  imagesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-  },
-  interactionContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  likeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  commentSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  commentInput: {
-    flex: 1,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 5,
-    marginRight: 10,
-  },
-  comment: {
-    marginBottom: 10,
-    padding: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
+  container: { flex: 1, padding: 10 },
+  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  image: { width: '100%', height: 200, borderRadius: 8, marginBottom: 10 },
+  userContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
+  userImage: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
+  userName: { fontSize: 16, fontWeight: 'bold' },
+  interactionContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
+  countText: { marginLeft: 5, fontSize: 16, color: 'black' },
+  commentIcon: { marginLeft: 20 },
+  commentInput: { borderColor: '#ddd', borderWidth: 1, padding: 8, borderRadius: 5, marginTop: 10 },
+  commentButton: { backgroundColor: '#007BFF', padding: 10, borderRadius: 5, marginTop: 10 },
+  commentButtonText: { color: '#fff', textAlign: 'center' },
+  comment: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#ddd' },
+  commentUserContainer: { marginBottom: 5 },
+  commentUserName: { fontWeight: 'bold', fontSize: 16 },
+  commentText: { fontSize: 14, marginTop: 5 },
+  commentDate: { fontSize: 12, color: '#888', marginTop: 5 },
 });
 
 export default AnnouncementDetail;

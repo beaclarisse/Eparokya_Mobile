@@ -3,7 +3,7 @@ import { Animated, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/FontAwesome";
 import UserNavigator from "./UserNavigator";
-import HomeNavigator from "./Home";
+import Home from "./Home";
 import WeddingNavigator from "./WeddingNavigator";
 
 const Tab = createBottomTabNavigator();
@@ -56,7 +56,7 @@ const Main = () => (
   >
     <Tab.Screen
       name="Home"
-      component={HomeNavigator}
+      component={Home}
       options={{ headerShown: false }}
     />
 

@@ -29,6 +29,31 @@ const UserProfile = ({ navigation }) => {
 
   const defaultImage = "https://rb.gy/hnb4yc";
 
+  // const getProfile = async () => {
+  //   const token = await SyncStorage.get("jwt");
+  //   if (!token) {
+  //     setIsAuthenticated(false);
+  //     navigation.navigate("Login");
+  //     return;
+  //   }
+  //   try {
+  //     const config = {
+  //       headers: {
+  //         Authorization: `${token}`,
+  //       },
+  //     };
+  //     const { data } = await axios.get(`${baseURL}/users/profile`, config);
+  //     setUserProfile(data.user);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setIsAuthenticated(false);
+  //     navigation.navigate("Login");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
   const getProfile = async () => {
     const token = await SyncStorage.get("jwt");
     if (!token) {
@@ -36,10 +61,11 @@ const UserProfile = ({ navigation }) => {
       navigation.navigate("Login");
       return;
     }
+    
     try {
       const config = {
         headers: {
-          Authorization: `${token}`,
+          Authorization: `Bearer ${token}`,  
         },
       };
       const { data } = await axios.get(`${baseURL}/users/profile`, config);
@@ -52,7 +78,7 @@ const UserProfile = ({ navigation }) => {
       setLoading(false);
     }
   };
-
+  
   useFocusEffect(
     useCallback(() => {
       setIsAuthenticated(true);

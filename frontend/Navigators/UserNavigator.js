@@ -6,6 +6,10 @@ import Register2 from "../Screens/User/Register2";
 import UserProfile from "../Screens/User/Profile";
 import UpdateProfile from "../Screens/User/Update";
 import WeddingForm from "../Screens/User/Wedding/WeddingForm";
+import WeddingForm2 from "../Screens/User/Wedding/WeddingForm2";
+import WeddingForm3 from "../Screens/User/Wedding/WeddingForm3";
+import WeddingFormContainer from "../Screens/User/Wedding/WeddingFormContainer";
+
 import Calendar from "../Screens/User/Calendar";
 import Announcement from "../Screens/User/Announcement/AnnouncementPage";
 import AnnouncementDetail from "../Screens/User/Announcement/AnnouncementDetail";
@@ -48,13 +52,37 @@ const UserNavigator = (props) => {
       />
 
       <Stack.Screen
+        name="WeddingFormContainer"
+        component={WeddingFormContainer}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
         name="WeddingForm"
         component={WeddingForm}
         options={{
           headerShown: false,
         }}
       />
-      
+
+      <Stack.Screen
+        name="WeddingForm2"
+        component={WeddingForm2}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="WeddingForm3"
+        component={WeddingForm3}
+        options={{
+          headerShown: false,
+        }}
+      />
+
 
       <Stack.Screen
         name="Calendar"

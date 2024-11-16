@@ -17,9 +17,9 @@ router.get('/:announcementId', announcementController.getAnnouncementById );
 router.put('/update/:id', announcementController.updateAnnouncement );
 router.delete('/delete/:id', announcementController.deleteAnnouncement);
 
-router.post('/comment/:announcementId', announcementController.addComment);
-router.put('/announcementId/comment/update/:commentId', announcementController.updateComment);
-router.delete('/announcementId/comment/delete/:commentId', announcementController.deleteComment);
+router.post('/comment/:announcementId', isAuthenticated, announcementController.addComment);
+router.put('/announcementId/comment/update/:commentId', isAuthenticated, announcementController.updateComment);
+router.delete('/announcementId/comment/delete/:commentId', isAuthenticated, announcementController.deleteComment);
 
 router.put('/like/:announcementId', isAuthenticated, announcementController.likeAnnouncement);
 router.post('/unlike/announcementId', announcementController.unlikeAnnouncement);

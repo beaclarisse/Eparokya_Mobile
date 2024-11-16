@@ -1,61 +1,39 @@
 const mongoose = require('mongoose');
+//const { User } = require('./../user');
 
 const weddingSchema = mongoose.Schema({
-  name1: {
-    type: String,
-    required: true,
-  },
-  address1: {
+  bride: { type: String, required: true },
+  brideAge: { type: Number, required: true },
+  brideGender: { type: String, required: true },
+  bridePhone: { type: String, required: true },
+  BrideAddress: {
     state: String,
     zip: String,
     country: String,
   },
-  age1: {
-    type: Number,
-    required: true,
-  },
-  gender1: {
-    type: String,
-    required: true,
-  },
-  phoneNumber1: {
-    type: String,
-    required: true,
-  },
-  name2: {
-    type: String,
-    required: true,
-  },
-  address2: {
+  groom: { type: String, required: true },
+  groomAge: { type: Number, required: true },
+  groomGender: { type: String, required: true },
+  groomPhone: { type: String, required: true },
+  GroomAddress: {
     state: String,
     zip: String,
     country: String,
   },
-  age2: {
-    type: Number,
-    required: true,
-  },
-  gender2: {
-    type: String,
-    required: true,
-  },
-  phoneNumber2: {
-    type: String,
-    required: true,
-  },
-  familyNameRelative1: {
+  
+  BrideRelative: {
     type: String,
     required: false,
   },
-  relationship1: {
+  BrideRelationship: {
     type: String,
     required: false,
   },
-  familyNameRelative2: {
+  GroomRelative: {
     type: String,
     required: false,
   },
-  relationship2: {
+  GroomRelationship: {
     type: String,
     required: false,
   },
