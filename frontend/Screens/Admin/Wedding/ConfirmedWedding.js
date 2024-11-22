@@ -48,6 +48,8 @@ const ConfirmedWedding = () => {
       <Heading style={styles.heading}>Confirmed Weddings</Heading>
       {loading ? (
         <Text>Loading...</Text>
+      ) : confirmedWeddings.length === 0 ? (
+        <Text>No confirmed weddings found.</Text>
       ) : (
         <FlatList
           data={confirmedWeddings}
@@ -57,6 +59,7 @@ const ConfirmedWedding = () => {
       )}
     </Box>
   );
+  
 };
 
 const styles = StyleSheet.create({

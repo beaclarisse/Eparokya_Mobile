@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
+import { View, TextInput, Button, StyleSheet, Text, Alert, ScrollView } from 'react-native';
 import axios from 'axios';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import SyncStorage from 'sync-storage';
@@ -28,7 +28,7 @@ const WeddingForm3 = ({ navigation, route }) => {
   const [brideBaptismalCertificate, setBrideBaptismalCertificate] = useState(null);
   const [groomBaptismalCertificate, setGroomBaptismalCertificate] = useState(null);
 
-  const pickBrideBirthCertificate = async () => {
+  const pickDocument = async (setFile) => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert("Permission required", "Camera roll permissions are needed to select images.");
@@ -42,61 +42,7 @@ const WeddingForm3 = ({ navigation, route }) => {
     });
 
     if (!result.canceled) {
-      setBrideBirthCertificate(result.assets[0].uri);
-    }
-  };
-
-  const pickGroomBirthCertificate = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Camera roll permissions are needed to select images.");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setGroomBirthCertificate(result.assets[0].uri);
-    }
-  };
-
-  const pickBrideBaptismalCertificate = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Camera roll permissions are needed to select images.");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setBrideBaptismalCertificate(result.assets[0].uri);
-    }
-  };
-
-  const pickGroomBaptismalCertificate = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Camera roll permissions are needed to select images.");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setGroomBaptismalCertificate(result.assets[0].uri);
+      setFile(result.assets[0].uri);
     }
   };
 
@@ -104,8 +50,6 @@ const WeddingForm3 = ({ navigation, route }) => {
     const fetchUserData = async () => {
       try {
         const token = await SyncStorage.get("jwt");
-        console.log("JWT Token:", token);
-
         if (!token) {
           Alert.alert("Error", "Token is missing. Please log in again.");
           navigation.navigate("LoginPage");
@@ -116,7 +60,6 @@ const WeddingForm3 = ({ navigation, route }) => {
         const { data } = await axios.get(`${baseURL}/users/profile`, config);
         setUserId(data.user._id);
       } catch (error) {
-        console.error("Failed to retrieve user ID:", error.response ? error.response.data : error.message);
         Alert.alert("Error", "Unable to retrieve user ID. Please log in again.");
         navigation.navigate("LoginPage");
       }
@@ -184,12 +127,6 @@ const WeddingForm3 = ({ navigation, route }) => {
 
     try {
       const token = await SyncStorage.get("jwt");
-      if (!token) {
-        Alert.alert("Error", "Authentication token is missing. Please log in again.");
-        navigation.navigate("Profile");
-        return;
-      }
-
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -197,11 +134,10 @@ const WeddingForm3 = ({ navigation, route }) => {
         },
       };
 
-      const response = await axios.post(`${baseURL}/wedding/submit`, formData, config);
+      await axios.post(`${baseURL}/wedding/submit`, formData, config);
       Alert.alert("Success", "Wedding form submitted successfully!");
-      navigation.navigate('ConfirmationPage');
+      navigation.navigate('Profile');
     } catch (error) {
-      console.error('Error submitting wedding data:', error.response ? error.response.data : error.message);
       setError('An error occurred while submitting your wedding details. Please try again.');
     }
   };
@@ -223,7 +159,7 @@ const WeddingForm3 = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       {error && <Text style={styles.error}>{error}</Text>}
 
       <TextInput placeholder="Number of Attendees" value={attendees} onChangeText={setAttendees} style={styles.input} />
@@ -246,30 +182,26 @@ const WeddingForm3 = ({ navigation, route }) => {
         />
       )}
 
-      {/* Bride Birth Certificate */}
-      <Button title="Upload Bride Birth Certificate" onPress={pickBrideBirthCertificate} />
+      <Button title="Upload Bride Birth Certificate" onPress={() => pickDocument(setBrideBirthCertificate)} />
       {brideBirthCertificate && <Text>Uploaded: {brideBirthCertificate.split('/').pop()}</Text>}
 
-      {/* Groom Birth Certificate */}
-      <Button title="Upload Groom Birth Certificate" onPress={pickGroomBirthCertificate} />
+      <Button title="Upload Groom Birth Certificate" onPress={() => pickDocument(setGroomBirthCertificate)} />
       {groomBirthCertificate && <Text>Uploaded: {groomBirthCertificate.split('/').pop()}</Text>}
 
-      {/* Bride Baptismal Certificate */}
-      <Button title="Upload Bride Baptismal Certificate" onPress={pickBrideBaptismalCertificate} />
+      <Button title="Upload Bride Baptismal Certificate" onPress={() => pickDocument(setBrideBaptismalCertificate)} />
       {brideBaptismalCertificate && <Text>Uploaded: {brideBaptismalCertificate.split('/').pop()}</Text>}
 
-      {/* Groom Baptismal Certificate */}
-      <Button title="Upload Groom Baptismal Certificate" onPress={pickGroomBaptismalCertificate} />
+      <Button title="Upload Groom Baptismal Certificate" onPress={() => pickDocument(setGroomBaptismalCertificate)} />
       {groomBaptismalCertificate && <Text>Uploaded: {groomBaptismalCertificate.split('/').pop()}</Text>}
 
       <Button title="Submit Form" onPress={handleSubmit} />
       <Button title="Clear Form" onPress={clearForm} />
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     padding: 20,
   },
   input: {

@@ -9,39 +9,56 @@ const AdminWedding = ({ navigation }) => {
   const [weddingForms, setWeddingForms] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchWeddingForms = async () => {
-      const token = await SyncStorage.get("jwt");
-      if (!token) {
-        Alert.alert("Error", "Token is missing. Please log in again.");
-        return;
-      }
+  const fetchWeddingForms = async () => {
+    setLoading(true);
+    const token = await SyncStorage.get("jwt");
 
-      try {
-        const response = await axios.get(`${baseURL}/wedding`, {
-          headers: { Authorization: `${token}` },
-        });
+    if (!token) {
+      Alert.alert("Error", "Token is missing. Please log in again.");
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${baseURL}/wedding`, {
+        headers: { Authorization: `${token}` },
+      });
+
+      console.log("Fetched wedding forms:", response.data);
+
+      if (response.data) {
         setWeddingForms(response.data);
-      } catch (error) {
-        console.log(`Fetching wedding details from: ${baseURL}/wedding/${weddingId}`);
-        Alert.alert("Error", "Unable to fetch wedding forms.");
-      } finally {
-        setLoading(false);
+      } else {
+        console.log("No data received from the API.");
+        setWeddingForms([]);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching wedding forms:", error.response?.data || error.message);
+      Alert.alert("Error", "Unable to fetch wedding forms.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchWeddingForms();
   }, []);
 
   const handleConfirm = async (id) => {
     try {
       const token = await SyncStorage.get("jwt");
+      if (!token) {
+        Alert.alert("Error", "Token is missing. Please log in again.");
+        return;
+      }
+
       await axios.patch(`${baseURL}/wedding/${id}/confirm`, null, {
         headers: { Authorization: `${token}` },
       });
+
       Alert.alert("Success", "Wedding confirmed.");
-      fetchWeddingForms();
+      fetchWeddingForms(); // Refresh the data
     } catch (error) {
+      console.error("Error confirming wedding:", error.response?.data || error.message);
       Alert.alert("Error", "Failed to confirm the wedding.");
     }
   };
@@ -49,12 +66,19 @@ const AdminWedding = ({ navigation }) => {
   const handleDecline = async (id) => {
     try {
       const token = await SyncStorage.get("jwt");
+      if (!token) {
+        Alert.alert("Error", "Token is missing. Please log in again.");
+        return;
+      }
+
       await axios.patch(`${baseURL}/wedding/${id}/decline`, null, {
         headers: { Authorization: `${token}` },
       });
+
       Alert.alert("Success", "Wedding declined.");
-      fetchWeddingForms();
+      fetchWeddingForms(); 
     } catch (error) {
+      console.error("Error declining wedding:", error.response?.data || error.message);
       Alert.alert("Error", "Failed to decline the wedding.");
     }
   };
@@ -64,22 +88,52 @@ const AdminWedding = ({ navigation }) => {
   };
 
   const renderWeddingForm = ({ item }) => {
+    if (!item._id) return null;
+  
+    const { bride, groom, attendees, flowerGirl, ringBearer, weddingDate, weddingStatus } = item;
+  
     return (
       <TouchableOpacity onPress={() => handleCardPress(item)}>
         <Card style={styles.card}>
           <VStack space={2}>
+            {/* Display Bride & Groom */}
             <Heading size="md" color="white">
-              {item.name1} {item.name2 ? `& ${item.name2}` : ""}
+              {bride && groom ? `${bride} & ${groom}` : 'Names not available'}
             </Heading>
-            <Text style={styles.text}>Wedding Date: {new Date(item.weddingDate).toLocaleDateString()}</Text>
-            <Text style={styles.text}>Status: {item.weddingStatus}</Text>
-
-            {item.status === "pending" && (
+  
+            {/* Wedding Date */}
+            <Text style={styles.text}>
+              Wedding Date: {weddingDate ? new Date(weddingDate).toLocaleDateString() : 'N/A'}
+            </Text>
+  
+            {/* Status */}
+            <Text style={styles.text}>
+              Status: {weddingStatus || 'N/A'}
+            </Text>
+  
+            {/* Attendees, Flower Girl, Ring Bearer */}
+            <Text style={styles.text}>
+              Attendees: {attendees || 'N/A'}
+            </Text>
+            <Text style={styles.text}>
+              Flower Girl: {flowerGirl || 'N/A'} | Ring Bearer: {ringBearer || 'N/A'}
+            </Text>
+  
+            {/* Pending Actions */}
+            {weddingStatus === 'Pending' && (
               <View style={styles.buttonContainer}>
-                <Button colorScheme="green" onPress={() => handleConfirm(item._id)} style={styles.button}>
+                <Button
+                  colorScheme="green"
+                  onPress={() => handleConfirm(item._id)}
+                  style={styles.button}
+                >
                   Confirm
                 </Button>
-                <Button colorScheme="red" onPress={() => handleDecline(item._id)} style={styles.button}>
+                <Button
+                  colorScheme="red"
+                  onPress={() => handleDecline(item._id)}
+                  style={styles.button}
+                >
                   Cancel
                 </Button>
               </View>
@@ -89,6 +143,7 @@ const AdminWedding = ({ navigation }) => {
       </TouchableOpacity>
     );
   };
+  
 
   return (
     <Box style={styles.container}>
@@ -97,7 +152,6 @@ const AdminWedding = ({ navigation }) => {
         style={styles.imageRow}
         contentContainerStyle={styles.imageContentContainer}
       >
-        {/* Replace all external URIs with local assets */}
         <TouchableOpacity onPress={() => navigation.navigate("UserList")} style={styles.imageContainer}>
           <Image source={require("../../../assets/FORMS.png")} style={styles.image} />
         </TouchableOpacity>
@@ -149,7 +203,6 @@ const AdminWedding = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.navigate("createPostResource")} style={styles.imageContainer}>
           <Image source={require("../../../assets/13.png")} style={styles.image} />
         </TouchableOpacity>
-
       </ScrollView>
 
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>
@@ -159,7 +212,7 @@ const AdminWedding = ({ navigation }) => {
         <FlatList
           data={weddingForms}
           renderItem={renderWeddingForm}
-          keyExtractor={(item) => item._id}
+          keyExtractor={(item) => item._id?.toString()}
         />
       )}
     </Box>
@@ -169,11 +222,11 @@ const AdminWedding = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#b3cf99", 
+    backgroundColor: "#b3cf99",
     padding: 10,
   },
   card: {
-    backgroundColor: "#333", 
+    backgroundColor: "#333",
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
@@ -181,7 +234,7 @@ const styles = StyleSheet.create({
     height: 180,
   },
   text: {
-    color: "#FFFFFF", // White text for dark mode
+    color: "#FFFFFF",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -191,7 +244,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5,
-    backgroundColor: "#4CAF50", 
+    backgroundColor: "#4CAF50",
   },
   imageRow: {
     marginVertical: 10,
@@ -203,13 +256,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   imageContainer: {
-    marginRight: 30, 
+    marginRight: 30,
     borderRadius: 10,
     overflow: "hidden",
   },
   image: {
-    width: 100, // Increased width for larger cards
-    height: 100, // Increased height for larger cards
+    width: 100,
+    height: 100,
   },
   heading: {
     marginBottom: 10,

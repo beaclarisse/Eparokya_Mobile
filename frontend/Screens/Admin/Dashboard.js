@@ -10,9 +10,10 @@ const Dashboard = () => {
   const [userData, setUserData] = useState({ users: 0, admins: 0 });
   const [weddingData, setWeddingData] = useState([]);
   const [confirmedWeddingData, setConfirmedWeddingData] = useState([]);
-  const [batchData, setBatchData] = useState([]); // State for batch data
+  const [batchData, setBatchData] = useState([]); 
   const screenWidth = Dimensions.get("window").width;
   const navigation = useNavigation();
+  const batchColors = ["#E1F0DA", "#D4E7C5", "#BFD8AF", "#99BC85"];
 
   useEffect(() => {
     fetchUserRoles();
@@ -67,7 +68,7 @@ const Dashboard = () => {
   const fetchMemberCountByBatch = async () => {
     try {
       const response = await axios.get(`${baseURL}/member/count-by-batch`);
-      console.log("Batch Data:", response.data); // Debug batch data
+      console.log("Batch Data:", response.data); 
       setBatchData(response.data);
     } catch (error) {
       console.error("Error fetching member count by batch:", error.message);
@@ -186,6 +187,7 @@ const Dashboard = () => {
       ) : (
         <Text style={styles.noData}>No batch data available</Text>
       )}
+
     </ScrollView>
   );
 };
