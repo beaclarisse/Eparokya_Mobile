@@ -141,6 +141,11 @@ const AdminWedding = ({ navigation }) => {
           <Image source={{ uri: "https://i.pinimg.com/736x/30/e7/43/30e743bac627ac3de6ffd1f040da1588.jpg" }} style={styles.image} />
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => navigation.navigate("resourceCategory")} style={styles.imageContainer}>
+          <Image source={{ uri: "https://i.pinimg.com/736x/98/f8/67/98f86712c0da864fdfc992ad4cb08415.jpg" }} style={styles.image} />
+        </TouchableOpacity>
+
+
       </ScrollView>
 
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>

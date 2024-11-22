@@ -24,6 +24,7 @@ const announcementCatgeoryRoutes = require("./routes/Announcement/announcementCa
 const announcementRoutes = require("./routes/Announcement/announcement");
 const memberYearBatchRoutes = require("./routes/Members/memberYearBatchCategory");
 const memberRoutes = require("./routes/Members/members");
+const resourceCategoryRoutes = require("./routes/Resource/ResourceCategory");
 
 app.use(`/api/v1/users`, usersRoutes);
 app.use(`/api/v1/wedding`, weddingRoutes);
@@ -32,6 +33,7 @@ app.use(`/api/v1/announcementCategory`, announcementCatgeoryRoutes);
 app.use(`/api/v1/announcement`, announcementRoutes);
 app.use(`/api/v1/memberYear`, memberYearBatchRoutes);
 app.use(`/api/v1/member`, memberRoutes);
+app.use(`/api/v1/resourceCategory`, resourceCategoryRoutes);
 
 module.exports = app;
 

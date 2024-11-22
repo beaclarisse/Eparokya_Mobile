@@ -16,6 +16,9 @@ import announcementCategory from "../Screens/Admin/Announcement/AnnouncementCate
 import announcementCategoryList from "../Screens/Admin/Announcement/AnnouncementCategoryList";
 import announcement from "../Screens/Admin/Announcement/Announcement";
 
+import resourceCategory from "../Screens/Admin/Resource/resourceCategory";
+
+
 import CreateMemberYear from "../Screens/Admin/Members/CreateMemberYear";
 import Members from "../Screens/Admin/Members/Members";
 import MemberList from "../Screens/Admin/Members/MemberList";
@@ -94,7 +97,6 @@ const AdminNavigator = () => {
         options={{ headerShown: true }}
       />
 
-
       <Stack.Screen
         name="announcementCategory"
         component={announcementCategory}
@@ -108,6 +110,12 @@ const AdminNavigator = () => {
       <Stack.Screen
         name="announcement"
         component={announcement}
+        options={{ headerShown: true }}
+      />
+
+      <Stack.Screen
+        name="resourceCategory"
+        component={resourceCategory}
         options={{ headerShown: true }}
       />
 
