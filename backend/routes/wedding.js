@@ -27,6 +27,9 @@ router.post(
     weddingUpload.fields([
       { name: "brideBirthCertificate", maxCount: 1 },
       { name: "groomBirthCertificate", maxCount: 1 },
+      { name: "brideBaptismalCertificate", maxCount: 1 },
+      { name: "groomBaptismalCertificate", maxCount: 1 },
+
     ]),
     WeddingFormController.submitWeddingForm
   );

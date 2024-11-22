@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-//const { User } = require('./../user');
 
 const weddingSchema = mongoose.Schema({
   bride: { type: String, required: true },
@@ -20,7 +19,6 @@ const weddingSchema = mongoose.Schema({
     zip: String,
     country: String,
   },
-  
   BrideRelative: {
     type: String,
     required: false,
@@ -53,17 +51,23 @@ const weddingSchema = mongoose.Schema({
     type: Date,
     required: false,
   },
-  
-//image
+  // Image Fields
   brideBirthCertificate: {
     type: String,
-    default: '', 
+    default: '',
   },
   groomBirthCertificate: {
     type: String,
     default: '',
   },
-
+  brideBaptismalCertificate: {
+    type: String,
+    default: '', 
+  },
+  groomBaptismalCertificate: {
+    type: String,
+    default: '', 
+  },
   weddingStatus: {
     type: String,
     required: true,

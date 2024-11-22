@@ -145,6 +145,10 @@ const AdminWedding = ({ navigation }) => {
           <Image source={{ uri: "https://i.pinimg.com/736x/98/f8/67/98f86712c0da864fdfc992ad4cb08415.jpg" }} style={styles.image} />
         </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => navigation.navigate("CreatePostResource")} style={styles.imageContainer}>
+          <Image source={{ uri: "https://i.pinimg.com/736x/42/3a/40/423a4003d06805be0727542d1fb46b2e.jpg" }} style={styles.image} />
+        </TouchableOpacity>
+
 
       </ScrollView>
 

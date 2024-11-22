@@ -48,12 +48,16 @@ exports.submitWeddingForm = async (req, res) => {
     const validUserId = mongoose.Types.ObjectId(userId);
     const brideCertificate = req.files['brideBirthCertificate']?.[0]?.path || "";
     const groomCertificate = req.files['groomBirthCertificate']?.[0]?.path || "";
+    const brideBaptismalCertificate = req.files['brideBaptismalCertificate']?.[0]?.path || "";
+    const groomBaptismalCertificate = req.files['groomBaptismalCertificate']?.[0]?.path || "";
 
     const newWeddingData = {
       userId: validUserId,
       ...JSON.parse(weddingData), 
       brideBirthCertificate: brideCertificate,
       groomBirthCertificate: groomCertificate,
+      brideBaptismalCertificate,
+      groomBaptismalCertificate,
     };
 
     if (req.files?.brideBirthCertificate?.[0]) {
@@ -62,6 +66,14 @@ exports.submitWeddingForm = async (req, res) => {
 
     if (req.files?.groomBirthCertificate?.[0]) {
       newWeddingData.groomBirthCertificateUrl = req.files.groomBirthCertificate[0].path;
+    }
+
+    if (req.files?.brideBaptismalCertificate?.[0]) {
+      newWeddingData.brideBaptismalCertificate = req.files.brideBaptismalCertificate[0].path;
+    }
+
+    if (req.files?.groomBaptismalCertificate?.[0]) {
+      newWeddingData.groomBaptismalCertificate = req.files.groomBaptismalCertificate[0].path;
     }
 
     console.log("Final wedding object to be saved:", newWeddingData);

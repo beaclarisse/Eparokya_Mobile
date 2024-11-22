@@ -17,6 +17,7 @@ import announcementCategoryList from "../Screens/Admin/Announcement/Announcement
 import announcement from "../Screens/Admin/Announcement/Announcement";
 
 import resourceCategory from "../Screens/Admin/Resource/resourceCategory";
+import CreatePostResource from "../Screens/Admin/Resource/CreatePostResource";
 
 
 import CreateMemberYear from "../Screens/Admin/Members/CreateMemberYear";
@@ -116,6 +117,12 @@ const AdminNavigator = () => {
       <Stack.Screen
         name="resourceCategory"
         component={resourceCategory}
+        options={{ headerShown: true }}
+      />
+
+      <Stack.Screen
+        name="CreatePostResource"
+        component={CreatePostResource}
         options={{ headerShown: true }}
       />
 

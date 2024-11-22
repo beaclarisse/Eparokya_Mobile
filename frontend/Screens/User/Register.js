@@ -14,6 +14,7 @@ import FormContainer from "../../Shared/Form/FormContainer";
 import Input from "../../Shared/Form/Input.js";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from "@expo/vector-icons";
+import mime from "mime";
 
 var { height, width } = Dimensions.get("window");
 
@@ -26,14 +27,43 @@ const Register = (props) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const navigation = useNavigation();
 
-  const defaultImage = "https://rb.gy/hnb4yc"; 
+  const defaultImage = "https://rb.gy/hnb4yc";
 
-  const goToNextPage = () => {
+  const goToNextPage = async () => {
     if (email === "" || name === "" || password === "") {
       setError("Please fill in the form correctly");
       return;
     }
-    navigation.navigate("Register2", { email, name, password, selectedImage });
+
+    try {
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("name", name);
+      formData.append("password", password);
+
+      if (selectedImage) {
+        formData.append("profileImage", {
+          uri: selectedImage,
+          type: mime.getType(selectedImage) || "image/jpeg",
+          name: selectedImage.split("/").pop(),
+        });
+      }
+
+      const response = await axios.post(`${baseURL}/users/register`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      Toast.show({ text1: "Registration Successful!" });
+      navigation.navigate("Login");
+    } catch (error) {
+      console.error("Registration Error:", error);
+      Toast.show({
+        text1: "Registration Error",
+        text2: error.response?.data?.message || error.message,
+      });
+    }
   };
 
   const handleImagePick = async () => {
@@ -164,29 +194,6 @@ const styles = StyleSheet.create({
   buttonGroup: {
     width: "100%",
     margin: 10,
-    alignItems: "center",
-  },
-  button: {
-    backgroundColor: "black",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 10,
-    width: "100%",
-  },
-  buttonText: {
-    color: "white",
-    fontFamily: "Roboto",
-  },
-  arrowButton: {
-    backgroundColor: "transparent",
-  },
-  arrowIconContainer: {
-    width: "100%",
-    backgroundColor: "#1C5739",
-    borderRadius: 25,
-    padding: 10,
-    justifyContent: "center",
     alignItems: "center",
   },
   profileImage: {
