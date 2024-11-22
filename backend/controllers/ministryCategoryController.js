@@ -1,4 +1,4 @@
-const { ministryCategory } = require('../models/ministryCategory'); 
+const ministryCategory  = require('../models/ministryCategory'); 
 const mongoose = require('mongoose');
 
 exports.createMinistry = async (req, res) => {
@@ -15,14 +15,13 @@ exports.createMinistry = async (req, res) => {
     }
 };
 
-exports.getMinistry = async (req, res) => {
+exports.getAllMinistryCategories = async (req, res) => {
     try {
-        const ministries = await ministryCategory.find();
-        console.log('Fetched Ministries:', ministries);
-        res.status(200).json(ministries);
+        const categories = await ministryCategory.find();
+        res.status(200).json(categories);
     } catch (error) {
-        console.error('Error fetching ministries:', error); 
-        res.status(500).json({ message: 'Server error' });
+        console.error('Error fetching ministry categories:', error);
+        res.status(500).json({ error: 'Error fetching ministry categories', details: error.message });
     }
 };
 

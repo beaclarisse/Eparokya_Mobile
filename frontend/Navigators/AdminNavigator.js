@@ -17,6 +17,9 @@ import announcementCategoryList from "../Screens/Admin/Announcement/Announcement
 import announcement from "../Screens/Admin/Announcement/Announcement";
 
 import CreateMemberYear from "../Screens/Admin/Members/CreateMemberYear";
+import Members from "../Screens/Admin/Members/Members";
+import MemberList from "../Screens/Admin/Members/MemberList";
+import MemberDetail from "../Screens/Admin/Members/MemberDetail";
 
 const Stack = createStackNavigator();
 
@@ -67,11 +70,30 @@ const AdminNavigator = () => {
         options={{ headerShown: true }}
       />
 
-       <Stack.Screen
+      <Stack.Screen
         name="CreateMemberYear"
         component={CreateMemberYear}
         options={{ headerShown: true }}
       />
+
+      <Stack.Screen
+        name="Members"
+        component={Members}
+        options={{ headerShown: true }}
+      />
+
+      <Stack.Screen
+        name="MemberList"
+        component={MemberList}
+        options={{ headerShown: true }}
+      />
+
+      <Stack.Screen
+        name="MemberDetail"
+        component={MemberDetail}
+        options={{ headerShown: true }}
+      />
+
 
       <Stack.Screen
         name="announcementCategory"

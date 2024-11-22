@@ -46,11 +46,13 @@ exports.createCategory = async (req, res) => {
 exports.getAllCategories = async (req, res) => {
     try {
         const categories = await MemberYearBatchCategory.find();
+        console.log(categories);  // Log the categories to ensure you're getting the data
         res.status(200).json({ data: categories });
     } catch (error) {
         res.status(500).json({ message: 'Server error.', error: error.message });
     }
 };
+
 
 exports.getCategoryById = async (req, res) => {
     try {

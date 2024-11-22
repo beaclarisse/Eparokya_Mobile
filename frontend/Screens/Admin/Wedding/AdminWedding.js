@@ -40,7 +40,7 @@ const AdminWedding = ({ navigation }) => {
         headers: { Authorization: `${token}` },
       });
       Alert.alert("Success", "Wedding confirmed.");
-      fetchWeddingForms(); 
+      fetchWeddingForms();
     } catch (error) {
       Alert.alert("Error", "Failed to confirm the wedding.");
     }
@@ -73,7 +73,7 @@ const AdminWedding = ({ navigation }) => {
             </Heading>
             <Text style={styles.text}>Wedding Date: {new Date(item.weddingDate).toLocaleDateString()}</Text>
             <Text style={styles.text}>Status: {item.weddingStatus}</Text>
-            
+
             {item.status === "pending" && (
               <View style={styles.buttonContainer}>
                 <Button colorScheme="green" onPress={() => handleConfirm(item._id)} style={styles.button}>
@@ -92,9 +92,9 @@ const AdminWedding = ({ navigation }) => {
 
   return (
     <Box style={styles.container}>
-      <ScrollView 
-        horizontal={true} 
-        style={styles.imageRow} 
+      <ScrollView
+        horizontal={true}
+        style={styles.imageRow}
         contentContainerStyle={styles.imageContentContainer}
       >
         <TouchableOpacity onPress={() => navigation.navigate("UserList")} style={styles.imageContainer}>
@@ -130,8 +130,16 @@ const AdminWedding = ({ navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("CreateMemberYear")} style={styles.imageContainer}>
-        <Image source={{ uri: "https://i.pinimg.com/736x/a7/98/ef/a798ef607e5d7e5a6ddf3bcb3dc3b0b1.jpg" }} style={styles.image} />
-    </TouchableOpacity>
+          <Image source={{ uri: "https://i.pinimg.com/736x/a7/98/ef/a798ef607e5d7e5a6ddf3bcb3dc3b0b1.jpg" }} style={styles.image} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate("Members")} style={styles.imageContainer}>
+          <Image source={{ uri: "https://i.pinimg.com/736x/a7/98/ef/a798ef607e5d7e5a6ddf3bcb3dc3b0b1.jpg" }} style={styles.image} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate("MemberList")} style={styles.imageContainer}>
+          <Image source={{ uri: "https://i.pinimg.com/736x/30/e7/43/30e743bac627ac3de6ffd1f040da1588.jpg" }} style={styles.image} />
+        </TouchableOpacity>
 
       </ScrollView>
 
@@ -177,16 +185,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#4CAF50", // Green for confirm button
   },
   imageRow: {
-    marginVertical: 10, 
-    paddingHorizontal: 10, 
+    marginVertical: 10,
+    paddingHorizontal: 10,
   },
   imageContentContainer: {
-    flexDirection: 'row', 
-    justifyContent: 'flex-start', 
-    alignItems: 'center', 
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   imageContainer: {
-    marginRight: 20, 
+    marginRight: 20,
     borderRadius: 10,
     overflow: "hidden",
   },

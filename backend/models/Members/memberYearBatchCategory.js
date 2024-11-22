@@ -40,4 +40,4 @@ memberYearBatchCategorySchema.pre('save', function (next) {
     next();
 });
 
-module.exports = mongoose.model('MemberYearBatchCategory', memberYearBatchCategorySchema);
+module.exports = mongoose.model('memberYearBatchCategory', memberYearBatchCategorySchema);
