@@ -5,6 +5,8 @@ const { isAuthenticated, isAuthorized } = require('../middlewares/Auth');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' }); 
 const cloudinary = require('../config/cloudinary');
+const {weddingUpload} = require('../config/cloudinary');
+
 
 // router.post('/submit', upload.fields([
 //     { name: 'birthCertificateBride', maxCount: 1 },
@@ -17,7 +19,18 @@ const cloudinary = require('../config/cloudinary');
 // ]), WeddingFormController.submitWeddingForm);
 
 
-router.post('/submit', isAuthenticated, WeddingFormController.submitWeddingForm);
+// router.post('/submit', isAuthenticated, WeddingFormController.submitWeddingForm);
+
+router.post(
+    "/submit",
+    isAuthenticated,
+    weddingUpload.fields([
+      { name: "brideBirthCertificate", maxCount: 1 },
+      { name: "groomBirthCertificate", maxCount: 1 },
+    ]),
+    WeddingFormController.submitWeddingForm
+  );
+
 router.post('/:id/confirm', WeddingFormController.confirmWedding);
 router.get('/confirmed', WeddingFormController.getConfirmedWeddings);
 router.post('/decline', WeddingFormController.declineWedding);

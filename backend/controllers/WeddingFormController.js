@@ -33,7 +33,7 @@ exports.getWeddingById = async (req, res) => {
 };
 
 
-
+//with image:
 exports.submitWeddingForm = async (req, res) => {
   const { userId, weddingData } = req.body;
 
@@ -41,27 +41,76 @@ exports.submitWeddingForm = async (req, res) => {
   console.log("Received weddingData:", weddingData);
 
   if (!userId || !weddingData) {
-      return res.status(400).json({ message: "User ID and wedding data are required." });
+    return res.status(400).json({ message: "User ID and wedding data are required." });
   }
 
   try {
-      const validUserId = mongoose.Types.ObjectId(userId); 
+    const validUserId = mongoose.Types.ObjectId(userId);
+    const brideCertificate = req.files['brideBirthCertificate']?.[0]?.path || "";
+    const groomCertificate = req.files['groomBirthCertificate']?.[0]?.path || "";
 
-      const newWedding = new Wedding({
-          userId: validUserId, 
-          ...weddingData, 
-      });
+    const newWeddingData = {
+      userId: validUserId,
+      ...JSON.parse(weddingData), 
+      brideBirthCertificate: brideCertificate,
+      groomBirthCertificate: groomCertificate,
+    };
 
-      console.log("New wedding object to be saved:", newWedding);
+    if (req.files?.brideBirthCertificate?.[0]) {
+      newWeddingData.brideBirthCertificateUrl = req.files.brideBirthCertificate[0].path;
+    }
 
-      await newWedding.save(); 
-      
-      return res.status(201).json({ message: "Wedding form submitted successfully!", wedding: newWedding });
+    if (req.files?.groomBirthCertificate?.[0]) {
+      newWeddingData.groomBirthCertificateUrl = req.files.groomBirthCertificate[0].path;
+    }
+
+    console.log("Final wedding object to be saved:", newWeddingData);
+
+    const newWedding = new Wedding(newWeddingData);
+    await newWedding.save();
+
+    return res.status(201).json({
+      message: "Wedding form submitted successfully!",
+      wedding: newWedding,
+    });
   } catch (error) {
-      console.error("Error saving wedding form:", error);
-      return res.status(500).json({ message: "There was an error saving the wedding form.", error: error.message });
+    console.error("Error saving wedding form:", error);
+    return res.status(500).json({
+      message: "There was an error saving the wedding form.",
+      error: error.message,
+    });
   }
 };
+
+//First Working Wedding Controller
+// exports.submitWeddingForm = async (req, res) => {
+//   const { userId, weddingData } = req.body;
+
+//   console.log("Received userId:", userId);
+//   console.log("Received weddingData:", weddingData);
+
+//   if (!userId || !weddingData) {
+//       return res.status(400).json({ message: "User ID and wedding data are required." });
+//   }
+
+//   try {
+//       const validUserId = mongoose.Types.ObjectId(userId); 
+
+//       const newWedding = new Wedding({
+//           userId: validUserId, 
+//           ...weddingData, 
+//       });
+
+//       console.log("New wedding object to be saved:", newWedding);
+
+//       await newWedding.save(); 
+      
+//       return res.status(201).json({ message: "Wedding form submitted successfully!", wedding: newWedding });
+//   } catch (error) {
+//       console.error("Error saving wedding form:", error);
+//       return res.status(500).json({ message: "There was an error saving the wedding form.", error: error.message });
+//   }
+// };
 
 
 exports.confirmWedding = async (req, res) => {

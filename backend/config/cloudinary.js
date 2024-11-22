@@ -24,6 +24,18 @@ const storage = new CloudinaryStorage({
     },
 });
 
+const weddingStorage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: "WeddingDocuments",
+      resource_type: "auto", 
+    },
+  });
+  
+const weddingUpload = multer({ storage: weddingStorage });
 const upload = multer({ storage: storage });
 
-module.exports = upload;
+module.exports = {
+    upload, 
+    cloudinary, 
+    weddingUpload,};

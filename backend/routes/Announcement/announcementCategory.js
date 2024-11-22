@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const announcementCategoryController = require('../controllers/AnnouncementCategoryController');
-const upload = require('../utils/multer');  
+const announcementCategoryController = require('../../controllers/AnnouncementCategoryController');
+const upload = require('../../utils/multer');  
 
 router.post('/create', upload.single('image'), announcementCategoryController.createAnnouncementCategory);
 router.get('/', announcementCategoryController.getAnnouncementCategories);

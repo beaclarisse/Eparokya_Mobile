@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const announcementController = require('../controllers/AnnouncementController');
+const announcementController = require('../../controllers/AnnouncementController');
 // const upload = require('../utils/multer');  
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
-const { isAuthenticated, isAuthorized } = require('../middlewares/Auth');
+const { isAuthenticated, isAuthorized } = require('../../middlewares/Auth');
 
 // router.post('/create', upload.single('media'), announcementController.createAnnouncement);
 router.post('/create', upload.fields([

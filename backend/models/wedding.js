@@ -53,6 +53,17 @@ const weddingSchema = mongoose.Schema({
     type: Date,
     required: false,
   },
+  
+//image
+  brideBirthCertificate: {
+    type: String,
+    default: '', 
+  },
+  groomBirthCertificate: {
+    type: String,
+    default: '',
+  },
+
   weddingStatus: {
     type: String,
     required: true,

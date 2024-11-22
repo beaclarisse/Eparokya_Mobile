@@ -4,6 +4,7 @@ import axios from 'axios';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import SyncStorage from 'sync-storage';
 import baseURL from "../../../assets/common/baseUrl";
+import * as ImagePicker from 'expo-image-picker';
 
 const WeddingForm3 = ({ navigation, route }) => {
   const { bride, brideAge, brideGender, bridePhone, brideAddress,
@@ -23,7 +24,46 @@ const WeddingForm3 = ({ navigation, route }) => {
   const [brideRelative, setBrideRelative] = useState('');
   const [brideRelationship, setBrideRelationship] = useState('');
 
-  // Fetch user data on component mount
+  const [brideBirthCertificate, setBrideBirthCertificate] = useState(null);
+  const [groomBirthCertificate, setGroomBirthCertificate] = useState(null);
+
+  const pickBrideBirthCertificate = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Permission required", "Camera roll permissions are needed to select images.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setBrideBirthCertificate(result.assets[0].uri);
+    }
+  };
+
+  const pickGroomBirthCertificate = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Permission required", "Camera roll permissions are needed to select images.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setGroomBirthCertificate(result.assets[0].uri); // Set the selected image URI
+    }
+  };
+
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -50,60 +90,76 @@ const WeddingForm3 = ({ navigation, route }) => {
     fetchUserData();
   }, [navigation]);
 
+  //testing with image
   const handleSubmit = async () => {
-    // Check for missing required fields
+    // Validate required fields
     if (!attendees || !flowerGirl || !ringBearer || !groomRelative || !groomRelationship || !brideRelative || !brideRelationship || !userId) {
       setError('Please fill in all fields and ensure you are logged in.');
       return;
     }
 
-    const formattedBrideAge = Number(brideAge);  
-    const formattedGroomAge = Number(groomAge);  
-    const cleanedBrideGender = brideGender.trim(); 
-    const cleanedGroomGender = groomGender.trim();  
+    if (!brideBirthCertificate || !groomBirthCertificate) {
+      setError('Please upload both birth certificates.');
+      return;
+    }
+
+    // Prepare the weddingData
+    const formattedBrideAge = Number(brideAge);
+    const formattedGroomAge = Number(groomAge);
+    const cleanedBrideGender = brideGender.trim();
+    const cleanedGroomGender = groomGender.trim();
 
     const weddingData = {
-      bride: bride || "", // Ensure bride name is not undefined
-      brideAge: formattedBrideAge || 0, // Ensure brideAge is a number
-      brideGender: cleanedBrideGender || "", // Ensure brideGender is not undefined
-      bridePhone: bridePhone || "", // Ensure bridePhone is a valid string
+      bride: bride || "",
+      brideAge: formattedBrideAge || 0,
+      brideGender: cleanedBrideGender || "",
+      bridePhone: bridePhone || "",
       brideAddress: {
-        country: brideAddress.country || "", // Ensure country is valid
+        country: brideAddress.country || "",
         state: brideAddress.state || "",
-        zip: brideAddress.zip || "", 
+        zip: brideAddress.zip || "",
       },
-    
-      groom: groom || "", 
-      groomAge: formattedGroomAge || 0, 
-      groomGender: cleanedGroomGender || "", 
-      groomPhone: groomPhone || "", 
+      groom: groom || "",
+      groomAge: formattedGroomAge || 0,
+      groomGender: cleanedGroomGender || "",
+      groomPhone: groomPhone || "",
       groomAddress: {
-        country: groomAddress.country || "", 
-        state: groomAddress.state || "", 
-        zip: groomAddress.zip || "", 
+        country: groomAddress.country || "",
+        state: groomAddress.state || "",
+        zip: groomAddress.zip || "",
       },
-      
       BrideRelative: brideRelative || "",
       BrideRelationship: brideRelationship || "",
       GroomRelative: groomRelative || "",
       GroomRelationship: groomRelationship || "",
       attendees: String(attendees),
-      flowerGirl: flowerGirl || "", 
-      ringBearer: ringBearer || "", 
-      weddingDate: weddingDate ? weddingDate.toISOString() : "", 
+      flowerGirl: flowerGirl || "",
+      ringBearer: ringBearer || "",
+      weddingDate: weddingDate ? weddingDate.toISOString() : "",
     };
 
     console.log('Wedding Data:', weddingData);
 
-    const payload = {
-      userId, // Pass the logged-in user ID
-      weddingData, // All wedding form data wrapped in weddingData
-    };
+    const formData = new FormData();
 
-    console.log('Final Payload:', payload); // Log the payload to verify
+    formData.append('userId', userId);
+    formData.append('weddingData', JSON.stringify(weddingData)); 
+
+    formData.append('brideBirthCertificate', {
+      uri: brideBirthCertificate,
+      type: 'image/jpeg', 
+      name: 'brideBirthCertificate.jpg',
+    });
+
+    formData.append('groomBirthCertificate', {
+      uri: groomBirthCertificate,
+      type: 'image/jpeg',
+      name: 'groomBirthCertificate.jpg',
+    });
+
+    console.log('Final Payload:', formData); // Verify FormData before submission
 
     try {
-      // Check if JWT is available
       const token = await SyncStorage.get("jwt");
       if (!token) {
         Alert.alert("Error", "Authentication token is missing. Please log in again.");
@@ -111,8 +167,14 @@ const WeddingForm3 = ({ navigation, route }) => {
         return;
       }
 
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      const response = await axios.post(`${baseURL}/wedding/submit`, payload, config);
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      };
+
+      const response = await axios.post(`${baseURL}/wedding/submit`, formData, config);
 
       console.log('Wedding data submitted successfully:', response.data);
       Alert.alert("Success", "Wedding form submitted successfully!");
@@ -122,6 +184,80 @@ const WeddingForm3 = ({ navigation, route }) => {
       setError('An error occurred while submitting your wedding details. Please try again.');
     }
   };
+
+
+  //working from the test
+  // const handleSubmit = async () => {
+  //   if (!attendees || !flowerGirl || !ringBearer || !groomRelative || !groomRelationship || !brideRelative || !brideRelationship || !userId) {
+  //     setError('Please fill in all fields and ensure you are logged in.');
+  //     return;
+  //   }
+
+  //   const formattedBrideAge = Number(brideAge);  
+  //   const formattedGroomAge = Number(groomAge);  
+  //   const cleanedBrideGender = brideGender.trim(); 
+  //   const cleanedGroomGender = groomGender.trim();  
+
+  //   const weddingData = {
+  //     bride: bride || "", // Ensure bride name is not undefined
+  //     brideAge: formattedBrideAge || 0, // Ensure brideAge is a number
+  //     brideGender: cleanedBrideGender || "", // Ensure brideGender is not undefined
+  //     bridePhone: bridePhone || "", // Ensure bridePhone is a valid string
+  //     brideAddress: {
+  //       country: brideAddress.country || "", // Ensure country is valid
+  //       state: brideAddress.state || "",
+  //       zip: brideAddress.zip || "", 
+  //     },
+
+  //     groom: groom || "", 
+  //     groomAge: formattedGroomAge || 0, 
+  //     groomGender: cleanedGroomGender || "", 
+  //     groomPhone: groomPhone || "", 
+  //     groomAddress: {
+  //       country: groomAddress.country || "", 
+  //       state: groomAddress.state || "", 
+  //       zip: groomAddress.zip || "", 
+  //     },
+
+  //     BrideRelative: brideRelative || "",
+  //     BrideRelationship: brideRelationship || "",
+  //     GroomRelative: groomRelative || "",
+  //     GroomRelationship: groomRelationship || "",
+  //     attendees: String(attendees),
+  //     flowerGirl: flowerGirl || "", 
+  //     ringBearer: ringBearer || "", 
+  //     weddingDate: weddingDate ? weddingDate.toISOString() : "", 
+  //   };
+
+  //   console.log('Wedding Data:', weddingData);
+
+  //   const payload = {
+  //     userId, // Pass the logged-in user ID
+  //     weddingData, // All wedding form data wrapped in weddingData
+  //   };
+
+  //   console.log('Final Payload:', payload); // Log the payload to verify
+
+  //   try {
+  //     // Check if JWT is available
+  //     const token = await SyncStorage.get("jwt");
+  //     if (!token) {
+  //       Alert.alert("Error", "Authentication token is missing. Please log in again.");
+  //       navigation.navigate("Profile");
+  //       return;
+  //     }
+
+  //     const config = { headers: { Authorization: `Bearer ${token}` } };
+  //     const response = await axios.post(`${baseURL}/wedding/submit`, payload, config);
+
+  //     console.log('Wedding data submitted successfully:', response.data);
+  //     Alert.alert("Success", "Wedding form submitted successfully!");
+  //     navigation.navigate('ConfirmationPage');
+  //   } catch (error) {
+  //     console.error('Error submitting wedding data:', error.response ? error.response.data : error.message);
+  //     setError('An error occurred while submitting your wedding details. Please try again.');
+  //   }
+  // };
 
   // Clear all form fields
   const clearForm = () => {
@@ -202,8 +338,16 @@ const WeddingForm3 = ({ navigation, route }) => {
         />
       )}
 
+      {/* Bride Birth Certificate Upload */}
+      <Button title="Upload Bride Birth Certificate" onPress={pickBrideBirthCertificate} />
+      {brideBirthCertificate && <Text>Uploaded: {brideBirthCertificate.split('/').pop()}</Text>}
+
+      {/* Groom Birth Certificate Upload */}
+      <Button title="Upload Groom Birth Certificate" onPress={pickGroomBirthCertificate} />
+      {groomBirthCertificate && <Text>Uploaded: {groomBirthCertificate.split('/').pop()}</Text>}
+
       <Button title="Submit" onPress={handleSubmit} />
-      
+
       {/* Clear Button */}
       <Button title="Clear" onPress={clearForm} color="red" />
     </View>

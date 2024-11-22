@@ -21,11 +21,10 @@ const Announcement = () => {
     const [selectedCategory, setSelectedCategory] = useState('');
 
     useEffect(() => {
-        // Fetch AnnouncementCategory data on component mount
         const fetchCategories = async () => {
             try {
                 const response = await axios.get(`${baseURL}/announcementCategory`);
-                setCategories(response.data); // Adjust the path as needed
+                setCategories(response.data);
             } catch (error) {
                 console.error("Error fetching categories:", error);
             }
@@ -64,7 +63,7 @@ const Announcement = () => {
         formData.append('name', name);
         formData.append('description', description);
         formData.append('richDescription', richDescription);
-        formData.append('category', selectedCategory); // Append category
+        formData.append('category', selectedCategory); 
 
         if (image) {
             const imageUri = image;

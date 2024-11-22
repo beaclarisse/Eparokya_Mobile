@@ -92,7 +92,6 @@ const AdminWedding = ({ navigation }) => {
 
   return (
     <Box style={styles.container}>
-      {/* Image cards in horizontal layout */}
       <ScrollView 
         horizontal={true} 
         style={styles.imageRow} 
@@ -129,6 +128,11 @@ const AdminWedding = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.navigate("announcement")} style={styles.imageContainer}>
           <Image source={{ uri: "https://i.pinimg.com/736x/30/e7/43/30e743bac627ac3de6ffd1f040da1588.jpg" }} style={styles.image} />
         </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate("CreateMemberYear")} style={styles.imageContainer}>
+        <Image source={{ uri: "https://i.pinimg.com/736x/a7/98/ef/a798ef607e5d7e5a6ddf3bcb3dc3b0b1.jpg" }} style={styles.image} />
+    </TouchableOpacity>
+
       </ScrollView>
 
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>

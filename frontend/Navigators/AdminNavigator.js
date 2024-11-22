@@ -3,15 +3,20 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import UserList from "../Screens/Admin/User/UserList";
 import UpdateUser from "../Screens/Admin/User/UpdateUser";
+
 import WeddingForm from "../Screens/Admin/Wedding/AdminWedding";
 import WeddingDetails from "../Screens/Admin/Wedding/WeddingDetails";
 import ConfirmedWedding from "../Screens/Admin/Wedding/ConfirmedWedding";
 import AdminAvailableDates from "../Screens/Admin/Wedding/AdminAvailableDates";
+
 import ministryCategory from "../Screens/Admin/Ministries/CreateMinistry";
 import ministryList from "../Screens/Admin/Ministries/MinistryList";
+
 import announcementCategory from "../Screens/Admin/Announcement/AnnouncementCategory";
 import announcementCategoryList from "../Screens/Admin/Announcement/AnnouncementCategoryList";
 import announcement from "../Screens/Admin/Announcement/Announcement";
+
+import CreateMemberYear from "../Screens/Admin/Members/CreateMemberYear";
 
 const Stack = createStackNavigator();
 
@@ -61,6 +66,13 @@ const AdminNavigator = () => {
         component={ministryList}
         options={{ headerShown: true }}
       />
+
+       <Stack.Screen
+        name="CreateMemberYear"
+        component={CreateMemberYear}
+        options={{ headerShown: true }}
+      />
+
       <Stack.Screen
         name="announcementCategory"
         component={announcementCategory}

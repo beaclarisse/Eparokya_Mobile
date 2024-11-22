@@ -20,14 +20,16 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 const usersRoutes = require("./routes/user");
 const weddingRoutes = require("./routes/wedding");
 const ministryCatgeoryRoutes = require("./routes/ministryCategory");
-const announcementCatgeoryRoutes = require("./routes/announcementCategory");
-const announcementRoutes = require("./routes/announcement");
+const announcementCatgeoryRoutes = require("./routes/Announcement/announcementCategory");
+const announcementRoutes = require("./routes/Announcement/announcement");
+const memberYearBatchRoutes = require("./routes/Members/memberYearBatchCategory");
 
 app.use(`/api/v1/users`, usersRoutes);
 app.use(`/api/v1/wedding`, weddingRoutes);
 app.use(`/api/v1/ministryCategory`, ministryCatgeoryRoutes);
 app.use(`/api/v1/announcementCategory`, announcementCatgeoryRoutes);
 app.use(`/api/v1/announcement`, announcementRoutes);
+app.use(`/api/v1/memberYear`, memberYearBatchRoutes);
 
 module.exports = app;
 
