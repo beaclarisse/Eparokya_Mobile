@@ -10,10 +10,10 @@ const AnnouncementCategory = () => {
   const [category, setCategory] = useState({
     name: '',
     description: '',
-    images: [],
+    images: [],  
   });
 
-  const [imagesPreview, setImagesPreview] = useState([]);
+  const [imagesPreview, setImagesPreview] = useState([]);  
 
   const handleChange = (name, value) => {
     setCategory({ ...category, [name]: value });
@@ -28,15 +28,15 @@ const AnnouncementCategory = () => {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsMultipleSelection: false,
+      allowsMultipleSelection: false,  
       aspect: [4, 3],
       quality: 1,
     });
 
     if (!result.canceled && result.assets.length > 0) {
       const selectedImage = result.assets[0];
-      setImagesPreview([selectedImage.uri]);
-      setCategory({ ...category, images: [selectedImage] });
+      setImagesPreview([selectedImage.uri]); 
+      setCategory({ ...category, images: [selectedImage] });  
     }
   };
 
@@ -45,56 +45,63 @@ const AnnouncementCategory = () => {
     formData.append('name', category.name);
     formData.append('description', category.description);
 
-    console.log('Form Data:', formData);
-
     if (category.images[0]) {
-        formData.append('image', {
-            uri: category.images[0].uri,
-            type: mime.getType(category.images[0].uri) || 'image/jpeg',
-            name: category.images[0].uri.split('/').pop(),
-        });
+      const imageUri = category.images[0].uri;
+      const fileType = mime.getType(imageUri);  
+      const fileName = imageUri.split('/').pop();  
+      formData.append('image', {
+        uri: imageUri,
+        type: fileType,
+        name: fileName,
+      });
     }
 
     try {
-        const response = await axios.post(`${baseURL}/announcementCategory/create`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        console.log('Response:', response.data);  
-        Toast.show({ text1: 'Announcement Category Created Successfully!' });
-        setCategory({ name: '', description: '', images: [] });
-        setImagesPreview([]);
+      const response = await axios.post(`${baseURL}/announcementCategory/create`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',  
+        },
+      });
+      console.log('Response:', response.data);
+      Toast.show({ text1: 'Announcement Category Created Successfully!' });
+
+      setCategory({ name: '', description: '', images: [] });
+      setImagesPreview([]);
     } catch (error) {
-        console.error('Error uploading image', error);  
-        Toast.show({
-            text1: 'Error uploading image',
-            text2: error.message,
-        });
+      console.error('Error uploading image', error);
+      Toast.show({
+        text1: 'Error uploading image',
+        text2: error.message,
+      });
     }
-};
+  };
 
   return (
     <View style={{ padding: 20 }}>
       <Text style={{ fontSize: 24 }}>Create Announcement Category</Text>
+
       <TextInput
         placeholder="Name"
         value={category.name}
         onChangeText={(value) => handleChange('name', value)}
         style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}
       />
+
       <TextInput
         placeholder="Description"
         value={category.description}
         onChangeText={(value) => handleChange('description', value)}
         style={{ borderWidth: 1, padding: 10, marginVertical: 10 }}
       />
+
       <Button title="Pick Image" onPress={handleImagePick} />
+
       <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
         {imagesPreview.map((img, index) => (
           <Image key={index} source={{ uri: img }} style={{ width: 100, height: 100, margin: 5 }} />
         ))}
       </View>
+
       <Button title="Create Announcement Category" onPress={submitForm} />
     </View>
   );

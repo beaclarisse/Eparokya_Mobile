@@ -16,6 +16,8 @@ import announcementCategory from "../Screens/Admin/Announcement/AnnouncementCate
 import announcementCategoryList from "../Screens/Admin/Announcement/AnnouncementCategoryList";
 import announcement from "../Screens/Admin/Announcement/Announcement";
 
+import Dashboard from "../Screens/Admin/Dashboard";
+
 import resourceCategory from "../Screens/Admin/Resource/resourceCategory";
 import CreatePostResource from "../Screens/Admin/Resource/CreatePostResource";
 
@@ -30,6 +32,14 @@ const Stack = createStackNavigator();
 const AdminNavigator = () => {
   return (
     <Stack.Navigator>
+
+      <Stack.Screen
+        name="Dashboard"
+        component={Dashboard}
+        options={{ headerShown: true }}
+      />
+
+
       <Stack.Screen
         name="WeddingForm"
         component={WeddingForm}
@@ -125,6 +135,8 @@ const AdminNavigator = () => {
         component={CreatePostResource}
         options={{ headerShown: true }}
       />
+
+
 
     </Stack.Navigator>
   );

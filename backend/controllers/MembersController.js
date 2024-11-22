@@ -1,6 +1,8 @@
 const MemberHistory = require('../models/Members/members');
 const { cloudinary } = require('../config/cloudinary');
 const MinistryCategory = require('../models/ministryCategory');
+const MemberYearBatchCategory = require('../models/Members/memberYearBatchCategory');
+
 
 // const upload = require('../config/cloudinary');
 // const cloudinary = require('cloudinary').v2;  
@@ -8,8 +10,6 @@ const MinistryCategory = require('../models/ministryCategory');
 exports.createMemberHistory = async (req, res) => {
     try {
         const { firstName, middleName, lastName, age, birthday, address, position, memberYearBatch, ministryCategory } = req.body;
-
-        // Validate required fields
         if (!firstName || !lastName || !age || !birthday || !position || !memberYearBatch || !ministryCategory) {
             return res.status(400).json({ error: 'All required fields must be provided.' });
         }
@@ -28,7 +28,7 @@ exports.createMemberHistory = async (req, res) => {
             lastName,
             age,
             birthday,
-            address: JSON.parse(address), // Parse address as it is sent as a stringified object
+            address: JSON.parse(address), 
             position,
             memberYearBatch,
             ministryCategory,
@@ -100,8 +100,8 @@ exports.deleteMemberHistory = async (req, res) => {
 exports.getMemberById = async (req, res) => {
     try {
         const member = await MemberHistory.findById(req.params.id)
-            .populate('memberYearBatch', 'name yearRange') // Example populate for memberYearBatch
-            .populate('ministryCategory', 'name'); // Example populate for ministryCategory
+            .populate('memberYearBatch', 'name yearRange')
+            .populate('ministryCategory', 'name'); 
 
         if (!member) {
             return res.status(404).json({ error: 'Member not found' });
@@ -110,6 +110,35 @@ exports.getMemberById = async (req, res) => {
         res.status(200).json(member);
     } catch (error) {
         res.status(500).json({ error: 'Error fetching member details', details: error.message });
+    }
+};
+
+
+exports.getMembersCountByBatch = async (req, res) => {
+    try {
+        const membersCountByBatch = await MemberYearBatchCategory.aggregate([
+            {
+                $lookup: {
+                    from: "members", // Replace with the actual collection name for members
+                    localField: "_id", // Field in MemberYearBatchCategory schema
+                    foreignField: "memberYearBatch", // Field in Members schema
+                    as: "members", // Alias for the joined data
+                },
+            },
+            {
+                $project: {
+                    batchName: "$name", // Name of the batch
+                    count: { $size: "$members" }, // Count the number of members
+                },
+            },
+        ]);
+
+        res.status(200).json(membersCountByBatch);
+    } catch (error) {
+        res.status(500).json({
+            message: "Error fetching members count by batch.",
+            error: error.message,
+        });
     }
 };
 

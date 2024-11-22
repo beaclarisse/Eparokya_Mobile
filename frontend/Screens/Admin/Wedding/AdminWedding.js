@@ -97,58 +97,58 @@ const AdminWedding = ({ navigation }) => {
         style={styles.imageRow}
         contentContainerStyle={styles.imageContentContainer}
       >
+        {/* Replace all external URIs with local assets */}
         <TouchableOpacity onPress={() => navigation.navigate("UserList")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/8c/bb/2b/8cbb2b0cf456b78ee7e5fa38df3d4c7c.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/FORMS.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("ConfirmedWedding")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/0a/b1/fa/0ab1faaa71504156bd0361b5ad3f3534.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/2.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("AdminAvailableDates")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://example.com/available-dates-image.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/3.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("ministryCategory")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/e0/6c/26/e06c2611b0ccdefb9e9a1c4f52c8ee65.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/4.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("ministryList")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/42/3a/40/423a4003d06805be0727542d1fb46b2e.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/5.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("announcementCategory")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/49/f3/af/49f3af704b4ff366cd5cad3f1755bce2.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/6.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("announcementCategoryList")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/98/f8/67/98f86712c0da864fdfc992ad4cb08415.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/7.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("announcement")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/30/e7/43/30e743bac627ac3de6ffd1f040da1588.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/8.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("CreateMemberYear")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/a7/98/ef/a798ef607e5d7e5a6ddf3bcb3dc3b0b1.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/9.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("Members")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/a7/98/ef/a798ef607e5d7e5a6ddf3bcb3dc3b0b1.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/10.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("MemberList")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/30/e7/43/30e743bac627ac3de6ffd1f040da1588.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/11.png")} style={styles.image} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigation.navigate("resourceCategory")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/98/f8/67/98f86712c0da864fdfc992ad4cb08415.jpg" }} style={styles.image} />
+          <Image source={require("../../../assets/12.png")} style={styles.image} />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("CreatePostResource")} style={styles.imageContainer}>
-          <Image source={{ uri: "https://i.pinimg.com/736x/42/3a/40/423a4003d06805be0727542d1fb46b2e.jpg" }} style={styles.image} />
+        <TouchableOpacity onPress={() => navigation.navigate("createPostResource")} style={styles.imageContainer}>
+          <Image source={require("../../../assets/13.png")} style={styles.image} />
         </TouchableOpacity>
-
 
       </ScrollView>
 
@@ -169,11 +169,11 @@ const AdminWedding = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#b3cf99", // Updated background color
+    backgroundColor: "#b3cf99", 
     padding: 10,
   },
   card: {
-    backgroundColor: "#333", // Darker card background
+    backgroundColor: "#333", 
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
@@ -191,30 +191,30 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 5,
-    backgroundColor: "#4CAF50", // Green for confirm button
+    backgroundColor: "#4CAF50", 
   },
   imageRow: {
     marginVertical: 10,
     paddingHorizontal: 10,
   },
   imageContentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   imageContainer: {
-    marginRight: 20,
+    marginRight: 30, 
     borderRadius: 10,
     overflow: "hidden",
   },
   image: {
-    width: 60,
-    height: 60,
+    width: 100, // Increased width for larger cards
+    height: 100, // Increased height for larger cards
   },
   heading: {
     marginBottom: 10,
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: "#FFFFFF",
   },
 });
