@@ -16,8 +16,6 @@ exports.getAllWeddings = async (req, res) => {
   }
 };
 
-
-
 exports.getWeddingById = async (req, res) => {
   console.log("Request ID:", req.params.id);
   try {
@@ -53,7 +51,7 @@ exports.submitWeddingForm = async (req, res) => {
 
     const newWeddingData = {
       userId: validUserId,
-      weddingStatus: "Pending",  // Set wedding status to "Pending" by default
+      weddingStatus: "Pending",  
       ...JSON.parse(weddingData),
       brideBirthCertificate: brideCertificate,
       groomBirthCertificate: groomCertificate,
@@ -61,7 +59,6 @@ exports.submitWeddingForm = async (req, res) => {
       groomBaptismalCertificate,
     };
 
-    // If you have additional files for the certificates, add them here
     if (req.files?.brideBirthCertificate?.[0]) {
       newWeddingData.brideBirthCertificateUrl = req.files.brideBirthCertificate[0].path;
     }

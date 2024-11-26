@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     },
     image: { 
         type: String, 
-        default: "https://rb.gy/hnb4yc",
+        default: '',
      }, 
     email: {
         type: String,

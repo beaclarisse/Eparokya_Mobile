@@ -9,7 +9,7 @@ import axios from "axios";
 import baseURL from "../../assets/common/baseUrl";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";  // Import ImagePicker
+import * as ImagePicker from "expo-image-picker";  
 import RNPickerSelect from 'react-native-picker-select';
 
 var { height, width } = Dimensions.get("window");
@@ -30,7 +30,7 @@ const Register2 = () => {
 
   const { email, name, password } = route.params;
 
-  const defaultImage = "https://rb.gy/hnb4yc";  // Default profile image
+  const defaultImage = "https://rb.gy/hnb4yc";  
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -41,7 +41,7 @@ const Register2 = () => {
     });
 
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);  // Store the selected image URI
+      setSelectedImage(result.assets[0].uri);  
     }
   };
 
@@ -105,10 +105,10 @@ const Register2 = () => {
     formData.append('preference', preference);
 
     if (selectedImage) {
-      formData.append('profileImage', {
+      formData.append('image', {
         uri: selectedImage,
         type: 'image/jpeg',
-        name: 'profileImage.jpg', 
+        name: 'image.jpg', 
       });
     }
 

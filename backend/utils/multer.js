@@ -8,7 +8,7 @@ const FILE_TYPE_MAP = {
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "uploads"); // Temporary local storage
+        cb(null, "uploads"); 
     },
     filename: (req, file, cb) => {
         const sanitizedName = file.originalname.split(" ").join("-");

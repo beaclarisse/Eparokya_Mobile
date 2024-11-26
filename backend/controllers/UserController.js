@@ -1,7 +1,8 @@
 const User = require('../models/user');
 const sendToken = require('../routes/jwtToken');
-const upload = require('../config/cloudinary');
-
+const cloudinary = require('../config/cloudinary');
+const fs = require('fs');
+const multer = require('multer');
 // exports.register = async (req, res, next) => {
 
 //     try {
@@ -27,41 +28,44 @@ const upload = require('../config/cloudinary');
 //     }
 // }
 
+exports.register = async (req, res) => {
+    console.log(req.file); 
 
-exports.register = async (req, res, next) => {
     try {
-      console.log('File:', req.file);  
-  
-      let profileImageUrl = null;
-  
-      if (req.file) {
-        profileImageUrl = req.file.path; 
-      } else {
-        console.log('No file uploaded');
-      }
-  
-      const user = await User.create({
-        ...req.body,
-        profileImage: profileImageUrl,
-      });
-  
-      if (!user) {
-        return res.status(400).send("The user cannot be created!");
-      }
-  
-      return sendToken(user, 200, res, "Registration Successful!");
-    } catch (err) {
-      console.error("Registration Error:", err);
-      return res.status(500).json({ 
-        message: "An error occurred while registering. Please try again later.",
-        success: false,
-      });
+        const { name, email, password, age, preference, phone, barangay, zip } = req.body;
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: 'Email already exists' });
+        }
+
+        let imageUrl = '';
+        if (req.file) {
+            imageUrl = req.file.path; 
+        }
+        const user = new User({
+            name,
+            email,
+            password,
+            image: imageUrl, 
+            age,
+            preference,
+            phone,
+            barangay,
+            zip,
+        });
+
+        await user.save();  
+
+        return sendToken(user, 200, res, 'User registered successfully');
+    } catch (error) {
+        console.error('Registration error:', error);
+        res.status(500).json({
+            message: 'Server error. Please try again later.',
+            success: false,
+        });
     }
-  };
-  
-  
-  
-  
+};
 
   
 exports.login = async (req, res) => {

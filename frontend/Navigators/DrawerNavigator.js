@@ -31,7 +31,6 @@ import BaptismList from "../Screens/Admin/Baptism/BaptismList";
 
 const Drawer = createDrawerNavigator();
 
-// Utility function to map screen names to icons
 const getIcon = (screenName) => {
   switch (screenName) {
     case "Home":
@@ -142,6 +141,8 @@ const DrawerNavigator = () => {
       >
         <Drawer.Screen name="HomeTab" component={Main} />
         <Drawer.Screen name="Calendar" component={CalendarComponent} />
+        <Drawer.Screen name="BaptismForm" options={{ drawerLabel: "Baptism Form",}} component={BaptismForm}/>
+        <Drawer.Screen name="BaptismList" options={{ drawerLabel: "Baptism List", }} component={BaptismList}/>
         <Drawer.Screen name="Wedding" component={Wedding} />
         {userInfo?.isAdmin && (
           <Drawer.Screen name="Admin Dashboard" component={AdminNavigator} />
