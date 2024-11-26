@@ -10,7 +10,7 @@ import SyncStorage from "sync-storage";
 import { useDispatch } from "react-redux";
 import { loginAction } from "../../Redux/Actions/userActions";
 import { Image } from "native-base";
-import { MaterialIcons } from "@expo/vector-icons"; // Import icons
+import { MaterialIcons } from "@expo/vector-icons"; 
 import Toast from "react-native-toast-message";
 import baseURL from "../../assets/common/baseUrl";
 
@@ -28,16 +28,14 @@ const Login = ({ navigation }) => {
         type: "success",
         text1: data.message,
       });
-      console.log(data);  // Logs the entire response
+      console.log(data);  
   
-      // Save JWT token and user information
       SyncStorage.set("jwt", data.token);
       SyncStorage.set("user", JSON.stringify(data.user));
   
-      // Save userId separately for easy access
-      SyncStorage.set("userId", data.user._id);  // Save the user ID correctly here
-      console.log('Stored userId:', SyncStorage.get("userId"));  // Log the userId to verify it's saved correctly
-  
+      SyncStorage.set("userId", data.user._id); 
+      console.log('Stored userId:', SyncStorage.get("userId")); 
+
       navigation.navigate("UserProfile");
     } catch (err) {
       console.log(err);
@@ -66,6 +64,7 @@ const Login = ({ navigation }) => {
       <Image
         source={require("../../assets/EParokya_WCP.png")}
         style={{ width: 250, height: 260, marginRight: 10 }}
+        alt = "EParokya Logo"
       />
 
       <View style={styles.inputContainer}>

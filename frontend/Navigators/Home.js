@@ -21,7 +21,6 @@ function MyStack() {
   )
 }
 
-//tanggal white-space 
 export default function Home() {
   return (
     <View style={styles.container}> 

@@ -3,12 +3,10 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
 } from "@react-navigation/drawer";
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from "expo-status-bar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-//import { MaterialCommunityIcons } from 'react-native-vector-icons';
 import {
   NativeBaseProvider,
-  Button,
   Box,
   Pressable,
   VStack,
@@ -17,10 +15,12 @@ import {
   Divider,
   Icon,
 } from "native-base";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutAction } from "../Redux/Actions/userActions"; 
+//import { loginAction } from "../Redux/Actions/userActions"; 
 import Login from "../Screens/User/Login";
 import Main from "./Main";
 import AdminNavigator from "./AdminNavigator";
-import { useDispatch, useSelector } from "react-redux";
 import UserNavigator from "./UserNavigator";
 import CalendarComponent from "../Screens/User/Calendar";
 import Wedding from "../Screens/User/Wedding/WeddingForm";
@@ -37,8 +37,8 @@ const getIcon = (screenName) => {
       return "calendar";
     case "Wedding":
       return "file-document";
-    case "Home":
-      return "Admin Dashboard";
+    case "Admin Dashboard":
+      return "monitor-dashboard";
     case "Profile":
       return "account";
     case "Logout":
@@ -62,14 +62,12 @@ function CustomDrawerContent(props) {
           <VStack space="3">
             {props.state.routeNames.map((name, index) => (
               <Pressable
-                key={index} 
+                key={index}
                 px="5"
                 py="3"
                 rounded="md"
                 bg={index === props.state.index ? "#b3cf99" : "transparent"}
-                onPress={() => {
-                  props.navigation.navigate(name);
-                }}
+                onPress={() => props.navigation.navigate(name)}
               >
                 <HStack space="7" alignItems="center">
                   <Icon
@@ -88,6 +86,7 @@ function CustomDrawerContent(props) {
                 </HStack>
               </Pressable>
             ))}
+
             <Pressable
               px="5"
               py="3"
@@ -142,7 +141,6 @@ function CustomDrawerContent(props) {
   );
 }
 
-
 const DrawerNavigator = () => {
   const { userInfo } = useSelector((state) => state.user);
 
@@ -154,49 +152,26 @@ const DrawerNavigator = () => {
         screenOptions={({ navigation }) => ({
           headerShown: true,
           headerLeft: () => (
-            <Button onPress={() => navigation.toggleDrawer()} colorScheme="white">
-              <MaterialCommunityIcons name="menu-open" size={24} color="black" />
-            </Button>
+            <Pressable onPress={() => navigation.toggleDrawer()} p="2">
+              <MaterialCommunityIcons name="menu-open" size={24} color="white" />
+            </Pressable>
           ),
           drawerStyle: {
-            backgroundColor: '#154314',
-            width: '80%',
+            backgroundColor: "#154314",
+            width: "80%",
           },
         })}
       >
-        <Drawer.Screen
-          name="Home"
-          options={{
-            drawerLabel: "Home",
-          }}
-          component={Main}
-        />
-        <Drawer.Screen
-          name="Calendar"
-          options={{
-            drawerLabel: "Calendar",
-          }}
-          component={CalendarComponent}
-        />
-        <Drawer.Screen
-          name="Wedding"
-          component={Wedding}
-          initialParams={{ screen: "Wedding" }}
-        />
+        <Drawer.Screen name="HomeTab" component={Main} />
+        <Drawer.Screen name="Calendar" component={CalendarComponent} />
+        <Drawer.Screen name="Wedding" component={Wedding} />
         {userInfo?.isAdmin && (
-          <Drawer.Screen
-            name="Admin Dashboard"
-            component={AdminNavigator}
-            initialParams={{ screen: "Admin" }}
-          />
+          <Drawer.Screen name="Admin Dashboard" component={AdminNavigator} />
         )}
         <Drawer.Screen name="Profile" component={Profile} />
       </Drawer.Navigator>
     </Box>
   );
 };
-
-
-
 
 export default DrawerNavigator;

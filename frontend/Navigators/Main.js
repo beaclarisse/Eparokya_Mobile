@@ -1,5 +1,5 @@
 import React from "react";
-import { Animated, View } from "react-native";
+import { View, Text, Animated, TouchableOpacity, StyleSheet } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/FontAwesome";
 import UserNavigator from "./UserNavigator";
@@ -8,70 +8,142 @@ import WeddingNavigator from "./WeddingNavigator";
 
 const Tab = createBottomTabNavigator();
 
-const TabBarIcon = ({ name, color, size, style, focused }) => {
-  const scale = new Animated.Value(1);
-
-  React.useEffect(() => {
-    Animated.timing(scale, {
-      toValue: focused ? 1.5 : 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [focused]);
-
+const CustomTabBar = ({ state, descriptors, navigation }) => {
   return (
-    <Animated.View
-      style={[
-        style,
-        {
-          transform: [{ scale }],
-          justifyContent: "center",
-          alignItems: "center",
-          borderWidth: focused ? 2 : 0,
-          borderColor: color,
-          borderRadius: 70,
-          padding: 5,
-        },
-      ]}
-    >
-      <Icon name={name} color={color} size={size} />
-    </Animated.View>
+    <View style={styles.tabBarContainer}>
+      {state.routes.map((route, index) => {
+        const { options } = descriptors[route.key];
+        const label =
+          options.tabBarLabel !== undefined
+            ? options.tabBarLabel
+            : options.title !== undefined
+            ? options.title
+            : route.name;
+
+        const isFocused = state.index === index;
+
+        const onPress = () => {
+          const event = navigation.emit({
+            type: "tabPress",
+            target: route.key,
+          });
+
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+
+        const onLongPress = () => {
+          navigation.emit({
+            type: "tabLongPress",
+            target: route.key,
+          });
+        };
+
+        const scale = new Animated.Value(isFocused ? 1.5 : 1);
+
+        React.useEffect(() => {
+          Animated.timing(scale, {
+            toValue: isFocused ? 1.5 : 1,
+            duration: 300,
+            useNativeDriver: true,
+          }).start();
+        }, [isFocused]);
+
+        return (
+          <TouchableOpacity
+            key={route.key}
+            accessibilityRole="button"
+            accessibilityState={isFocused ? { selected: true } : {}}
+            accessibilityLabel={options.tabBarAccessibilityLabel}
+            testID={options.tabBarTestID}
+            onPress={onPress}
+            onLongPress={onLongPress}
+            style={[
+              styles.tabButton,
+              isFocused && styles.focusedTabButton,
+              index === 1 && styles.centralTab,
+            ]}
+          >
+            <Animated.View
+              style={[
+                {
+                  transform: [{ scale }],
+                },
+              ]}
+            >
+              <Icon
+                name={route.name === "HomeTab" ? "home" : route.name === "Forms" ? "leaf" : "user"}
+                size={isFocused ? 20 : 19} 
+                color={isFocused ? "#4CAF50" : "gray"}
+              />
+            </Animated.View>
+            {isFocused && <Text style={styles.tabLabel}>{label}</Text>}
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 };
 
 const Main = () => (
   <Tab.Navigator
-    initialRouteName="Home"
-    screenOptions={({ route }) => ({
-      tabBarIcon: ({ color, size, focused }) => (
-        <TabBarIcon
-          name={route.name === "Home" ? "home" : "user"}
-          color={color}
-          size={size}
-          focused={focused}
-        />
-      ),
-      tabBarShowLabel: false,
-    })}
+    initialRouteName="HomTab"
+    tabBar={(props) => <CustomTabBar {...props} />}
+    screenOptions={{
+      headerShown: false,
+    }}
   >
-    <Tab.Screen
-      name="Home"
-      component={Home}
-      options={{ headerShown: false }}
-    />
-
-    <Tab.Screen
-      name="Forms"
-      component={WeddingNavigator}
-      options={{ headerShown: false }}
-    />
-
-    <Tab.Screen
-      name="Profile"
-      component={UserNavigator}
-      options={{ headerShown: false }}
-    />
+    <Tab.Screen name="Home" component={Home} />
+    <Tab.Screen name="Forms" component={WeddingNavigator} />
+    <Tab.Screen name="Profile" component={UserNavigator} />
   </Tab.Navigator>
 );
+
+const styles = StyleSheet.create({
+  tabBarContainer: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    height: 70,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+    alignItems: "center",
+    justifyContent: "space-around",
+    paddingHorizontal: 10,
+  },
+  tabButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+  },
+  centralTab: {
+    position: "relative",
+    bottom: 20,
+    backgroundColor: "#E8F5E9",
+    borderRadius: 35,
+    width: 70,
+    height: 70,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  focusedTabButton: {
+    backgroundColor: "#F1F8E9",
+    borderRadius: 30,
+  },
+  tabLabel: {
+    color: "#4CAF50",
+    fontSize: 12,
+    marginTop: 4,
+  },
+});
 
 export default Main;

@@ -126,71 +126,73 @@ const AnnouncementPage = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {error ? (
-        <Text>{error}</Text>
-      ) : (
-        <>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
-            {categories.map(category => (
-              <TouchableOpacity
-                key={category._id}
-                style={[styles.categoryIcon, selectedCategory === category._id && styles.selectedCategory]}
-                onPress={() => setSelectedCategory(category._id)}
-              >
-                {category.image && (
-                  <Image source={{ uri: category.image }} style={styles.categoryImage} />
-                )}
-                <Text style={styles.categoryText}>{category.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-
-          <FlatList
-            data={filteredAnnouncements}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.card}
-                onPress={() => {
-                  navigation.navigate("Profile", {
-                    screen: "AnnouncementDetail", 
-                    params: { announcementId: item._id }, 
-                  });
-                }}
-              >
-                <Text style={styles.title}>{item.name || 'No title available'}</Text>
-                <Text>{item.description || 'No description available'}</Text>
-                {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
-                {item.video && <Text style={styles.media}>Video: {item.video}</Text>}
-
-                <View style={styles.interactionContainer}>
-                  <TouchableOpacity onPress={() => handleLike(item._id)}>
-                    <MaterialIcons
-                      name="thumb-up"
-                      size={24}
-                      color={item.liked ? 'green' : 'gray'}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.countText}>{item.likes || 0}</Text>
-
-                  <TouchableOpacity onPress={() => navigation.navigate("AnnouncementDetail", { announcementId: item._id })}>
-                    <MaterialIcons
-                      name="comment"
-                      size={24}
-                      color="gray"
-                      style={styles.commentIcon}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.countText}>{item.comments ? item.comments.length : 0}</Text>
-                </View>
-              </TouchableOpacity>
+<ScrollView nestedScrollEnabled style={styles.container}>
+  {error ? (
+    <Text>{error}</Text>
+  ) : (
+    <>
+      <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
+        {categories.map(category => (
+          <TouchableOpacity
+            key={category._id}
+            style={[styles.categoryIcon, selectedCategory === category._id && styles.selectedCategory]}
+            onPress={() => setSelectedCategory(category._id)}
+          >
+            {category.image && (
+              <Image source={{ uri: category.image }} style={styles.categoryImage} />
             )}
-            keyExtractor={item => item._id}
-          />
-        </>
-      )}
-      <Toast />
-    </ScrollView>
+            <Text style={styles.categoryText}>{category.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <FlatList
+        nestedScrollEnabled
+        data={filteredAnnouncements}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => {
+              navigation.navigate("Profile", {
+                screen: "AnnouncementDetail",
+                params: { announcementId: item._id },
+              });
+            }}
+          >
+            <Text style={styles.title}>{item.name || 'No title available'}</Text>
+            <Text>{item.description || 'No description available'}</Text>
+            {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
+            {item.video && <Text style={styles.media}>Video: {item.video}</Text>}
+
+            <View style={styles.interactionContainer}>
+              <TouchableOpacity onPress={() => handleLike(item._id)}>
+                <MaterialIcons
+                  name="thumb-up"
+                  size={24}
+                  color={item.liked ? 'green' : 'gray'}
+                />
+              </TouchableOpacity>
+              <Text style={styles.countText}>{item.likes || 0}</Text>
+
+              <TouchableOpacity onPress={() => navigation.navigate("AnnouncementDetail", { announcementId: item._id })}>
+                <MaterialIcons
+                  name="comment"
+                  size={24}
+                  color="gray"
+                  style={styles.commentIcon}
+                />
+              </TouchableOpacity>
+              <Text style={styles.countText}>{item.comments ? item.comments.length : 0}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        keyExtractor={item => item._id}
+      />
+    </>
+  )}
+  <Toast />
+</ScrollView>
+
   );
 };
 

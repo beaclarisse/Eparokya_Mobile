@@ -39,11 +39,6 @@ const WeddingNavigator = () => {
         component={WeddingFormContainer}
         options={{ title: "Wedding Form Container" }}
       />
-        {/* <Stack.Screen
-        name="WeddingForm5"
-        component={WeddingForm5}
-        options={{ title: "Wedding Form 5" }}
-      /> */}
 
       <Stack.Screen
         name="ConfirmedWedding"

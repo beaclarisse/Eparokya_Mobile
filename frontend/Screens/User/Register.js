@@ -1,20 +1,11 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  Modal,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useNavigation } from "@react-navigation/native";
-import { Button, Image } from "native-base";
+import { Button } from "native-base";
 import FormContainer from "../../Shared/Form/FormContainer";
 import Input from "../../Shared/Form/Input.js";
-import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons } from "@expo/vector-icons";
-import mime from "mime";
 
 var { height, width } = Dimensions.get("window");
 
@@ -23,79 +14,14 @@ const Register = (props) => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
   const navigation = useNavigation();
 
-  const defaultImage = "https://rb.gy/hnb4yc";
-
-  const goToNextPage = async () => {
+  const goToNextPage = () => {
     if (email === "" || name === "" || password === "") {
       setError("Please fill in the form correctly");
       return;
     }
-
-    try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("name", name);
-      formData.append("password", password);
-
-      if (selectedImage) {
-        formData.append("profileImage", {
-          uri: selectedImage,
-          type: mime.getType(selectedImage) || "image/jpeg",
-          name: selectedImage.split("/").pop(),
-        });
-      }
-
-      const response = await axios.post(`${baseURL}/users/register`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      Toast.show({ text1: "Registration Successful!" });
-      navigation.navigate("Login");
-    } catch (error) {
-      console.error("Registration Error:", error);
-      Toast.show({
-        text1: "Registration Error",
-        text2: error.response?.data?.message || error.message,
-      });
-    }
-  };
-
-  const handleImagePick = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-    setModalVisible(false);
-  };
-
-  const handleTakePhoto = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-    setModalVisible(false);
-  };
-
-  const handleRemoveProfile = () => {
-    setSelectedImage(null);
-    setModalVisible(false);
+    navigation.navigate("Register2", { email, name, password });
   };
 
   return (
@@ -104,55 +30,7 @@ const Register = (props) => {
       extraHeight={200}
       enableOnAndroid={true}
     >
-      {/* Picture */}
       <FormContainer style={styles.container}>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Image
-            source={{ uri: selectedImage || defaultImage }}
-            style={styles.profileImage}
-            alt="Profile Image"
-          />
-        </TouchableOpacity>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Select Profile</Text>
-              <TouchableOpacity
-                onPress={handleImagePick}
-                style={styles.modalButton}
-              >
-                <Text style={styles.modalButtonText}>Choose from Gallery</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleTakePhoto}
-                style={styles.modalButton}
-              >
-                <Text style={styles.modalButtonText}>Take a Photo</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleRemoveProfile}
-                style={styles.modalButton}
-              >
-                <Text style={styles.modalButtonText}>Remove Profile Picture</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={styles.modalCloseButton}
-              >
-                <Text style={styles.modalButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-
         <Input
           placeholder={"Email"}
           name={"email"}
@@ -196,44 +74,15 @@ const styles = StyleSheet.create({
     margin: 10,
     alignItems: "center",
   },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 20,
+  errorText: {
+    color: "red",
+    textAlign: "center",
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
+  arrowButton: {
+    backgroundColor: '#1C5739',
     width: "80%",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-    backgroundColor: "white",
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 20,
-    fontWeight: "bold",
-  },
-  modalButton: {
-    marginVertical: 10,
-    padding: 10,
-    backgroundColor: "#154314",
-    borderRadius: 5,
-    width: "100%",
-    alignItems: "center",
-  },
-  modalButtonText: {
-    color: "white",
-  },
-  modalCloseButton: {
-    marginTop: 20,
-    padding: 10,
+    borderRadius: 20,
+    alignSelf: "center",
   },
 });
 

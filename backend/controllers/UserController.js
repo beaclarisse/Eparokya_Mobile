@@ -1,31 +1,69 @@
 const User = require('../models/user');
 const sendToken = require('../routes/jwtToken');
+const upload = require('../config/cloudinary');
+
+// exports.register = async (req, res, next) => {
+
+//     try {
+
+//         // const file = req.file;
+//         // const fileName = file.filename;
+
+//         // if (!file) return res.status(400).send('No image in the request');
+
+//         // const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+//         // req.body.image = `${basePath}${fileName}`
+
+//         const user = await User.create(req.body)
+//         if (!user) {
+//             return res.status(400).send('the user cannot be created!')
+//         }
+//         return sendToken(user, 200, res, 'Success');
+//     } catch (err) {
+//         return res.status(400).json({
+//             message: 'Please try again later',
+//             success: false,
+//         })
+//     }
+// }
+
 
 exports.register = async (req, res, next) => {
-
     try {
-
-        // const file = req.file;
-        // const fileName = file.filename;
-
-        // if (!file) return res.status(400).send('No image in the request');
-
-        // const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
-        // req.body.image = `${basePath}${fileName}`
-
-        const user = await User.create(req.body)
-        if (!user) {
-            return res.status(400).send('the user cannot be created!')
-        }
-        return sendToken(user, 200, res, 'Success');
+      console.log('File:', req.file);  
+  
+      let profileImageUrl = null;
+  
+      if (req.file) {
+        profileImageUrl = req.file.path; 
+      } else {
+        console.log('No file uploaded');
+      }
+  
+      const user = await User.create({
+        ...req.body,
+        profileImage: profileImageUrl,
+      });
+  
+      if (!user) {
+        return res.status(400).send("The user cannot be created!");
+      }
+  
+      return sendToken(user, 200, res, "Registration Successful!");
     } catch (err) {
-        return res.status(400).json({
-            message: 'Please try again later',
-            success: false,
-        })
+      console.error("Registration Error:", err);
+      return res.status(500).json({ 
+        message: "An error occurred while registering. Please try again later.",
+        success: false,
+      });
     }
-}
+  };
+  
+  
+  
+  
 
+  
 exports.login = async (req, res) => {
 
     try {
