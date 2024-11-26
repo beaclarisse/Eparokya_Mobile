@@ -26,9 +26,12 @@ import CalendarComponent from "../Screens/User/Calendar";
 import Wedding from "../Screens/User/Wedding/WeddingForm";
 import Announcement from "../Screens/User/Announcement/AnnouncementPage";
 import Profile from "../Screens/User/Profile";
+import BaptismForm from "../Screens/User/Baptism/BinyagForm";
+import BaptismList from "../Screens/Admin/Baptism/BaptismList";
 
 const Drawer = createDrawerNavigator();
 
+// Utility function to map screen names to icons
 const getIcon = (screenName) => {
   switch (screenName) {
     case "Home":
@@ -41,19 +44,18 @@ const getIcon = (screenName) => {
       return "monitor-dashboard";
     case "Profile":
       return "account";
-    case "Logout":
-      return "logout";
+    case "BaptismForm":
+      return "water";
+    case "BaptismList":
+      return "playlist-check"; // Icon for baptism list
     default:
       return undefined;
   }
 };
 
+// Custom Drawer Content Component
 function CustomDrawerContent(props) {
   const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    dispatch(logoutAction());
-  };
 
   return (
     <DrawerContentScrollView {...props} safeArea>
@@ -107,30 +109,6 @@ function CustomDrawerContent(props) {
                   fontSize="md"
                 >
                   Login
-                </Text>
-              </HStack>
-            </Pressable>
-
-            <Pressable
-              px="5"
-              py="3"
-              rounded="md"
-              bg="transparent"
-              onPress={handleLogout}
-            >
-              <HStack space="7" alignItems="center">
-                <Icon
-                  color="white"
-                  size="5"
-                  as={<MaterialCommunityIcons name="logout" />}
-                />
-                <Text
-                  fontWeight="500"
-                  color="white"
-                  fontFamily="Roboto"
-                  fontSize="md"
-                >
-                  Logout
                 </Text>
               </HStack>
             </Pressable>

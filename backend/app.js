@@ -26,6 +26,8 @@ const memberYearBatchRoutes = require("./routes/Members/memberYearBatchCategory"
 const memberRoutes = require("./routes/Members/members");
 const resourceCategoryRoutes = require("./routes/Resource/ResourceCategory");
 const postResourceRoutes = require("./routes/Resource/postResource");
+const BinyagRoutes = require("./routes/Binyag")
+
 
 app.use(`/api/v1/users`, usersRoutes);
 app.use(`/api/v1/wedding`, weddingRoutes);
@@ -36,6 +38,7 @@ app.use(`/api/v1/memberYear`, memberYearBatchRoutes);
 app.use(`/api/v1/member`, memberRoutes);
 app.use(`/api/v1/resourceCategory`, resourceCategoryRoutes);
 app.use(`/api/v1/postResource`, postResourceRoutes);
+app.use(`/api/v1/binyag`, BinyagRoutes);
 
 
 module.exports = app;
