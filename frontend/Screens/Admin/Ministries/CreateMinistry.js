@@ -32,7 +32,7 @@ const MinistryCategory = ({ navigation }) => {
         type: "success",
         text1: response.data.message || "Ministry category created successfully!",
       });
-      navigation.navigate("MinistryList"); 
+      // navigation.navigate("MinistryList"); 
     } catch (err) {
       console.error("Submission Error:", err.response ? err.response.data : err.message);
       setError(err?.response?.data?.message || "Please try again later");

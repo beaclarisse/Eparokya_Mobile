@@ -115,6 +115,7 @@ const UserNavigator = (props) => {
           headerShown: false,
         }}
       />
+
     </Stack.Navigator>
   );
 };

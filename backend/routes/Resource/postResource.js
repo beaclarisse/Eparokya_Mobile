@@ -1,18 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { createPostResource, getPostResources, getPostResourceById, updatePostResource, deletePostResource } = require('../../controllers/postResourceController');
-const upload = require('../../config/cloudinary').upload;
+const upload = require('../../utils/multer');
+
 // router.post(
 //     '/create',
 //     upload.fields([{ name: 'image', maxCount: 1 }, { name: 'file', maxCount: 1 }]),
 //     createPostResource
 // );
 
-router.post('/create', upload.fields([{ name: 'image' }, { name: 'file' }]), (req, res) => {
-    console.log('Files received:', req.files);
-    console.log('Body:', req.body);
-    res.send({ success: true });
-});
+router.post('/create', upload.fields([{ name: 'image' }, { name: 'file' }]), createPostResource)
 
 router.get('/', getPostResources);
 router.get('/:id', getPostResourceById);

@@ -5,8 +5,8 @@ const postResourceSchema = new mongoose.Schema(
         title: { type: String, required: true },
         description: { type: String, required: true },
         richDescription: { type: String, required: true },
-        file: { type: String, default: null }, // URL of uploaded PDF
-        image: { type: String, default: null }, // URL of uploaded image
+        file: { type: String, default: null, required: false }, // URL of uploaded PDF
+        image: { type: String, default: null, required: false }, // URL of uploaded image
         ratings: [
             {
                 userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

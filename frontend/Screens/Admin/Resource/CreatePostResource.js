@@ -16,6 +16,7 @@
     import axios from 'axios';
     import mime from 'mime';
     import baseURL from "../../../assets/common/baseUrl";
+    import Toast from 'react-native-toast-message';
 
     const CreatePostResource = ({ navigation }) => {
         const [title, setTitle] = useState('');

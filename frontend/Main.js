@@ -16,7 +16,6 @@ export default function Main() {
 
     const initializeData = () => {
         
-
         const user = SyncStorage.get('user') || null;
         const token = SyncStorage.get('token') || null;
         console.log(SyncStorage.get('user'))

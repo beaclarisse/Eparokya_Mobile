@@ -1,27 +1,37 @@
-const multer = require('multer');
+const multer = require("multer");
+const path = require("path");
 
 const FILE_TYPE_MAP = {
-    'image/png': 'png',
-    'image/jpeg': 'jpeg',
-    'image/jpg': 'jpg',
-    'video/mp4': 'mp4'
+    image: [".jpg", ".jpeg", ".png"],
+    file: [".pdf"],
 };
 
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const isValid = FILE_TYPE_MAP[file.mimetype];
-        let uploadError = new Error('invalid image type');
-
-        if (isValid) {
-            uploadError = null;
-        }
-        cb(uploadError, 'public/uploads');
+    destination: (req, file, cb) => {
+        cb(null, "uploads"); // Temporary local storage
     },
-    filename: function (req, file, cb) {
-        const fileName = file.originalname.split(' ').join('-');
-        const extension = FILE_TYPE_MAP[file.mimetype];
-        cb(null, `${fileName}-${Date.now()}.${extension}`);
-    }
+    filename: (req, file, cb) => {
+        const sanitizedName = file.originalname.split(" ").join("-");
+        cb(null, `${Date.now()}-${sanitizedName}`);
+    },
 });
 
-module.exports = multer({ storage: storage });
+const fileFilter = (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (
+        FILE_TYPE_MAP.image.includes(ext) ||
+        FILE_TYPE_MAP.file.includes(ext)
+    ) {
+        cb(null, true);
+    } else {
+        cb(new Error("Unsupported file type!"), false);
+    }
+};
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 50 * 1024 * 1024 },
+    fileFilter,
+});
+
+module.exports = upload;

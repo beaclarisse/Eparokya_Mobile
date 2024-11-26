@@ -36,7 +36,7 @@ const ConfirmedWedding = () => {
   const renderWeddingForm = ({ item }) => (
     <Card style={styles.card}>
       <VStack space={2}>
-        <Heading size="md">{item.name1} & {item.name2}</Heading>
+        <Heading size="md">{item.bride} & {item.groom}</Heading>
         <Text>Wedding Date: {new Date(item.weddingDate).toLocaleDateString()}</Text>
         <Text>Status: {item.weddingStatus}</Text>
       </VStack>

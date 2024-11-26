@@ -3,9 +3,8 @@ import {
   createDrawerNavigator,
   DrawerContentScrollView,
 } from "@react-navigation/drawer";
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from "expo-status-bar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-//import { MaterialCommunityIcons } from 'react-native-vector-icons';
 import {
   NativeBaseProvider,
   Button,
@@ -17,18 +16,21 @@ import {
   Divider,
   Icon,
 } from "native-base";
+import { useDispatch, useSelector } from "react-redux";
 import Login from "../Screens/User/Login";
 import Main from "./Main";
 import AdminNavigator from "./AdminNavigator";
-import { useDispatch, useSelector } from "react-redux";
 import UserNavigator from "./UserNavigator";
 import CalendarComponent from "../Screens/User/Calendar";
 import Wedding from "../Screens/User/Wedding/WeddingForm";
 import Announcement from "../Screens/User/Announcement/AnnouncementPage";
 import Profile from "../Screens/User/Profile";
+import BaptismForm from "../Screens/User/Baptism/BinyagForm";
+import BaptismList from "../Screens/Admin/Baptism/BaptismList";
 
 const Drawer = createDrawerNavigator();
 
+// Utility function to map screen names to icons
 const getIcon = (screenName) => {
   switch (screenName) {
     case "Home":
@@ -37,23 +39,22 @@ const getIcon = (screenName) => {
       return "calendar";
     case "Wedding":
       return "file-document";
-    case "Home":
-      return "Admin Dashboard";
+    case "Admin Dashboard":
+      return "account-cog";
     case "Profile":
       return "account";
-    case "Logout":
-      return "logout";
+    case "BaptismForm":
+      return "water";
+    case "BaptismList":
+      return "playlist-check"; // Icon for baptism list
     default:
       return undefined;
   }
 };
 
+// Custom Drawer Content Component
 function CustomDrawerContent(props) {
   const dispatch = useDispatch();
-
-  const handleLogout = () => {
-    dispatch(logoutAction());
-  };
 
   return (
     <DrawerContentScrollView {...props} safeArea>
@@ -62,7 +63,7 @@ function CustomDrawerContent(props) {
           <VStack space="3">
             {props.state.routeNames.map((name, index) => (
               <Pressable
-                key={index} 
+                key={index}
                 px="5"
                 py="3"
                 rounded="md"
@@ -111,30 +112,6 @@ function CustomDrawerContent(props) {
                 </Text>
               </HStack>
             </Pressable>
-
-            <Pressable
-              px="5"
-              py="3"
-              rounded="md"
-              bg="transparent"
-              onPress={handleLogout}
-            >
-              <HStack space="7" alignItems="center">
-                <Icon
-                  color="white"
-                  size="5"
-                  as={<MaterialCommunityIcons name="logout" />}
-                />
-                <Text
-                  fontWeight="500"
-                  color="white"
-                  fontFamily="Roboto"
-                  fontSize="md"
-                >
-                  Logout
-                </Text>
-              </HStack>
-            </Pressable>
           </VStack>
         </VStack>
       </VStack>
@@ -142,7 +119,7 @@ function CustomDrawerContent(props) {
   );
 }
 
-
+// Main Drawer Navigator Component
 const DrawerNavigator = () => {
   const { userInfo } = useSelector((state) => state.user);
 
@@ -159,8 +136,8 @@ const DrawerNavigator = () => {
             </Button>
           ),
           drawerStyle: {
-            backgroundColor: '#154314',
-            width: '80%',
+            backgroundColor: "#154314",
+            width: "80%",
           },
         })}
       >
@@ -183,6 +160,20 @@ const DrawerNavigator = () => {
           component={Wedding}
           initialParams={{ screen: "Wedding" }}
         />
+        <Drawer.Screen
+          name="BaptismForm"
+          options={{
+            drawerLabel: "Baptism Form",
+          }}
+          component={BaptismForm}
+        />
+        <Drawer.Screen
+          name="BaptismList"
+          options={{
+            drawerLabel: "Baptism List",
+          }}
+          component={BaptismList}
+        />
         {userInfo?.isAdmin && (
           <Drawer.Screen
             name="Admin Dashboard"
@@ -195,8 +186,5 @@ const DrawerNavigator = () => {
     </Box>
   );
 };
-
-
-
 
 export default DrawerNavigator;

@@ -1,37 +1,111 @@
 const PostResource = require('../models/Resource/postResource');
 // const cloudinary = require('../config/cloudinary');
 const cloudinary = require('cloudinary').v2;
-const ResourceCategory = require('../models/Resource/ResourceCategory'); 
+const ResourceCategory = require('../models/Resource/ResourceCategory');
 
 exports.createPostResource = async (req, res) => {
     try {
         const { title, description, richDescription, resourceCategory } = req.body;
 
-        // Handle uploaded files
-        const imageFile = req.files?.image ? req.files.image[0].path : null;
-        const pdfFile = req.files?.file ? req.files.file[0].path : null;
-
-        if (!title || !description || !resourceCategory) {
-            return res.status(400).json({ message: 'Missing required fields' });
+        // Validate required fields
+        if (!title || !description || !richDescription || !resourceCategory) {
+            return res.status(400).json({ message: 'All required fields must be provided' });
         }
 
-        // Create a new resource
-        const newResource = new PostResource({
+        // Check if the provided resource category exists
+        const category = await ResourceCategory.findById(resourceCategory);
+        if (!category) {
+            return res.status(404).json({ message: 'Resource category not found' });
+        }
+
+        let fileUrl = null;
+        let imageUrl = null;
+
+        // Upload file to Cloudinary if provided
+        if (req.files && req.files.file) {
+            const fileUpload = await cloudinary.uploader.upload(req.files.file.path, {
+                resource_type: 'auto',
+                folder: 'post_resources/files',
+            });
+            fileUrl = fileUpload.secure_url;
+        }
+
+        // Upload image to Cloudinary if provided
+        if (req.files && req.files.image) {
+            const imageUpload = await cloudinary.uploader.upload(req.files.image.path, {
+                folder: 'post_resources/images',
+            });
+            imageUrl = imageUpload.secure_url;
+        }
+
+        // Create the post resource document
+        const newPostResource = new PostResource({
             title,
             description,
             richDescription,
-            image: imageFile, // Cloudinary URL for image
-            file: pdfFile,    // Cloudinary URL for PDF
+            file: fileUrl,
+            image: imageUrl,
             resourceCategory,
         });
 
-        const savedResource = await newResource.save();
-        res.status(201).json({ message: 'Resource created successfully!', data: savedResource });
+        // Save to the database
+        const savedPostResource = await newPostResource.save();
+
+        res.status(201).json({ message: 'Post resource created successfully', data: savedPostResource });
     } catch (error) {
         console.error('Error creating post resource:', error);
-        res.status(500).json({ message: 'Internal server error', error });
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
 };
+
+
+// exports.createPostResource = async (req, res) => {
+//     try {
+//         const { title, description, richDescription, resourceCategory } = req.body;
+
+//         if (!title || !description || !resourceCategory) {
+//             return res.status(400).json({ message: 'Missing required fields' });
+//         }
+
+//         // Verify Resource Category exists
+//         const categoryExists = await ResourceCategory.findById(resourceCategory);
+//         if (!categoryExists) {
+//             return res.status(400).json({ message: 'Invalid resource category ID' });
+//         }
+
+//         // Handle uploaded files
+//         let uploadedImage = null;
+//         let uploadedFile = null;
+
+//         if (req.files?.image) {
+//             const imageResult = await cloudinary.uploader.upload(req.files.image[0].path, { folder: 'resources/images' });
+//             uploadedImage = imageResult.secure_url;
+//         }
+
+//         if (req.files?.file) {
+//             const fileResult = await cloudinary.uploader.upload(req.files.file[0].path, { folder: 'resources/files', resource_type: 'raw' });
+//             uploadedFile = fileResult.secure_url;
+//         }
+
+//         // Create and save the resource
+//         const newResource = new PostResource({
+//             title,
+//             description,
+//             richDescription,
+//             image: uploadedImage,
+//             file: uploadedFile,
+//             resourceCategory,
+//         });
+
+//         const savedResource = await newResource.save();
+//         console.log('Saved Resource:', savedResource);
+
+//         res.status(201).json({ message: 'Resource created successfully!', data: savedResource });
+//     } catch (error) {
+//         console.error('Error creating post resource:', error);
+//         res.status(500).json({ message: 'Internal server error', error });
+//     }
+// };
 
 
 

@@ -132,11 +132,11 @@ const WeddingDetails = ({ route, navigation }) => {
     try {
       const response = await axios.post(
         `${baseURL}/wedding/${weddingId}/confirm`,
-        {}, // If no body is needed
+        {}, 
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Ensure no extra quotes
-            "Content-Type": "application/json", // Align Content-Type with backend expectations
+            Authorization: `Bearer ${token}`, 
+            "Content-Type": "application/json", 
           },
         }
       );
@@ -244,7 +244,6 @@ const WeddingDetails = ({ route, navigation }) => {
           <Button title="Submit Comment" onPress={handleSubmitComment} color="#1C5739" />
         </View>
 
-        {/* Display Submitted Comments */}
         <View style={styles.commentsSection}>
           <Text style={styles.commentsTitle}>Comments:</Text>
           {comments.length > 0 ? (
