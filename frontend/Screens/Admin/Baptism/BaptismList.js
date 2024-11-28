@@ -9,11 +9,10 @@ const BaptismList = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch baptism forms
     const fetchBaptismForms = async () => {
       try {
         const response = await axios.get(`${baseURL}/binyag/list`);
-        setBaptismForms(response.data.baptismForms); // Access the baptismForms array from the response
+        setBaptismForms(response.data.baptismForms); 
       } catch (err) {
         setError(err.response?.data?.message || "Error fetching baptism forms.");
       } finally {

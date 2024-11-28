@@ -105,12 +105,10 @@ const CalendarComponent = () => {
     const selectedDay = day.dateString;
     setSelectedDate(selectedDay);
 
-    // Filter weddings for the selected date
     const weddingsOnDate = confirmedWeddings.filter(wedding =>
         new Date(wedding.weddingDate).toISOString().split('T')[0] === selectedDay
     );
 
-    // Ensure the wedding objects are properly structured
     const sanitizedWeddings = weddingsOnDate.map(wedding => ({
         ...wedding,
         BrideAddress: wedding.BrideAddress || {}, 
@@ -123,7 +121,7 @@ const CalendarComponent = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Wedding Calendar</Text>
+      <Text style={styles.title}>Calendar of Events</Text>
       <RNCalendar
         markedDates={markedDates}
         markingType="dot"
@@ -141,15 +139,9 @@ const CalendarComponent = () => {
                 <Text style={styles.cardTitle}>
                   {item.bride} & {item.groom}
                 </Text>
-                <Text>Phone (Bride): {item.bridePhone}</Text>
-                <Text>Phone (Groom): {item.groomPhone}</Text>
                 <Text>Attendees: {item.attendees}</Text>
                 <Text>Flower Girl: {item.flowerGirl}</Text>
                 <Text>Ring Bearer: {item.ringBearer}</Text>
-                <Text>
-                  Address: {item.BrideAddress.state},{" "}
-                  {item.BrideAddress.country}
-                </Text>
                 <Text>Status: {item.weddingStatus}</Text>
               </View>
             )}

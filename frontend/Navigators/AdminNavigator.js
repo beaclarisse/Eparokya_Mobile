@@ -4,7 +4,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import UserList from "../Screens/Admin/User/UserList";
 import UpdateUser from "../Screens/Admin/User/UpdateUser";
 
-import WeddingForm from "../Screens/Admin/Wedding/AdminWedding";
+import AdminWedding from "../Screens/Admin/Wedding/AdminWedding";
 import WeddingDetails from "../Screens/Admin/Wedding/WeddingDetails";
 import ConfirmedWedding from "../Screens/Admin/Wedding/ConfirmedWedding";
 import AdminAvailableDates from "../Screens/Admin/Wedding/AdminAvailableDates";
@@ -17,6 +17,8 @@ import announcementCategoryList from "../Screens/Admin/Announcement/Announcement
 import announcement from "../Screens/Admin/Announcement/Announcement";
 
 import Dashboard from "../Screens/Admin/Dashboard";
+import Cards from "../Screens/Admin/Cards";
+import Forms from "../Screens/Admin/Forms";
 
 import resourceCategory from "../Screens/Admin/Resource/resourceCategory";
 import CreatePostResource from "../Screens/Admin/Resource/CreatePostResource";
@@ -39,10 +41,21 @@ const AdminNavigator = () => {
         options={{ headerShown: true }}
       />
 
+      <Stack.Screen
+        name="Cards"
+        component={Cards}
+        options={{ headerShown: false }}
+      />
 
       <Stack.Screen
-        name="WeddingForm"
-        component={WeddingForm}
+        name="Forms"
+        component={Forms}
+        options={{ headerShown: true }}
+      />
+
+      <Stack.Screen
+        name="AdminWedding"
+        component={AdminWedding}
         options={{ headerShown: false }}
       />
       <Stack.Screen

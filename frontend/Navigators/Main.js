@@ -5,6 +5,7 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import UserNavigator from "./UserNavigator";
 import Home from "./Home";
 import WeddingNavigator from "./WeddingNavigator";
+import UserForms from "../Screens/User/UserForms";
 
 const Tab = createBottomTabNavigator();
 
@@ -88,14 +89,14 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
 
 const Main = () => (
   <Tab.Navigator
-    initialRouteName="HomTab"
+    initialRouteName="HomeTab"
     tabBar={(props) => <CustomTabBar {...props} />}
     screenOptions={{
       headerShown: false,
     }}
   >
     <Tab.Screen name="Home" component={Home} />
-    <Tab.Screen name="Forms" component={WeddingNavigator} />
+    <Tab.Screen name="Forms" component={UserForms} />
     <Tab.Screen name="Profile" component={UserNavigator} />
   </Tab.Navigator>
 );

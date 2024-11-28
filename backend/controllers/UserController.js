@@ -43,6 +43,12 @@ exports.register = async (req, res) => {
         if (req.file) {
             imageUrl = req.file.path; 
         }
+
+        const category = await ministryCategory.findById(ministryCategory);
+        if (!category) {
+            return res.status(400).json({ error: 'Invalid ministry category' });
+        }
+
         const user = new User({
             name,
             email,
@@ -53,6 +59,7 @@ exports.register = async (req, res) => {
             phone,
             barangay,
             zip,
+            ministryCategory: category._id, 
         });
 
         await user.save();  

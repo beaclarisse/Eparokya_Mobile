@@ -24,10 +24,9 @@ import AdminNavigator from "./AdminNavigator";
 import UserNavigator from "./UserNavigator";
 import CalendarComponent from "../Screens/User/Calendar";
 import Wedding from "../Screens/User/Wedding/WeddingForm";
+import Forms from "../Screens/User/UserForms";
 import Announcement from "../Screens/User/Announcement/AnnouncementPage";
 import Profile from "../Screens/User/Profile";
-import BaptismForm from "../Screens/User/Baptism/BinyagForm";
-import BaptismList from "../Screens/Admin/Baptism/BaptismList";
 
 const Drawer = createDrawerNavigator();
 
@@ -37,22 +36,17 @@ const getIcon = (screenName) => {
       return "home";
     case "Calendar":
       return "calendar";
-    case "Wedding":
+    case "Forms":
       return "file-document";
     case "Admin Dashboard":
       return "monitor-dashboard";
     case "Profile":
       return "account";
-    case "BaptismForm":
-      return "water";
-    case "BaptismList":
-      return "playlist-check"; // Icon for baptism list
     default:
       return undefined;
   }
 };
 
-// Custom Drawer Content Component
 function CustomDrawerContent(props) {
   const dispatch = useDispatch();
 
@@ -141,9 +135,7 @@ const DrawerNavigator = () => {
       >
         <Drawer.Screen name="HomeTab" component={Main} />
         <Drawer.Screen name="Calendar" component={CalendarComponent} />
-        <Drawer.Screen name="BaptismForm" options={{ drawerLabel: "Baptism Form",}} component={BaptismForm}/>
-        <Drawer.Screen name="BaptismList" options={{ drawerLabel: "Baptism List", }} component={BaptismList}/>
-        <Drawer.Screen name="Wedding" component={Wedding} />
+        <Drawer.Screen name="Forms" component={Forms} />
         {userInfo?.isAdmin && (
           <Drawer.Screen name="Admin Dashboard" component={AdminNavigator} />
         )}

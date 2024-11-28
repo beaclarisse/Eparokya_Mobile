@@ -1,8 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack'
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
-//import EventContainer from "../Screens/Events/EventContainer";
-// import SingleProduct from '../Screens/Product/SingleProduct';
 import AnnouncementPage from "../Screens/User/Announcement/AnnouncementPage";
 
 const Stack = createStackNavigator();

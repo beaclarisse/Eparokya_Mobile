@@ -16,6 +16,11 @@ const userSchema = new mongoose.Schema({
         type: String, 
         default: '',
      }, 
+     ministryCategory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ministryCategory',  
+        required: false,  
+    },
     email: {
         type: String,
         required: [true, 'Please provide your email address'],
@@ -28,10 +33,6 @@ const userSchema = new mongoose.Schema({
         minLength: [8, 'Your password must be longer than 6 characters'],
         select: false
     },
-    // image: {
-    //     type: String,
-    //     default: ''
-    // },
     age: {
         type: Number,
         min: [1, 'Age must be between 1 and 1000'],

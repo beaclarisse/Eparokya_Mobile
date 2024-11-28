@@ -19,7 +19,7 @@ const Dashboard = () => {
     fetchUserRoles();
     fetchWeddingForms();
     fetchConfirmedWeddings();
-    fetchMemberCountByBatch(); // Fetch batch data
+    fetchMemberCountByBatch(); 
   }, []);
 
   const processWeddingData = (data) => {
@@ -121,20 +121,22 @@ const Dashboard = () => {
   const batchPieChartData = batchData.map((batch) => ({
     name: batch.batchName,
     population: batch.count,
-    color: "#" + Math.floor(Math.random() * 16777215).toString(16), // Random color
+    color: "#" + Math.floor(Math.random() * 16777215).toString(16), 
     legendFontColor: "#7F7F7F",
     legendFontSize: 15,
   }));
 
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity
-        style={styles.iconContainer}
-        onPress={() => navigation.navigate("WeddingForm")}
-      >
-        <Icon name="home-outline" size={30} color="#1E90FF" />
-        <Text style={styles.iconText}>Forms</Text>
-      </TouchableOpacity>
+
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Cards")}
+            style={styles.navigationButton}
+          >
+            <Text style={styles.navigationButtonText}>Navigations</Text>
+          </TouchableOpacity>
+        </View>
 
       <Text style={styles.chartTitle}>User Roles</Text>
       <PieChart
@@ -230,6 +232,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 10,
     color: "#777",
+  },
+  navigationButton: {
+    width: 380,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 20,
+    backgroundColor: "#1C5739",
+    marginVertical: 10,
+    alignSelf: "center",
+    elevation: 3,
+  },
+  navigationButtonText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
   },
 });
 

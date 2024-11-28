@@ -24,6 +24,7 @@ const Register2 = () => {
   const [preference, setPreference] = useState("They/Them");
   const [error, setError] = useState("");
   const [selectedImage, setSelectedImage] = useState(null); 
+  const [ministryCategory, setMinistryCategories] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
@@ -144,8 +145,14 @@ const Register2 = () => {
   };
 
   useEffect(() => {
-    console.log("Received in Register2:", { email, name, password });
-  }, []);
+    axios.get(`${baseURL}/ministryCategory`) 
+        .then(response => {
+            setMinistryCategories(response.data);
+        })
+        .catch(error => {
+            console.error('Error fetching ministry categories:', error);
+        });
+}, []);
 
   return (
     <KeyboardAwareScrollView
@@ -227,6 +234,18 @@ const Register2 = () => {
             ]}
             style={pickerSelectStyles}
             value={preference}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Ministry</Text>
+          <RNPickerSelect
+            onValueChange={(value) => setMinistryCategories(value)}
+            items={ministryCategory.map(category => ({
+                label: category.name,
+                value: category._id,
+            }))}
+            placeholder={{ label: 'Select Ministry Category if Part of the Ministry', value: null }}
           />
         </View>
 
