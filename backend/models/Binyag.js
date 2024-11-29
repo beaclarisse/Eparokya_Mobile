@@ -23,7 +23,7 @@ const BaptismSchema = new mongoose.Schema({
     },
   ],
   additionalDocs: {
-    birthCertificate: { type: String }, // File URL or path
+    birthCertificate: { type: String }, 
     marriageCertificate: { type: String },
     baptismPermit: { type: String },
   },

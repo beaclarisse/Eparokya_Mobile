@@ -10,6 +10,7 @@ const Forms = () => {
     { route: "AdminWedding", image: require("../../assets/15.png") },
     { route: "BaptismList", image: require("../../assets/16.png") },
     { route: "ConfirmedWedding", image: require("../../assets/2.png") },
+    { route: "FuneralList", image: require("../../assets/15.png") },
 
   ];
 

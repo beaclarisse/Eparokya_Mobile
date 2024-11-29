@@ -3,7 +3,6 @@ const router = express.Router();
 const BaptismController = require('../controllers/BinyagController');
 const { isAuthenticated, isAuthorized } = require('../middlewares/Auth');
 
-// Define routes
 router.post('/create', isAuthenticated, BaptismController.submitBaptismForm);
 router.get('/list', BaptismController.listBaptismForms)
 

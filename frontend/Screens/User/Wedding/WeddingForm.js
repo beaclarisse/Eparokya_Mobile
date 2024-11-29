@@ -7,7 +7,6 @@ const WeddingForm = ({ navigation }) => {
   const [brideGender, setBrideGender] = useState('');
   const [bridePhone, setBridePhone] = useState('');
   
-  // Separate fields for the address
   const [brideState, setBrideState] = useState('');
   const [brideZip, setBrideZip] = useState('');
   const [brideCountry, setBrideCountry] = useState('');
@@ -15,7 +14,6 @@ const WeddingForm = ({ navigation }) => {
   const [error, setError] = useState('');
 
   const goToNextPage = () => {
-    // Check if all required fields are filled in
     if (!bride || !brideAge || !brideGender || !bridePhone || !brideState || !brideZip || !brideCountry) {
       setError('Please fill in all fields.');
       return;
@@ -33,11 +31,10 @@ const WeddingForm = ({ navigation }) => {
       brideAge: formattedBrideAge,
       brideGender: brideGender.trim(),
       bridePhone,
-      brideAddress, // Pass the structured address object
+      brideAddress, 
     });
   };
 
-  // Clear all fields
   const clearFields = () => {
     setBride('');
     setBrideAge('');
@@ -77,7 +74,6 @@ const WeddingForm = ({ navigation }) => {
         onChangeText={setBridePhone}
         style={styles.input}
       />
-      {/* Separate fields for the address */}
       <TextInput
         placeholder="State"
         value={brideState}

@@ -155,8 +155,6 @@ const WeddingDetails = ({ route, navigation }) => {
   };
   
   
-  
-  
   const handleDecline = async () => {
     const token = await AsyncStorage.getItem("jwt");
     try {

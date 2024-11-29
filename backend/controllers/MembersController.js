@@ -2,8 +2,6 @@ const MemberHistory = require('../models/Members/members');
 const { cloudinary } = require('../config/cloudinary');
 const MinistryCategory = require('../models/ministryCategory');
 const MemberYearBatchCategory = require('../models/Members/memberYearBatchCategory');
-
-
 // const upload = require('../config/cloudinary');
 // const cloudinary = require('cloudinary').v2;  
 
@@ -119,16 +117,16 @@ exports.getMembersCountByBatch = async (req, res) => {
         const membersCountByBatch = await MemberYearBatchCategory.aggregate([
             {
                 $lookup: {
-                    from: "members", // Replace with the actual collection name for members
-                    localField: "_id", // Field in MemberYearBatchCategory schema
-                    foreignField: "memberYearBatch", // Field in Members schema
-                    as: "members", // Alias for the joined data
+                    from: "members", 
+                    localField: "_id", 
+                    foreignField: "memberYearBatch", 
+                    as: "members", 
                 },
             },
             {
                 $project: {
-                    batchName: "$name", // Name of the batch
-                    count: { $size: "$members" }, // Count the number of members
+                    batchName: "$name", 
+                    count: { $size: "$members" }, 
                 },
             },
         ]);

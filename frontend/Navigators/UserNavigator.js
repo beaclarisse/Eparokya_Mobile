@@ -13,6 +13,7 @@ import WeddingFormContainer from "../Screens/User/Wedding/WeddingFormContainer";
 
 
 import BinyagForm from "../Screens/User/Baptism/BinyagForm";
+import FuneralForm from "../Screens/User/Funeral/FuneralForm";
 
 import Calendar from "../Screens/User/Calendar";
 import Announcement from "../Screens/User/Announcement/AnnouncementPage";
@@ -94,7 +95,15 @@ const UserNavigator = (props) => {
           headerShown: false,
         }}
       />
-      
+
+      <Stack.Screen
+        name="FuneralForm"
+        component={FuneralForm}
+        options={{
+          headerShown: false,
+        }}
+      />
+
       <Stack.Screen
         name="Calendar"
         component={Calendar}

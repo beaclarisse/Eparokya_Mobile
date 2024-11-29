@@ -9,6 +9,8 @@ const UserForms = () => {
   const cards = [
     { route: "WeddingForm", image: require("../../assets/17.png") },
     { route: "BinyagForm", image: require("../../assets/18.png") },
+    { route: "FuneralForm", image: require("../../assets/18.png") },
+
   ];
 
   return (
