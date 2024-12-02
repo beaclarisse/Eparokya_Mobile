@@ -265,8 +265,6 @@ exports.createComment = async (req, res) => {
     }
 };
 
-
-
 exports.deleteComment = async (req, res) => {
     try {
         const { funeralId, commentId } = req.params;
@@ -312,7 +310,17 @@ exports.updateComment = async (req, res) => {
         console.error('Error updating comment:', err);
         res.status(500).json({ message: "Error updating comment.", error: err.message });
     }
-};
+};  
+
+exports.getConfirmedFunerals = async (req, res) => {
+    try {
+      const confirmedFunerals = await Funeral.find({ funeralStatus: 'Confirmed' }); 
+      res.status(200).json(confirmedFunerals);
+    } catch (error) {
+      console.error('Error fetching confirmed funerals:', error);
+      res.status(500).json({ error: 'Failed to fetch confirmed funerals' });
+    }
+  };
 
 
 

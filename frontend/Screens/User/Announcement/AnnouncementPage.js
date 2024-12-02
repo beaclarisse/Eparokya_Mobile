@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View,
-   Text, 
-   StyleSheet, 
-   FlatList, 
-   TouchableOpacity, 
-   Image, 
-   ScrollView, 
-   TextInput } from 'react-native';
-import Toast from 'react-native-toast-message'; 
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  TextInput,
+} from 'react-native';
+import Toast from 'react-native-toast-message';
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
-import baseURL from "../../../assets/common/baseUrl";
-import SyncStorage from "sync-storage";
+import baseURL from '../../../assets/common/baseUrl';
+import SyncStorage from 'sync-storage';
 
 const AnnouncementPage = ({ navigation }) => {
   const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -25,7 +29,7 @@ const AnnouncementPage = ({ navigation }) => {
         const response = await axios.get(`${baseURL}/announcementCategory/`);
         setCategories(response.data);
       } catch (err) {
-        console.error("Error fetching categories:", err);
+        console.error('Error fetching categories:', err);
       }
     };
 
@@ -33,8 +37,9 @@ const AnnouncementPage = ({ navigation }) => {
       try {
         const response = await axios.get(`${baseURL}/announcement/`);
         setAnnouncements(response.data);
+        setFilteredAnnouncements(response.data);
       } catch (err) {
-        setError("Failed to fetch announcements.");
+        setError('Failed to fetch announcements.');
         console.log('Error:', err);
       }
     };
@@ -43,20 +48,25 @@ const AnnouncementPage = ({ navigation }) => {
     fetchAnnouncements();
   }, []);
 
-  const filteredAnnouncements = selectedCategory
-    ? announcements.filter(announcement =>
-        announcement.announcementCategory && announcement.announcementCategory._id === selectedCategory
-      )
-    : announcements;
+  useEffect(() => {
+    if (searchQuery) {
+      const searchResults = announcements.filter((announcement) =>
+        announcement.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredAnnouncements(searchResults);
+    } else {
+      setFilteredAnnouncements(announcements);
+    }
+  }, [searchQuery, announcements]);
 
   const handleLike = async (announcementId) => {
-    const token = await SyncStorage.get("jwt");
+    const token = await SyncStorage.get('jwt');
     if (!token) {
       console.error('No token found');
       return;
     }
 
-    const announcement = announcements.find(item => item._id === announcementId);
+    const announcement = announcements.find((item) => item._id === announcementId);
     const isLiked = announcement && announcement.liked;
 
     try {
@@ -70,129 +80,117 @@ const AnnouncementPage = ({ navigation }) => {
         }
       );
 
-      setAnnouncements(prevAnnouncements =>
-        prevAnnouncements.map(item =>
+      setAnnouncements((prevAnnouncements) =>
+        prevAnnouncements.map((item) =>
           item._id === announcementId
             ? { ...item, likes: isLiked ? item.likes - 1 : item.likes + 1, liked: !isLiked }
             : item
         )
       );
     } catch (error) {
-      console.error("Error liking announcement:", error);
-    }
-  };
-
-  const handleComment = async (announcementId, commentText) => {
-    const token = await SyncStorage.get("jwt");
-    if (!token) {
-      console.error('No token found');
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        `${baseURL}/announcement/comment/${announcementId}`,
-        { text: commentText },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setAnnouncements(prevAnnouncements =>
-        prevAnnouncements.map(item =>
-          item._id === announcementId
-            ? {
-                ...item,
-                comments: [...item.comments, response.data],
-              }
-            : item
-        )
-      );
-      Toast.show({
-        type: 'success',
-        position: 'top',
-        text1: 'Comment Added!',
-        text2: 'Your comment was successfully posted.',
-        visibilityTime: 3000,
-        autoHide: true,
-        topOffset: 50,
-      });
-
-    } catch (error) {
-      console.error("Error posting comment:", error);
+      console.error('Error liking announcement:', error);
     }
   };
 
   return (
-<ScrollView nestedScrollEnabled style={styles.container}>
-  {error ? (
-    <Text>{error}</Text>
-  ) : (
-    <>
-      <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
-        {categories.map(category => (
-          <TouchableOpacity
-            key={category._id}
-            style={[styles.categoryIcon, selectedCategory === category._id && styles.selectedCategory]}
-            onPress={() => setSelectedCategory(category._id)}
+    <ScrollView nestedScrollEnabled style={styles.container}>
+      {error ? (
+        <Text>{error}</Text>
+      ) : (
+        <>
+          {/* Search Bar */}
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search by title..."
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)}
+          />
+
+          {/* Categories */}
+          <ScrollView
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryContainer}
           >
-            {category.image && (
-              <Image source={{ uri: category.image }} style={styles.categoryImage} />
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category._id}
+                style={[
+                  styles.categoryIcon,
+                  selectedCategory === category._id && styles.selectedCategory,
+                ]}
+                onPress={() => setSelectedCategory(category._id)}
+              >
+                {category.image && (
+                  <Image source={{ uri: category.image }} style={styles.categoryImage} />
+                )}
+                <Text style={styles.categoryText}>{category.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {/* Announcements */}
+          <FlatList
+            nestedScrollEnabled
+            data={
+              selectedCategory
+                ? filteredAnnouncements.filter(
+                    (announcement) =>
+                      announcement.announcementCategory &&
+                      announcement.announcementCategory._id === selectedCategory
+                  )
+                : filteredAnnouncements
+            }
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.card}
+                onPress={() =>
+                  navigation.navigate('Profile', {
+                    screen: 'AnnouncementDetail',
+                    params: { announcementId: item._id },
+                  })
+                }
+              >
+                <Text style={styles.title}>{item.name || 'No title available'}</Text>
+                <Text>{item.description || 'No description available'}</Text>
+                {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
+                {item.video && <Text style={styles.media}>Video: {item.video}</Text>}
+
+                <View style={styles.interactionContainer}>
+                  <TouchableOpacity onPress={() => handleLike(item._id)}>
+                    <MaterialIcons
+                      name="thumb-up"
+                      size={24}
+                      color={item.liked ? 'green' : 'gray'}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.countText}>{item.likes || 0}</Text>
+
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate('AnnouncementDetail', { announcementId: item._id })
+                    }
+                  >
+                    <MaterialIcons
+                      name="comment"
+                      size={24}
+                      color="gray"
+                      style={styles.commentIcon}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.countText}>
+                    {item.comments ? item.comments.length : 0}
+                  </Text>
+                </View>
+              </TouchableOpacity>
             )}
-            <Text style={styles.categoryText}>{category.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-
-      <FlatList
-        nestedScrollEnabled
-        data={filteredAnnouncements}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => {
-              navigation.navigate("Profile", {
-                screen: "AnnouncementDetail",
-                params: { announcementId: item._id },
-              });
-            }}
-          >
-            <Text style={styles.title}>{item.name || 'No title available'}</Text>
-            <Text>{item.description || 'No description available'}</Text>
-            {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
-            {item.video && <Text style={styles.media}>Video: {item.video}</Text>}
-
-            <View style={styles.interactionContainer}>
-              <TouchableOpacity onPress={() => handleLike(item._id)}>
-                <MaterialIcons
-                  name="thumb-up"
-                  size={24}
-                  color={item.liked ? 'green' : 'gray'}
-                />
-              </TouchableOpacity>
-              <Text style={styles.countText}>{item.likes || 0}</Text>
-
-              <TouchableOpacity onPress={() => navigation.navigate("AnnouncementDetail", { announcementId: item._id })}>
-                <MaterialIcons
-                  name="comment"
-                  size={24}
-                  color="gray"
-                  style={styles.commentIcon}
-                />
-              </TouchableOpacity>
-              <Text style={styles.countText}>{item.comments ? item.comments.length : 0}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-        keyExtractor={item => item._id}
-      />
-    </>
-  )}
-  <Toast />
-</ScrollView>
-
+            keyExtractor={(item) => item._id}
+          />
+        </>
+      )}
+      <Toast />
+    </ScrollView>
   );
 };
 
@@ -200,6 +198,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+  },
+  searchInput: {
+    borderColor: '#ddd',
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    fontSize: 16,
   },
   categoryContainer: {
     flexDirection: 'row',
@@ -262,13 +268,6 @@ const styles = StyleSheet.create({
   },
   commentIcon: {
     marginLeft: 20,
-  },
-  commentInput: {
-    borderColor: '#ddd',
-    borderWidth: 1,
-    padding: 8,
-    borderRadius: 5,
-    marginTop: 10,
   },
 });
 
