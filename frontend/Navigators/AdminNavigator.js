@@ -12,6 +12,8 @@ import AdminAvailableDates from "../Screens/Admin/Wedding/AdminAvailableDates";
 import FuneralList from "../Screens/Admin/Funeral/FuneralList";
 import FuneralDetails from "../Screens/Admin/Funeral/FuneralDetails";
 
+import BaptismList from "../Screens/Admin/Baptism/BaptismList";
+
 
 import ministryCategory from "../Screens/Admin/Ministries/CreateMinistry";
 import ministryList from "../Screens/Admin/Ministries/MinistryList";
@@ -89,6 +91,12 @@ const AdminNavigator = () => {
       <Stack.Screen
         name="FuneralDetails"
         component={FuneralDetails}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="BaptismList"
+        component={BaptismList}
         options={{ headerShown: false }}
       />
 

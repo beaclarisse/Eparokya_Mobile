@@ -220,13 +220,22 @@ exports.cancelFuneral = async (req, res) => {
 //     }
 // };
 
-
 exports.createComment = async (req, res) => {
     try {
         const { funeralId } = req.params;
         console.log('Received funeralId:', funeralId);
 
-        const { selectedComment, additionalComment, priestName, updatedScheduledDate } = req.body;
+        const { 
+            selectedComment, 
+            additionalComment, 
+            priestName, 
+            updatedScheduledDate, 
+            adminRescheduledDate, 
+            adminRescheduledReason 
+        } = req.body;
+
+        // Log request body to confirm values
+        console.log('Request Body:', req.body);
 
         if (!selectedComment || !priestName) {
             return res.status(400).json({ message: "Priest name and selected comment are required." });
@@ -243,10 +252,18 @@ exports.createComment = async (req, res) => {
             scheduledDate, 
             selectedComment,
             additionalComment,
-            createdAt: new Date()
+            adminRescheduled: {
+                date: adminRescheduledDate,
+                reason: adminRescheduledReason,
+            },
+            createdAt: new Date(),
         };
 
         funeral.comments.push(newComment);
+
+        // Log the funeral object before saving
+        console.log('Funeral with new comment:', funeral);
+
         await funeral.save();
 
         res.status(201).json({ message: 'Comment added successfully', comment: newComment });
@@ -255,6 +272,8 @@ exports.createComment = async (req, res) => {
         res.status(500).json({ message: "Error creating comment.", error: err.message });
     }
 };
+
+
 
 exports.deleteComment = async (req, res) => {
     try {

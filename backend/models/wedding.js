@@ -89,6 +89,7 @@
         scheduledDate: Date,
         selectedComment: String,
         additionalComment: String,
+       
         createdAt: {
           type: Date,
           default: Date.now,

@@ -65,10 +65,6 @@ const FuneralSchema = new mongoose.Schema({
         default: 'Pending',
         enum: ['Pending', 'Confirmed', 'Cancelled'],
     },
-    adminRescheduled: {
-        date: { type: Date },
-        reason: { type: String },
-    },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 },
     { timestamps: true }
