@@ -5,19 +5,21 @@
     brideAge: { type: Number, required: true },
     brideGender: { type: String, required: true },
     bridePhone: { type: String, required: true },
-    BrideAddress: {
+    brideAddress: {
       state: String,
       zip: String,
       country: String,
+      
     },
     groom: { type: String, required: true },
     groomAge: { type: Number, required: true },
     groomGender: { type: String, required: true },
     groomPhone: { type: String, required: true },
-    GroomAddress: {
+    groomAddress: {
       state: String,
       zip: String,
       country: String,
+       
     },
     BrideRelative: {
       type: String,
@@ -70,26 +72,25 @@
     },
     weddingStatus: {
       type: String,
-      required: true,
+      required: false,
       default: 'Pending',
+      enum: ['Pending', 'Confirmed', 'Cancelled'], 
     },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     confirmedAt: {
       type: Date,
     },
-    weddingStatus: {
-      type: String,
-      required: false,
-      default: 'Pending',
-      enum: ['Pending', 'Confirmed', 'Cancelled'], 
-    },
+  
     comments: [
       {
         priest: String,
         scheduledDate: Date,
         selectedComment: String,
         additionalComment: String,
-       
+        adminRescheduled: {
+          date: { type: Date },
+          reason: { type: String },
+      },
         createdAt: {
           type: Date,
           default: Date.now,

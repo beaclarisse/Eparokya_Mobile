@@ -4,7 +4,7 @@ const { User } = require('../models/user');
 
 exports.getAllWeddings = async (req, res) => {
   try {
-    const weddingList = await Wedding.find({}, 'bride groom weddingDate user');
+    const weddingList = await Wedding.find({}, 'bride groom weddingDate weddingStatus attendees flowerGirl ringBearer user'); // Include all required fields
     console.log("Fetched Weddings:", weddingList);
     if (!weddingList) {
       return res.status(500).json({ success: false });
@@ -15,6 +15,7 @@ exports.getAllWeddings = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+
 
 exports.getWeddingById = async (req, res) => {
   console.log("Request ID:", req.params.id);
@@ -259,6 +260,11 @@ exports.addComment = async (req, res) => {
       scheduledDate: req.body.scheduledDate,
       selectedComment: req.body.selectedComment,
       additionalComment: req.body.additionalComment,
+      adminRescheduled: {
+        date: req.body.adminRescheduledDate,
+        reason: req.body.adminRescheduledReason,
+      },
+      createdAt: new Date(),
     };
 
     wedding.comments.push(newComment);

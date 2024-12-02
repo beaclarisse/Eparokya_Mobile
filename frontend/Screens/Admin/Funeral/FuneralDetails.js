@@ -193,7 +193,6 @@ const FuneralDetails = ({ route, navigation }) => {
         }
     };
 
-
     const handleDeleteComment = async (commentId) => {
         try {
             const token = await SyncStorage.get('jwt');
@@ -236,16 +235,11 @@ const FuneralDetails = ({ route, navigation }) => {
             Alert.alert('Error', 'Failed to submit comment.');
         }
     };
-
-
     const handleEditComment = (comment) => {
         setEditingCommentId(comment._id);
         setEditedPriestName(comment.priest);
         setEditedAdditionalComment(comment.additionalComment || '');
     };
-
-
-
     if (!funeralDetails) {
         return <Text>Loading...</Text>;
     }

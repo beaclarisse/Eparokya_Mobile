@@ -32,18 +32,15 @@ exports.createFuneral = async (req, res) => {
             userId,
         } = req.body;
 
-        // Funeral date validation
         if (new Date(funeralDate) < new Date()) {
             return res.status(400).json({ message: "Funeral date cannot be in the past." });
         }
 
-        // Check for placingOfPall validation
         const placingValidation = validatePlacingOfPall(placingOfPall);
         if (!placingValidation.valid) {
             return res.status(400).json({ message: placingValidation.message });
         }
 
-        // Proceed with saving the funeral
         const newFuneral = new Funeral({
             name: {
                 firstName: name.firstName,
@@ -142,8 +139,6 @@ exports.updateFuneral = async (req, res) => {
 };
 
 
-
-
 exports.deleteFuneral = async (req, res) => {
     try {
         const funeralId = req.params.id;
@@ -234,8 +229,7 @@ exports.createComment = async (req, res) => {
             adminRescheduledReason 
         } = req.body;
 
-        // Log request body to confirm values
-        console.log('Request Body:', req.body);
+        // console.log('Request Body:', req.body);
 
         if (!selectedComment || !priestName) {
             return res.status(400).json({ message: "Priest name and selected comment are required." });
@@ -260,8 +254,6 @@ exports.createComment = async (req, res) => {
         };
 
         funeral.comments.push(newComment);
-
-        // Log the funeral object before saving
         console.log('Funeral with new comment:', funeral);
 
         await funeral.save();
