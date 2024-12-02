@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import baseURL from "../../../assets/common/baseUrl";
 import SyncStorage from 'sync-storage';
@@ -7,6 +8,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message'; // Import Toast
 
 const AnnouncementDetail = ({ route }) => {
+  const navigation = useNavigation(); // Hook to use navigation
   const { announcementId } = route.params;
   const [announcement, setAnnouncement] = useState(null);
   const [error, setError] = useState('');
@@ -94,25 +96,24 @@ const AnnouncementDetail = ({ route }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <MaterialIcons name="arrow-back" size={24} color="black" />
+        <Text style={styles.backButtonText}>Back</Text>
+      </TouchableOpacity>
       {error ? (
         <Text>{error}</Text>
       ) : (
         <View>
-          {/* Announcement Details */}
           <Text style={styles.title}>{announcement.name}</Text>
           <Text>{announcement.description}</Text>
           {announcement.image && <Image source={{ uri: announcement.image }} style={styles.image} />}
           {announcement.video && <Text>Video: {announcement.video}</Text>}
-
-          {/* User Information (Author of the Announcement) */}
           {announcement.user && (
             <View style={styles.userContainer}>
               <Image source={{ uri: announcement.user.profilePicture }} style={styles.userImage} />
               <Text style={styles.userName}>{announcement.user.name}</Text>
             </View>
           )}
-
-          {/* Interaction (Like/Comment Count) */}
           <View style={styles.interactionContainer}>
             <TouchableOpacity onPress={handleLike}>
               <MaterialIcons
@@ -122,12 +123,9 @@ const AnnouncementDetail = ({ route }) => {
               />
             </TouchableOpacity>
             <Text style={styles.countText}>{announcement.likes}</Text>
-
             <MaterialIcons name="comment" size={24} color="gray" style={styles.commentIcon} />
             <Text style={styles.countText}>{announcement.comments.length}</Text>
           </View>
-
-          {/* Comment Section */}
           <TextInput
             value={commentText}
             onChangeText={setCommentText}
@@ -137,17 +135,12 @@ const AnnouncementDetail = ({ route }) => {
           <TouchableOpacity onPress={handleComment} style={styles.commentButton}>
             <Text style={styles.commentButtonText}>Submit</Text>
           </TouchableOpacity>
-
-          {/* Displaying Comments */}
           {announcement.comments.map((comment, index) => (
             <View key={index} style={styles.comment}>
-              {/* Comment User Info */}
               {comment.user && (
                 <View style={styles.commentUserContainer}>
                   <Text style={styles.commentUserName}>{comment.user.name}:</Text>
                   <Text style={styles.commentText}>{comment.text}</Text>
-
-                  {/* Format date using dateCreated */}
                   <Text style={styles.commentDate}>
                     {new Date(comment.dateCreated).toLocaleString() || 'Invalid Date'}
                   </Text>
@@ -163,6 +156,8 @@ const AnnouncementDetail = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10 },
+  backButton: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
+  backButtonText: { marginLeft: 5, fontSize: 16, color: 'black' },
   title: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   image: { width: '100%', height: 200, borderRadius: 8, marginBottom: 10 },
   userContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },

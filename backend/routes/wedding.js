@@ -39,6 +39,9 @@ router.get('/confirmed', WeddingFormController.getConfirmedWeddings);
 router.post('/decline', WeddingFormController.declineWedding);
 router.post('/:weddingId/admin/addComment', WeddingFormController.addComment);
 
+
+router.get('/mySubmittedForms', isAuthenticated, WeddingFormController.getUserSubmittedForms);
+
 //WeddingDates
 router.get('/weddingDate', WeddingFormController.getAvailableDates);
 router.post('/book/date', WeddingFormController.bookDate);

@@ -323,3 +323,21 @@ exports.removeAvailableDate = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getUserSubmittedForms = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const userForms = await Wedding.find({ userId }).select(
+      'bride groom weddingDate weddingStatus attendees flowerGirl ringBearer'
+    );
+
+    if (!userForms || userForms.length === 0) {
+      return res.status(404).json({ message: 'You have not submitted any wedding forms.' });
+    }
+
+    res.status(200).json({ success: true, data: userForms });
+  } catch (error) {
+    console.error("Error fetching user's wedding forms:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
