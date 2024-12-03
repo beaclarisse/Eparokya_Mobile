@@ -16,6 +16,9 @@ const WeddingDetails = ({ route, navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedComment, setSelectedComment] = useState('');
   const [additionalComment, setAdditionalComment] = useState('');
+  const [rescheduledDate, setRescheduledDate] = useState('');
+  const [rescheduledReason, setRescheduledReason] = useState('');
+
   const [comments, setComments] = useState([]);
 
   const predefinedComments = [
@@ -38,9 +41,9 @@ const WeddingDetails = ({ route, navigation }) => {
 
         const parsedComments = Array.isArray(response.data.comments)
           ? response.data.comments.map(comment => ({
-              ...comment,
-              scheduledDate: comment.scheduledDate ? new Date(comment.scheduledDate) : null,
-            }))
+            ...comment,
+            scheduledDate: comment.scheduledDate ? new Date(comment.scheduledDate) : null,
+          }))
           : [];
 
         setComments(parsedComments);
@@ -64,9 +67,13 @@ const WeddingDetails = ({ route, navigation }) => {
     const token = await AsyncStorage.getItem("jwt");
     const newComment = {
       priest,
-      scheduledDate: selectedDate,
+      scheduledDate: selectedDate ? selectedDate.toISOString() : null,
       selectedComment,
       additionalComment,
+      adminRescheduled: {
+        date: rescheduledDate ? new Date(rescheduledDate).toISOString() : null,
+        reason: rescheduledReason,
+      },
     };
 
     try {
@@ -83,12 +90,15 @@ const WeddingDetails = ({ route, navigation }) => {
       setSelectedDate(null);
       setSelectedComment('');
       setAdditionalComment('');
+      setRescheduledDate('');
+      setRescheduledReason('');
       Alert.alert("Success", "Comment submitted.");
     } catch (error) {
       console.error("Error submitting comment:", error.response ? error.response.data : error.message);
       Alert.alert("Error", error.response?.data?.message || "Failed to submit the comment.");
     }
   };
+
 
 
   // const handleSubmitComment = async () => {
@@ -120,32 +130,32 @@ const WeddingDetails = ({ route, navigation }) => {
   //     Alert.alert("Error", error.response?.data?.message || "Failed to submit the comment.");
   //   }
   // };
- 
- 
+
+
   const handleConfirm = async () => {
     const token = await AsyncStorage.getItem("jwt");
     if (!token) {
       Alert.alert("Error", "User token is missing. Please log in again.");
       return;
     }
-  
+
     try {
       const response = await axios.post(
         `${baseURL}/wedding/${weddingId}/confirm`,
-        {}, 
+        {},
         {
           headers: {
-            Authorization: `Bearer ${token}`, 
-            "Content-Type": "application/json", 
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
-  
+
       console.log("Confirmation response:", response.data);
       Alert.alert("Success", response.data.message);
     } catch (error) {
       console.error("Error confirming wedding:", error.response || error.message);
-  
+
       if (error.response) {
         Alert.alert("Error", error.response.data?.message || "Failed to confirm the wedding.");
       } else {
@@ -153,8 +163,8 @@ const WeddingDetails = ({ route, navigation }) => {
       }
     }
   };
-  
-  
+
+
   const handleDecline = async () => {
     const token = await AsyncStorage.getItem("jwt");
     try {
@@ -167,7 +177,7 @@ const WeddingDetails = ({ route, navigation }) => {
       Alert.alert("Error", "Failed to decline the wedding.");
     }
   };
-  
+
 
   if (loading) return <ActivityIndicator size="large" color="#1C5739" />;
 
@@ -178,13 +188,13 @@ const WeddingDetails = ({ route, navigation }) => {
       <ScrollView>
         {/* Bride and Groom Information */}
         <Text style={styles.label}>Bride: {weddingDetails.bride || 'N/A'}</Text>
-        <Text style={styles.label}>State: {weddingDetails.BrideAddress && weddingDetails.BrideAddress.state ? weddingDetails.BrideAddress.state : 'N/A'}</Text>
+        <Text style={styles.label}>State: {weddingDetails.brideAddress && weddingDetails.brideAddress.state ? weddingDetails.brideAddress.state : 'N/A'}</Text>
         <Text style={styles.label}>Age: {weddingDetails.brideAge || 'N/A'}</Text>
         <Text style={styles.label}>Gender: {weddingDetails.brideGender || 'N/A'}</Text>
         <Text style={styles.label}>Phone Number: {weddingDetails.bridePhone || 'N/A'}</Text>
 
         <Text style={styles.label}>Groom: {weddingDetails.groom || 'N/A'}</Text>
-        <Text style={styles.label}>State: {weddingDetails.GroomAddress && weddingDetails.GroomAddress.state ? weddingDetails.GroomAddress.state : 'N/A'}</Text>
+        <Text style={styles.label}>State: {weddingDetails.groomAddress && weddingDetails.groomAddress.state ? weddingDetails.groomAddress.state : 'N/A'}</Text>
         <Text style={styles.label}>Age: {weddingDetails.groomAge || 'N/A'}</Text>
         <Text style={styles.label}>Gender: {weddingDetails.groomGender || 'N/A'}</Text>
         <Text style={styles.label}>Phone Number: {weddingDetails.groomPhone || 'N/A'}</Text>
@@ -194,6 +204,7 @@ const WeddingDetails = ({ route, navigation }) => {
         <Text style={styles.label}>Status: {weddingDetails.weddingStatus || 'Pending'}</Text>
 
         {/* Admin Comment Section */}
+
         <View style={styles.adminSection}>
           <TextInput
             style={styles.input}
@@ -234,6 +245,21 @@ const WeddingDetails = ({ route, navigation }) => {
 
           <TextInput
             style={styles.input}
+            placeholder="Rescheduled Date (optional)"
+            value={rescheduledDate} 
+            onChangeText={(text) => setRescheduledDate(text)} 
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Reason for Rescheduling"
+            value={rescheduledReason}
+            onChangeText={(text) => setRescheduledReason(text)}
+          />
+
+
+          <TextInput
+            style={styles.input}
             placeholder="Additional Comment (optional)"
             value={additionalComment}
             onChangeText={(text) => setAdditionalComment(text)}
@@ -252,6 +278,15 @@ const WeddingDetails = ({ route, navigation }) => {
                   Scheduled Date: {comment.scheduledDate ? comment.scheduledDate.toLocaleDateString() : 'Not set'}
                 </Text>
                 <Text style={styles.commentText}>Selected Comment: {comment.selectedComment}</Text>
+                {comment.adminRescheduled?.date && (
+                  <Text style={styles.commentText}>
+                    Rescheduled Date: {new Date(comment.adminRescheduled.date).toLocaleDateString()}
+                  </Text>
+                )}
+                {comment.adminRescheduled?.reason && (
+                  <Text style={styles.commentText}>Reason: {comment.adminRescheduled.reason}</Text>
+                )}
+
                 <Text style={styles.commentText}>Additional Comment: {comment.additionalComment}</Text>
               </View>
             ))

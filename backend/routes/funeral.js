@@ -3,7 +3,9 @@ const router = express.Router();
 const funeralController = require('../controllers/FuneralController');
 const { isAuthenticated, isAuthorized } = require('../middlewares/Auth');
 
+
 router.post('/create', funeralController.createFuneral);
+router.get('/confirmed', funeralController.getConfirmedFunerals);
 router.get('/', funeralController.getFunerals);
 router.get('/:id', funeralController.getFuneralById);
 router.put('/update/:id', funeralController.updateFuneral);

@@ -15,9 +15,11 @@ import baseURL from "../../assets/common/baseUrl";
 
 const CalendarComponent = () => {
   const [confirmedWeddings, setConfirmedWeddings] = useState([]);
-  const [filteredWeddings, setFilteredWeddings] = useState([]);
+  const [confirmedFunerals, setConfirmedFunerals] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const [markedDates, setMarkedDates] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
+  const [filterType, setFilterType] = useState("all"); // 'all', 'wedding', 'funeral'
 
   useEffect(() => {
     (async () => {
@@ -25,6 +27,7 @@ const CalendarComponent = () => {
       if (status === "granted") {
         const calendarId = await createCalendar();
         fetchConfirmedWeddingDates(calendarId);
+        fetchConfirmedFuneralDates(calendarId);
       } else {
         Alert.alert(
           "Permission Denied",
@@ -65,39 +68,64 @@ const CalendarComponent = () => {
       const weddings = response.data;
       setConfirmedWeddings(weddings);
 
-      const dates = {};
+      const dates = { ...markedDates };
       for (const wedding of weddings) {
         const date = wedding.weddingDate
           ? new Date(wedding.weddingDate).toISOString().split("T")[0]
           : null;
         if (date) {
-          dates[date] = { marked: true, dotColor: "red" };
-
-          const brideAddress = wedding.BrideAddress || {};
-          const groomAddress = wedding.GroomAddress || {};
-          const location = `${brideAddress.state || "N/A"}, ${
-            brideAddress.country || "N/A"
-          }`;
-
-          await Calendar.createEventAsync(calendarId, {
-            title: `${wedding.bride} & ${wedding.groom} Wedding`,
-            startDate: new Date(wedding.weddingDate),
-            endDate: new Date(
-              new Date(wedding.weddingDate).getTime() + 2 * 60 * 60 * 1000
-            ),
-            timeZone: "GMT",
-            location,
-            notes: `Attendees: ${wedding.attendees || "N/A"}, Flower Girl: ${
-              wedding.flowerGirl || "N/A"
-            }, Ring Bearer: ${wedding.ringBearer || "N/A"}`,
-          });
+          if (!dates[date]) {
+            dates[date] = { dots: [{ color: "red" }] };
+          } else {
+            dates[date].dots = [...(dates[date].dots || []), { color: "red" }];
+          }
         }
       }
-
       setMarkedDates(dates);
     } catch (error) {
       console.error("Error fetching confirmed weddings:", error);
-      Alert.alert("Error", "Failed to fetch confirmed weddings.");
+    }
+  };
+
+  const fetchConfirmedFuneralDates = async (calendarId) => {
+    try {
+      const token = await SyncStorage.get("jwt");
+      const response = await axios.get(`${baseURL}/funeral/confirmed`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const funerals = response.data;
+      setConfirmedFunerals(funerals);
+
+      const dates = { ...markedDates };
+      for (const funeral of funerals) {
+        const date = funeral.funeralDate
+          ? new Date(funeral.funeralDate).toISOString().split("T")[0]
+          : null;
+
+        if (date) {
+          if (!dates[date]) {
+            dates[date] = { dots: [{ color: "blue" }] };
+          } else {
+            dates[date].dots = [...(dates[date].dots || []), { color: "blue" }];
+          }
+        }
+      }
+      setMarkedDates(dates);
+    } catch (error) {
+      console.error("Error fetching confirmed funerals:", error);
+    }
+  };
+
+  const handleFilter = (type) => {
+    setFilterType(type);
+
+    if (type === "wedding") {
+      setFilteredEvents(confirmedWeddings);
+    } else if (type === "funeral") {
+      setFilteredEvents(confirmedFunerals);
+    } else {
+      setFilteredEvents([...confirmedWeddings, ...confirmedFunerals]);
     }
   };
 
@@ -105,55 +133,93 @@ const CalendarComponent = () => {
     const selectedDay = day.dateString;
     setSelectedDate(selectedDay);
 
-    const weddingsOnDate = confirmedWeddings.filter(wedding =>
-        new Date(wedding.weddingDate).toISOString().split('T')[0] === selectedDay
-    );
+    const eventsOnDate = [
+      ...confirmedWeddings.filter(
+        (wedding) =>
+          new Date(wedding.weddingDate).toISOString().split("T")[0] ===
+          selectedDay
+      ),
+      ...confirmedFunerals.filter(
+        (funeral) =>
+          new Date(funeral.funeralDate).toISOString().split("T")[0] ===
+          selectedDay
+      ),
+    ];
 
-    const sanitizedWeddings = weddingsOnDate.map(wedding => ({
-        ...wedding,
-        BrideAddress: wedding.BrideAddress || {}, 
-        GroomAddress: wedding.GroomAddress || {}, 
-    }));
-
-    setFilteredWeddings(sanitizedWeddings);
-};
-
+    setFilteredEvents(eventsOnDate);
+  };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Calendar of Events</Text>
       <RNCalendar
         markedDates={markedDates}
-        markingType="dot"
+        markingType="multi-dot"
         onDayPress={handleDayPress}
-        theme={calendarTheme}
       />
-      {selectedDate && (
-        <>
-          <Text style={styles.dateText}>Weddings on {selectedDate}:</Text>
-          <FlatList
-            data={filteredWeddings}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "all" && styles.activeFilter,
+          ]}
+          onPress={() => handleFilter("all")}
+        >
+          <Text style={styles.filterText}>All</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "wedding" && styles.activeFilter,
+          ]}
+          onPress={() => handleFilter("wedding")}
+        >
+          <Text style={styles.filterText}>Weddings</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "funeral" && styles.activeFilter,
+          ]}
+          onPress={() => handleFilter("funeral")}
+        >
+          <Text style={styles.filterText}>Funerals</Text>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={filteredEvents}
+        keyExtractor={(item) => item._id}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>
+              {item.bride ? "Wedding" : "Funeral"}
+            </Text>
+            {item.bride ? (
+              <>
+                <Text>
                   {item.bride} & {item.groom}
                 </Text>
-                <Text>Attendees: {item.attendees}</Text>
-                <Text>Flower Girl: {item.flowerGirl}</Text>
-                <Text>Ring Bearer: {item.ringBearer}</Text>
-                <Text>Status: {item.weddingStatus}</Text>
-              </View>
+                <Text>Attendees: {item.attendees || "N/A"}</Text>
+                <Text>Flower Girl: {item.flowerGirl || "N/A"}</Text>
+                <Text>Ring Bearer: {item.ringBearer || "N/A"}</Text>
+                <Text>Status: {item.weddingStatus || "Pending"}</Text>
+              </>
+            ) : (
+              <>
+                <Text>
+                  {item.name.firstName} {item.name.lastName}
+                </Text>
+                <Text>Contact Person: {item.contactPerson || "N/A"}</Text>
+                <Text>Status: {item.funeralStatus || "Pending"}</Text>
+              </>
             )}
-          />
-        </>
-      )}
-      <TouchableOpacity style={styles.addButton}>
-        <Text style={styles.addButtonText}>+</Text>
-      </TouchableOpacity>
+          </View>
+        )}
+      />
     </View>
   );
 };
+
 
 const calendarTheme = {
   calendarBackground: "#ffffff",
@@ -221,6 +287,25 @@ const styles = StyleSheet.create({
   addButtonText: {
     color: "#fff",
     fontSize: 24,
+  },
+  filterContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  filterButton: {
+    marginHorizontal: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: "#ccc",
+  },
+  activeFilter: {
+    backgroundColor: "#ff6347",
+  },
+  filterText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 

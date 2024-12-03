@@ -11,6 +11,10 @@ import AdminAvailableDates from "../Screens/Admin/Wedding/AdminAvailableDates";
 
 import FuneralList from "../Screens/Admin/Funeral/FuneralList";
 import FuneralDetails from "../Screens/Admin/Funeral/FuneralDetails";
+import ConfirmedFuneral from "../Screens/Admin/Funeral/ConfirmedFuneral";
+import ConfirmedFuneralDetails from "../Screens/Admin/Funeral/ConfirmedFuneralDetails";
+
+import BaptismList from "../Screens/Admin/Baptism/BaptismList";
 
 
 import ministryCategory from "../Screens/Admin/Ministries/CreateMinistry";
@@ -91,6 +95,26 @@ const AdminNavigator = () => {
         component={FuneralDetails}
         options={{ headerShown: false }}
       />
+
+      <Stack.Screen
+        name="ConfirmedFuneral"
+        component={ConfirmedFuneral}
+        options={{ headerShown: false }}
+      />
+
+       <Stack.Screen
+        name="ConfirmedFuneralDetails"
+        component={ConfirmedFuneralDetails}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="BaptismList"
+        component={BaptismList}
+        options={{ headerShown: false }}
+      />
+
+
 
       <Stack.Screen
         name="UserList"

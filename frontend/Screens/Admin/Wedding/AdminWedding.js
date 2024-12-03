@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity, Image, ScrollView } from "react-native";
-import { Card, Box, Heading, VStack, Button } from "native-base";
+import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity, ScrollView } from "react-native";
+import { Card, Box, Heading, VStack } from "native-base";
 import axios from "axios";
 import baseURL from "../../../assets/common/baseUrl";
 import SyncStorage from "sync-storage";
@@ -8,6 +8,7 @@ import SyncStorage from "sync-storage";
 const AdminWedding = ({ navigation }) => {
   const [weddingForms, setWeddingForms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filteredStatus, setFilteredStatus] = useState("All");
 
   const fetchWeddingForms = async () => {
     setLoading(true);
@@ -23,12 +24,12 @@ const AdminWedding = ({ navigation }) => {
         headers: { Authorization: `${token}` },
       });
 
-      console.log("Fetched wedding forms:", response.data);
+      console.log("Fetched wedding forms response:", response.data);
 
-      if (response.data) {
+      if (response.data && Array.isArray(response.data)) {
         setWeddingForms(response.data);
       } else {
-        console.log("No data received from the API.");
+        console.log("No data or unexpected format received:", response.data);
         setWeddingForms([]);
       }
     } catch (error) {
@@ -43,48 +44,15 @@ const AdminWedding = ({ navigation }) => {
     fetchWeddingForms();
   }, []);
 
-  const handleConfirm = async (id) => {
-    try {
-      const token = await SyncStorage.get("jwt");
-      if (!token) {
-        Alert.alert("Error", "Token is missing. Please log in again.");
-        return;
-      }
-
-      await axios.patch(`${baseURL}/wedding/${id}/confirm`, null, {
-        headers: { Authorization: `${token}` },
-      });
-
-      Alert.alert("Success", "Wedding confirmed.");
-      fetchWeddingForms();
-    } catch (error) {
-      console.error("Error confirming wedding:", error.response?.data || error.message);
-      Alert.alert("Error", "Failed to confirm the wedding.");
-    }
-  };
-
-  const handleDecline = async (id) => {
-    try {
-      const token = await SyncStorage.get("jwt");
-      if (!token) {
-        Alert.alert("Error", "Token is missing. Please log in again.");
-        return;
-      }
-
-      await axios.patch(`${baseURL}/wedding/${id}/decline`, null, {
-        headers: { Authorization: `${token}` },
-      });
-
-      Alert.alert("Success", "Wedding declined.");
-      fetchWeddingForms();
-    } catch (error) {
-      console.error("Error declining wedding:", error.response?.data || error.message);
-      Alert.alert("Error", "Failed to decline the wedding.");
-    }
-  };
-
   const handleCardPress = (item) => {
     navigation.navigate("WeddingDetails", { weddingId: item._id });
+  };
+
+  const filterWeddingForms = (status) => {
+    if (status === "All") {
+      return weddingForms;
+    }
+    return weddingForms.filter((wedding) => wedding.weddingStatus === status);
   };
 
   const renderWeddingForm = ({ item }) => {
@@ -92,71 +60,68 @@ const AdminWedding = ({ navigation }) => {
 
     const { bride, groom, attendees, flowerGirl, ringBearer, weddingDate, weddingStatus } = item;
 
+    console.log("Rendering wedding form item:", item);
+
+    const statusColor =
+      weddingStatus === "Confirmed"
+        ? "green"
+        : weddingStatus === "Declined"
+          ? "red"
+          : "orange";
+
     return (
       <TouchableOpacity onPress={() => handleCardPress(item)}>
         <Card style={styles.card}>
           <VStack space={2}>
-
-            <Heading size="md" color="white">
-              {bride && groom ? `${bride} & ${groom}` : 'Names not available'}
+            <Heading size="md" style={[styles.nameText, { color: "black" }]}>
+              {bride && groom ? `${bride} & ${groom}` : "Names not available"}
             </Heading>
 
+
             <Text style={styles.text}>
-              Wedding Date: {weddingDate ? new Date(weddingDate).toLocaleDateString() : 'N/A'}
+              Wedding Date: {weddingDate ? new Date(weddingDate).toLocaleDateString() : "N/A"}
+            </Text>
+
+            <Text style={[styles.text, { color: statusColor }]}>
+              Status: {weddingStatus || "N/A"}
             </Text>
 
             <Text style={styles.text}>
-              Status: {weddingStatus || 'N/A'}
+              Attendees: {attendees != null ? attendees : "N/A"}
             </Text>
 
             <Text style={styles.text}>
-              Attendees: {attendees || 'N/A'}
+              Flower Girl: {flowerGirl || "N/A"} | Ring Bearer: {ringBearer || "N/A"}
             </Text>
-            <Text style={styles.text}>
-              Flower Girl: {flowerGirl || 'N/A'} | Ring Bearer: {ringBearer || 'N/A'}
-            </Text>
-
-            {weddingStatus === 'Pending' && (
-              <View style={styles.buttonContainer}>
-                <Button
-                  colorScheme="green"
-                  onPress={() => handleConfirm(item._id)}
-                  style={styles.button}
-                >
-                  Confirm
-                </Button>
-                <Button
-                  colorScheme="red"
-                  onPress={() => handleDecline(item._id)}
-                  style={styles.button}
-                >
-                  Cancel
-                </Button>
-              </View>
-            )}
           </VStack>
         </Card>
       </TouchableOpacity>
     );
   };
 
-
   return (
     <Box style={styles.container}>
-
-      <ScrollView
-        horizontal={true}
-        style={styles.imageRow}
-        contentContainerStyle={styles.imageContentContainer}
-      >
-      </ScrollView>
+      <ScrollView horizontal={true} style={styles.imageRow} contentContainerStyle={styles.imageContentContainer}></ScrollView>
 
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>
+
+      <View style={styles.filterContainer}>
+        {['All', 'Confirmed', 'Pending', 'Declined'].map((status) => (
+          <TouchableOpacity
+            key={status}
+            style={[styles.filterButton, filteredStatus === status && styles.activeFilterButton]}
+            onPress={() => setFilteredStatus(status)}
+          >
+            <Text style={styles.filterText}>{status}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {loading ? (
         <Text style={styles.text}>Loading...</Text>
       ) : (
         <FlatList
-          data={weddingForms}
+          data={filterWeddingForms(filteredStatus)}
           renderItem={renderWeddingForm}
           keyExtractor={(item) => item._id?.toString()}
         />
@@ -172,7 +137,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   card: {
-    backgroundColor: "#333",
+    backgroundColor: "#fff",
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,
@@ -180,45 +145,34 @@ const styles = StyleSheet.create({
     height: 180,
   },
   text: {
-    color: "#FFFFFF",
+    color: "black",
   },
-  buttonContainer: {
+  nameText: {
+    color: "black",
+  },
+  filterContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 10,
+    marginBottom: 10,
   },
-  button: {
-    flex: 1,
-    marginHorizontal: 5,
-    backgroundColor: "#4CAF50",
+  filterButton: {
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "#ddd",
   },
-  imageRow: {
-    marginVertical: 10,
-    paddingHorizontal: 10,
+  activeFilterButton: {
+    backgroundColor: "#1C5739",
   },
-  imageContentContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-  },
-  imageContainer: {
-    marginRight: 30,
-    borderRadius: 10,
-    overflow: "hidden",
-  },
-  image: {
-    width: 100,
-    height: 100,
+  filterText: {
+    color: "#fff",
   },
   heading: {
     marginBottom: 10,
     fontSize: 24,
     fontWeight: "bold",
-    color: "#FFFFFF",
+    color: "black",
   },
-  
-
-
 });
+
 
 export default AdminWedding;

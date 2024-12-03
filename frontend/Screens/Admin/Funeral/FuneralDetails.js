@@ -15,6 +15,9 @@ const FuneralDetails = ({ route, navigation }) => {
     const [additionalComment, setAdditionalComment] = useState('');
     const [status, setStatus] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [showUserDatePicker, setShowUserDatePicker] = useState(false);
+    const [showAdminDatePicker, setShowAdminDatePicker] = useState(false);
+
     const [selectedComment, setSelectedComment] = useState('');
     const [error, setError] = useState('');
     const [comments, setComments] = useState([]);
@@ -45,13 +48,19 @@ const FuneralDetails = ({ route, navigation }) => {
                 const response = await axios.get(`${baseURL}/funeral/${funeralId}`);
                 console.log('Funeral Details:', response.data);
 
-                // Set funeral details and comments
                 setFuneralDetails(response.data);
                 setComments(response.data.comments || []);
 
-                // Update funeralDate-related states if available
+                if (response.data.adminRescheduled) {
+                    setAdminRescheduledDate({
+                        date: response.data.adminRescheduled.date,
+                        reason: response.data.adminRescheduled.reason,
+                        comment: response.data.adminRescheduled.comment || ''
+                    });
+                }
+
                 if (response.data.funeralDate) {
-                    const formattedDate = response.data.funeralDate; // Assuming it is already ISO format
+                    const formattedDate = response.data.funeralDate;
                     setUserScheduledDate(formattedDate);
                     setNewDate(formattedDate);
                     setAdminRescheduledDate(formattedDate);
@@ -65,34 +74,22 @@ const FuneralDetails = ({ route, navigation }) => {
     }, [funeralId]);
 
 
-
-
-
-    const fetchComments = async () => {
-        try {
-            const response = await axios.get(`${baseURL}/funeral/comment/${funeralId}`);
-            setComments(response.data.comments);
-        } catch (error) {
-            console.error('Error fetching comments:', error);
-            Alert.alert('Error', 'Failed to fetch comments.');
+    const handleUserDateChange = (event, date) => {
+        setShowUserDatePicker(false);
+        if (date) {
+            setUserScheduledDate(date.toISOString());
         }
     };
 
-
-    const handleDateChange = (event, date) => {
-        setShowDatePicker(false);
+    const handleAdminDateChange = (event, date) => {
+        setShowAdminDatePicker(false);
         if (date) {
-            setAdminRescheduled((prev) => ({
+            setAdminRescheduledDate((prev) => ({
                 ...prev,
-                date: new Date(date).toISOString(),
+                date: date.toISOString(),
             }));
         }
     };
-
-
-
-
-
     const handleUpdate = async () => {
         if (!adminRescheduledDate.date || !adminRescheduledDate.reason) {
             Alert.alert('Error', 'Please provide both a date and a reason.');
@@ -120,8 +117,6 @@ const FuneralDetails = ({ route, navigation }) => {
         }
     };
 
-
-
     const handleConfirm = async () => {
         try {
             const token = await SyncStorage.get('jwt');
@@ -145,8 +140,6 @@ const FuneralDetails = ({ route, navigation }) => {
         }
     };
 
-
-
     const handleCancel = async () => {
         try {
             const token = await SyncStorage.get('jwt');
@@ -161,58 +154,44 @@ const FuneralDetails = ({ route, navigation }) => {
         }
     };
 
-    //   const handleSubmitComment = async () => {
-    //     if (!selectedComment || !priestName) {
-    //         Alert.alert('Error', 'Priest name and selected comment are required.');
-    //         return;
-    //     }
-    //     try {
-    //         const token = await SyncStorage.get('jwt');
-    //         const config = { headers: { Authorization: `Bearer ${token}` } };
-    //         const commentData = {
-    //             text: additionalComment || selectedComment,
-    //             status: status,
-    //         };
-    //         console.log('Funeral ID:', funeralId);
-    //         const response = await axios.post(`${baseURL}/funeral/comment/${funeralId}`, commentData, config);
-    //         setComments([...comments, response.data.comment]);
-    //         setAdditionalComment(''); 
-    //     } catch (err) {
-    //         console.error(err);
-    //         Alert.alert('Error', 'Failed to submit comment.');
-    //     }
-    // };
-
     const handleSubmitComment = async () => {
         if (!selectedComment || !priestName) {
             Alert.alert('Error', 'Priest name and selected comment are required.');
             return;
         }
+
+        const commentData = {
+            priestName,
+            selectedComment,
+            additionalComment,
+            scheduledDate: adminRescheduledDate || userScheduledDate,
+            adminRescheduled: adminRescheduledDate,
+        };
+
         try {
             const token = await SyncStorage.get('jwt');
+            console.log("Token:", token);
+            if (!token) {
+                Alert.alert('Error', 'Token is missing');
+                return;
+            }
+
             const config = { headers: { Authorization: `Bearer ${token}` } };
-
-            const commentData = {
-                priestName,
-                selectedComment,
-                additionalComment,
-                scheduledDate: adminRescheduledDate || userScheduledDate, // Use admin's date or user date
-            };
-
             const response = await axios.post(`${baseURL}/funeral/comment/${funeralId}`, commentData, config);
 
-            setComments([...comments, response.data.comment]);
+            console.log("Comment submitted:", response.data);
+
+            setComments((prevComments) => [...prevComments, { ...response.data.comment, adminRescheduled: adminRescheduledDate }]);
             setPriestName('');
             setSelectedComment('');
             setAdditionalComment('');
-            setAdminRescheduledDate(''); // Clear after submission
+            setAdminRescheduledDate('');
 
         } catch (err) {
-            console.error('Error submitting comment:', err);
+            console.error('Error submitting comment:', err.response ? err.response.data : err.message);
             Alert.alert('Error', 'Failed to submit comment.');
         }
     };
-
 
     const handleDeleteComment = async (commentId) => {
         try {
@@ -228,45 +207,39 @@ const FuneralDetails = ({ route, navigation }) => {
             Alert.alert('Error', 'Failed to delete comment.');
         }
     };
-
     const saveUpdatedComment = async (commentId) => {
+        if (!selectedComment || !priestName) {
+            Alert.alert('Error', 'Priest name and selected comment are required.');
+            return;
+        }
         try {
-            const response = await fetch(`/api/v1/funeral/comment/${funeralId}/${commentId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    priest: editedPriestName,
-                    additionalComment: editedAdditionalComment,
-                }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                // Update the local comments state
-                setComments((prevComments) =>
-                    prevComments.map((comment) =>
-                        comment._id === commentId
-                            ? { ...comment, priest: editedPriestName, additionalComment: editedAdditionalComment }
-                            : comment
-                    )
-                );
-                setEditingCommentId(null); // Exit edit mode
-            } else {
-                console.error('Error updating comment:', data.message);
-            }
-        } catch (error) {
-            console.error('Error saving updated comment:', error);
+            const token = await SyncStorage.get('jwt');
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+
+            const commentData = {
+                priestName,
+                selectedComment,
+                additionalComment,
+                scheduledDate: adminRescheduledDate || userScheduledDate,
+            };
+
+            const response = await axios.post(`${baseURL}/funeral/comment/${funeralId}`, commentData, config);
+
+            setComments((prevComments) => [...prevComments, { ...response.data.comment, adminRescheduled: adminRescheduledDate }]);
+            setPriestName('');
+            setSelectedComment('');
+            setAdditionalComment('');
+            setAdminRescheduledDate('');
+        } catch (err) {
+            console.error('Error submitting comment:', err);
+            Alert.alert('Error', 'Failed to submit comment.');
         }
     };
-
-
     const handleEditComment = (comment) => {
         setEditingCommentId(comment._id);
         setEditedPriestName(comment.priest);
         setEditedAdditionalComment(comment.additionalComment || '');
     };
-
-
-
     if (!funeralDetails) {
         return <Text>Loading...</Text>;
     }
@@ -293,15 +266,22 @@ const FuneralDetails = ({ route, navigation }) => {
                 <Text>Address: {funeralDetails.address?.state}, {funeralDetails.address?.country}, {funeralDetails.address?.zip}</Text>
 
                 <Text>User Scheduled Date: {userScheduledDate ? new Date(userScheduledDate).toLocaleDateString() : 'N/A'}</Text>
-                <Text>Admin Rescheduled Date: {adminRescheduledDate.date ? new Date(adminRescheduledDate.date).toLocaleDateString() : 'N/A'}</Text>
-<Text>Reason: {adminRescheduledDate.reason || 'N/A'}</Text>
-                {/* FOR USER DATE */}
 
-                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
+                {/* FOR USER DATE */}
+                <TouchableOpacity onPress={() => setShowUserDatePicker(true)} style={styles.dateButton}>
                     <Text style={styles.dateText}>
-                        {newDate ? new Date(newDate).toLocaleDateString() : "Set Scheduled Date"}
+                        {userScheduledDate ? new Date(userScheduledDate).toLocaleDateString() : "Set User Scheduled Date"}
                     </Text>
                 </TouchableOpacity>
+
+                {showUserDatePicker && (
+                    <DateTimePicker
+                        value={userScheduledDate ? new Date(userScheduledDate) : new Date()}
+                        mode="date"
+                        display="default"
+                        onChange={handleUserDateChange}
+                    />
+                )}
 
                 {showDatePicker && (
                     <DateTimePicker
@@ -318,87 +298,90 @@ const FuneralDetails = ({ route, navigation }) => {
                     />
                 )}
 
-
-
                 <Text>Time: {funeralDetails.time}</Text>
-
                 <Text>Service Type: {funeralDetails.serviceType}</Text>
-
                 <Text>Entrance Song: {funeralDetails.entranceSong || 'N/A'}</Text>
-
                 <Text>Placing of Pall: {funeralDetails.placingOfPall?.by || 'N/A'}</Text>
                 {funeralDetails.placingOfPall?.familyMembers && (
                     <Text>Family Members: {funeralDetails.placingOfPall.familyMembers.join(', ')}</Text>
                 )}
-
                 <Text>Funeral Status: {funeralDetails.funeralStatus}</Text>
 
 
+{/* FOR ADMIN COMMENT */}
                 {/* FOR ADMIN DATE */}
-                <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateButton}>
-                    <Text style={styles.dateText}>
-                        {newDate ? new Date(newDate).toLocaleDateString() : "Set Scheduled Date"}
-                    </Text>
-                </TouchableOpacity>
+                <View style={styles.container}>
+                    <View style={styles.boxContainer}>
+                        {showUserDatePicker && (
+                            <DateTimePicker
+                                value={userScheduledDate ? new Date(userScheduledDate) : new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={handleUserDateChange}
+                            />
+                        )}
 
-                {showDatePicker && (
-                    <DateTimePicker
-                        value={newDate ? new Date(newDate) : new Date()}
-                        mode="date"
-                        display="default"
-                        onChange={(event, date) => {
-                            if (date) {
-                                setNewDate(date.toISOString());
-                                setAdminRescheduledDate(date.toISOString());
+                        <TouchableOpacity onPress={() => setShowAdminDatePicker(true)} style={styles.dateButton}>
+                            <Text style={styles.dateText}>
+                                {adminRescheduledDate.date
+                                    ? new Date(adminRescheduledDate.date).toLocaleDateString()
+                                    : "Set Admin Rescheduled Date"}
+                            </Text>
+                        </TouchableOpacity>
+
+                        {showAdminDatePicker && (
+                            <DateTimePicker
+                                value={adminRescheduledDate.date ? new Date(adminRescheduledDate.date) : new Date()}
+                                mode="date"
+                                display="default"
+                                onChange={handleAdminDateChange}
+                            />
+                        )}
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Reason for Reschedule"
+                            value={adminRescheduledDate.reason}
+                            onChangeText={(text) =>
+                                setAdminRescheduledDate((prev) => ({ ...prev, reason: text }))
                             }
-                            setShowDatePicker(false);
-                        }}
-                    />
-                )}
+                        />
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Reason for Reschedule"
-                    value={adminRescheduledDate.reason}
-                    onChangeText={(text) =>
-                        setAdminRescheduledDate((prev) => ({ ...prev, reason: text }))
-                    }
-                />
+                        <Select
+                            selectedValue={selectedComment}
+                            minWidth="200"
+                            accessibilityLabel="Select a comment"
+                            placeholder="Select a comment"
+                            _selectedItem={{
+                                bg: "cyan.600",
+                                endIcon: <CheckIcon size="5" />,
+                            }}
+                            onValueChange={(value) => setSelectedComment(value)}
+                        >
+                            {predefinedComments.map((comment, index) => (
+                                <Select.Item label={comment} value={comment} key={index} />
+                            ))}
+                        </Select>
 
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Priest Name"
+                            value={priestName}
+                            onChangeText={(text) => setPriestName(text)}
+                        />
 
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Additional Comment (optional)"
+                            value={additionalComment}
+                            onChangeText={(text) => setAdditionalComment(text)}
+                        />
 
-                <Select
-                    selectedValue={selectedComment}
-                    minWidth="200"
-                    accessibilityLabel="Select a comment"
-                    placeholder="Select a comment"
-                    _selectedItem={{
-                        bg: "cyan.600",
-                        endIcon: <CheckIcon size="5" />,
-                    }}
-                    onValueChange={(value) => setSelectedComment(value)}
-                >
-                    {predefinedComments.map((comment, index) => (
-                        <Select.Item label={comment} value={comment} key={index} />
-                    ))}
-                </Select>
+                        <Button title="Submit Comment" onPress={handleSubmitComment} color="#1C5739" />
+                    </View>
+                </View>
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Priest Name"
-                    value={priestName}
-                    onChangeText={(text) => setPriestName(text)}
-                />
-
-                <TextInput
-                    style={styles.input}
-                    placeholder="Additional Comment (optional)"
-                    value={additionalComment}
-                    onChangeText={(text) => setAdditionalComment(text)}
-                />
-
-                <Button title="Submit Comment" onPress={handleSubmitComment} color="#1C5739" />
-
+                {/* COMMENT SECTION  */}
                 <View style={styles.commentsContainer}>
                     <Text style={styles.commentTitle}>Admin Replies:</Text>
                     {comments.length > 0 ? (
@@ -442,9 +425,16 @@ const FuneralDetails = ({ route, navigation }) => {
                                         <Text><Text style={styles.bold}>Comment:</Text> {comment.selectedComment || comment.text || 'No comment provided'}</Text>
                                         <Text><Text style={styles.bold}>Scheduled Date:</Text> {comment.scheduledDate ? new Date(comment.scheduledDate).toLocaleString() : 'N/A'}</Text>
                                         <Text><Text style={styles.bold}>Date Added:</Text> {new Date(comment.createdAt).toLocaleString()}</Text>
-                                        <Text>Admin Rescheduled Date: {adminRescheduledDate.date ? new Date(adminRescheduledDate.date).toLocaleDateString() : 'N/A'}</Text>
-                                        <Text>Reason: {adminRescheduledDate.reason || 'N/A'}</Text>
-                                        {comment.additionalComment && <Text>Additional Comment: {comment.additionalComment}</Text>}
+                                        <Text><Text style={styles.bold}>
+                                            Admin Rescheduled Date: </Text> {comment.adminRescheduled?.date
+                                                ? new Date(comment.adminRescheduled.date).toLocaleDateString()
+                                                : 'N/A'}
+                                        </Text>
+                                        <Text><Text style={styles.bold}>
+                                            Reason: </Text> {comment.adminRescheduled?.reason || 'N/A'}
+                                        </Text>
+                                        {comment.additionalComment && <Text><Text style={styles.bold}>Additional Comment: </Text>
+                                            {comment.additionalComment}</Text>}
                                     </>
                                 )}
                             </View>
@@ -469,6 +459,21 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
+        backgroundColor: "#f8f8f8",
+    },
+    boxContainer: {
+        backgroundColor: "#ffffff",
+        width: "99%",
+        padding: 16,
+        marginVertical: 10,
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
     },
     title: {
         fontSize: 18,
@@ -524,8 +529,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 5,
-        padding: 8,
-        marginBottom: 5,
+        padding: 10,
+        marginBottom: 10,
     },
     saveButton: {
         backgroundColor: '#1C5739',

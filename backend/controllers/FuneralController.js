@@ -32,18 +32,15 @@ exports.createFuneral = async (req, res) => {
             userId,
         } = req.body;
 
-        // Funeral date validation
         if (new Date(funeralDate) < new Date()) {
             return res.status(400).json({ message: "Funeral date cannot be in the past." });
         }
 
-        // Check for placingOfPall validation
         const placingValidation = validatePlacingOfPall(placingOfPall);
         if (!placingValidation.valid) {
             return res.status(400).json({ message: placingValidation.message });
         }
 
-        // Proceed with saving the funeral
         const newFuneral = new Funeral({
             name: {
                 firstName: name.firstName,
@@ -142,8 +139,6 @@ exports.updateFuneral = async (req, res) => {
 };
 
 
-
-
 exports.deleteFuneral = async (req, res) => {
     try {
         const funeralId = req.params.id;
@@ -220,13 +215,21 @@ exports.cancelFuneral = async (req, res) => {
 //     }
 // };
 
-
 exports.createComment = async (req, res) => {
     try {
         const { funeralId } = req.params;
         console.log('Received funeralId:', funeralId);
 
-        const { selectedComment, additionalComment, priestName, updatedScheduledDate } = req.body;
+        const { 
+            selectedComment, 
+            additionalComment, 
+            priestName, 
+            updatedScheduledDate, 
+            adminRescheduledDate, 
+            adminRescheduledReason 
+        } = req.body;
+
+        // console.log('Request Body:', req.body);
 
         if (!selectedComment || !priestName) {
             return res.status(400).json({ message: "Priest name and selected comment are required." });
@@ -243,10 +246,16 @@ exports.createComment = async (req, res) => {
             scheduledDate, 
             selectedComment,
             additionalComment,
-            createdAt: new Date()
+            adminRescheduled: {
+                date: adminRescheduledDate,
+                reason: adminRescheduledReason,
+            },
+            createdAt: new Date(),
         };
 
         funeral.comments.push(newComment);
+        console.log('Funeral with new comment:', funeral);
+
         await funeral.save();
 
         res.status(201).json({ message: 'Comment added successfully', comment: newComment });
@@ -301,7 +310,17 @@ exports.updateComment = async (req, res) => {
         console.error('Error updating comment:', err);
         res.status(500).json({ message: "Error updating comment.", error: err.message });
     }
-};
+};  
+
+exports.getConfirmedFunerals = async (req, res) => {
+    try {
+      const confirmedFunerals = await Funeral.find({ funeralStatus: 'Confirmed' }); 
+      res.status(200).json(confirmedFunerals);
+    } catch (error) {
+      console.error('Error fetching confirmed funerals:', error);
+      res.status(500).json({ error: 'Failed to fetch confirmed funerals' });
+    }
+  };
 
 
 
