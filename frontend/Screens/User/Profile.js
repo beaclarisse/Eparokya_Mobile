@@ -156,6 +156,13 @@ const UserProfile = ({ navigation }) => {
             >
               <MaterialIcons name="app-registration" size={24} color="white" />
             </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("SubmittedForms")}
+              style={styles.actionButton}
+            >
+              <MaterialIcons name="app-registration" size={24} color="white" />
+            </TouchableOpacity>
   
             <TouchableOpacity
               onPress={handleLogout}

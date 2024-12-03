@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, Alert, ScrollView } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker'; // Add this package
-import axios from 'axios';
-import SyncStorage from 'sync-storage';
-import baseURL from '../../../assets/common/baseUrl';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  TextInput,
+  Button,
+  StyleSheet,
+  Text,
+  Alert,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import axios from "axios";
+import SyncStorage from "sync-storage";
+import baseURL from "../../../assets/common/baseUrl";
 
 const BaptismForm = ({ navigation }) => {
   const [baptismDate, setBaptismDate] = useState(null);
@@ -11,25 +20,26 @@ const BaptismForm = ({ navigation }) => {
   const [showBaptismDatePicker, setShowBaptismDatePicker] = useState(false);
   const [showBirthDatePicker, setShowBirthDatePicker] = useState(false);
 
-  const [church, setChurch] = useState('');
-  const [priest, setPriest] = useState('');
-  const [childName, setChildName] = useState('');
-  const [placeOfBirth, setPlaceOfBirth] = useState('');
-  const [gender, setGender] = useState('');
-  const [fatherName, setFatherName] = useState('');
-  const [motherName, setMotherName] = useState('');
-  const [address, setAddress] = useState('');
-  const [contactNumber, setContactNumber] = useState('');
-  const [error, setError] = useState('');
+  const [church, setChurch] = useState("");
+  const [priest, setPriest] = useState("");
+  const [childName, setChildName] = useState("");
+  const [placeOfBirth, setPlaceOfBirth] = useState("");
+  const [gender, setGender] = useState("");
+  const [fatherName, setFatherName] = useState("");
+  const [motherName, setMotherName] = useState("");
+  const [address, setAddress] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [godparents, setGodparents] = useState([]);
+  const [error, setError] = useState("");
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const token = await SyncStorage.get('jwt');
+        const token = await SyncStorage.get("jwt");
         if (!token) {
-          Alert.alert('Error', 'Token is missing. Please log in again.');
-          navigation.navigate('LoginPage');
+          Alert.alert("Not Login", "Login First.");
+          navigation.navigate("UserProfile");
           return;
         }
 
@@ -37,14 +47,34 @@ const BaptismForm = ({ navigation }) => {
         const { data } = await axios.get(`${baseURL}/users/profile`, config);
         setUserId(data.user._id);
       } catch (error) {
-        console.error('Failed to retrieve user ID:', error.response ? error.response.data : error.message);
-        Alert.alert('Error', 'Unable to retrieve user ID. Please log in again.');
-        navigation.navigate('LoginPage');
+        console.error(
+          "Failed to retrieve user ID:",
+          error.response ? error.response.data : error.message
+        );
+        Alert.alert(
+          "Error",
+          "Unable to retrieve user ID. Please log in again."
+        );
+        navigation.navigate("LoginPage");
       }
     };
 
     fetchUserData();
   }, []);
+
+  const handleAddGodparent = () => {
+    setGodparents([...godparents, { name: "", contactInfo: "" }]);
+  };
+
+  const handleRemoveGodparent = (index) => {
+    setGodparents(godparents.filter((_, i) => i !== index));
+  };
+
+  const handleGodparentChange = (index, field, value) => {
+    const updatedGodparents = [...godparents];
+    updatedGodparents[index][field] = value;
+    setGodparents(updatedGodparents);
+  };
 
   const handleSubmit = async () => {
     if (
@@ -60,7 +90,7 @@ const BaptismForm = ({ navigation }) => {
       !address ||
       !contactNumber
     ) {
-      setError('Please fill in all the fields.');
+      setError("Please fill in all the fields.");
       return;
     }
 
@@ -80,25 +110,32 @@ const BaptismForm = ({ navigation }) => {
         address,
         contactInfo: contactNumber,
       },
-      godparents: [], // Placeholder for godparents
+      godparents,
       userId,
     };
 
     try {
-      const token = await SyncStorage.get('jwt');
+      const token = await SyncStorage.get("jwt");
       const config = { headers: { Authorization: `Bearer ${token}` } };
 
-      const response = await axios.post(`${baseURL}/binyag/create`, formData, config);
+      const response = await axios.post(
+        `${baseURL}/binyag/create`,
+        formData,
+        config
+      );
 
       if (response.status === 201) {
-        Alert.alert('Success', 'Baptism form submitted successfully.');
-        navigation.navigate('Home');
+        Alert.alert("Success", "Baptism form submitted successfully.");
+        navigation.navigate("Home");
       } else {
-        setError('Failed to submit form. Please try again.');
+        setError("Failed to submit form. Please try again.");
       }
     } catch (err) {
-      console.error('Error submitting form:', err.response ? err.response.data : err.message);
-      setError('An error occurred. Please try again later.');
+      console.error(
+        "Error submitting form:",
+        err.response ? err.response.data : err.message
+      );
+      setError("An error occurred. Please try again later.");
     }
   };
 
@@ -107,8 +144,12 @@ const BaptismForm = ({ navigation }) => {
       <Text style={styles.title}>Baptism Form</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
+      <Text style={styles.subtitle}>Baptism Info</Text>
       <View>
-        <Button title="Select Baptism Date" onPress={() => setShowBaptismDatePicker(true)} />
+        <Button
+          title="Select Baptism Date"
+          onPress={() => setShowBaptismDatePicker(true)}
+        />
         {showBaptismDatePicker && (
           <DateTimePicker
             value={baptismDate || new Date()}
@@ -120,7 +161,11 @@ const BaptismForm = ({ navigation }) => {
             }}
           />
         )}
-        <Text>{baptismDate ? new Date(baptismDate).toLocaleDateString() : 'No date selected'}</Text>
+        <Text>
+          {baptismDate
+            ? new Date(baptismDate).toLocaleDateString()
+            : "No date selected"}
+        </Text>
       </View>
 
       <TextInput
@@ -136,8 +181,12 @@ const BaptismForm = ({ navigation }) => {
         onChangeText={setPriest}
       />
 
+      <Text style={styles.subtitle}>Child Info</Text>
       <View>
-        <Button title="Select Child's Birth Date" onPress={() => setShowBirthDatePicker(true)} />
+        <Button
+          title="Select Child's Birth Date"
+          onPress={() => setShowBirthDatePicker(true)}
+        />
         {showBirthDatePicker && (
           <DateTimePicker
             value={birthDate || new Date()}
@@ -149,7 +198,11 @@ const BaptismForm = ({ navigation }) => {
             }}
           />
         )}
-        <Text>{birthDate ? new Date(birthDate).toLocaleDateString() : 'No date selected'}</Text>
+        <Text>
+          {birthDate
+            ? new Date(birthDate).toLocaleDateString()
+            : "No date selected"}
+        </Text>
       </View>
 
       <TextInput
@@ -170,6 +223,8 @@ const BaptismForm = ({ navigation }) => {
         value={gender}
         onChangeText={setGender}
       />
+
+      <Text style={styles.subtitle}>Parents Info</Text>
       <TextInput
         style={styles.input}
         placeholder="Father's Full Name"
@@ -196,6 +251,36 @@ const BaptismForm = ({ navigation }) => {
         onChangeText={setContactNumber}
       />
 
+      {/* Godparents Section */}
+      <Text style={styles.subtitle}>Godparents</Text>
+      {godparents.map((godparent, index) => (
+        <View key={index} style={styles.godparentContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Godparent's Name"
+            value={godparent.name}
+            onChangeText={(value) =>
+              handleGodparentChange(index, "name", value)
+            }
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Contact Info"
+            value={godparent.contactInfo}
+            onChangeText={(value) =>
+              handleGodparentChange(index, "contactInfo", value)
+            }
+          />
+          <Button
+            title="Remove"
+            color="red"
+            onPress={() => handleRemoveGodparent(index)}
+          />
+        </View>
+      ))}
+      <Button title="Add Godparent" onPress={handleAddGodparent} />
+
+      {/* Submit Button */}
       <Button title="Submit" onPress={handleSubmit} />
     </ScrollView>
   );
@@ -205,25 +290,34 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginTop: 20,
+    marginBottom: 10,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
     marginBottom: 15,
   },
-  error: {
-    color: 'red',
+  godparentContainer: {
     marginBottom: 10,
-    textAlign: 'center',
+  },
+  error: {
+    color: "red",
+    marginBottom: 10,
+    textAlign: "center",
   },
 });
 

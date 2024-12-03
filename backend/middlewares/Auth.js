@@ -13,7 +13,8 @@ exports.isAuthenticated = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Decoded Token:", decoded);
-    req.user = decoded;
+    req.user = decoded; 
+    console.log("User set in req.user:", req.user); 
     next();
   } catch (error) {
     console.error("Token verification failed:", error);
@@ -23,6 +24,7 @@ exports.isAuthenticated = (req, res, next) => {
     return res.status(401).json({ error: "Unauthorized: Invalid token" });
   }
 };
+
 
 //simple working logged in 
 // exports.isAuthenticated = async (req, res, next) => {

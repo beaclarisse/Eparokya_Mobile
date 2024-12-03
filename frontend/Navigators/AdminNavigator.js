@@ -14,9 +14,6 @@ import FuneralDetails from "../Screens/Admin/Funeral/FuneralDetails";
 import ConfirmedFuneral from "../Screens/Admin/Funeral/ConfirmedFuneral";
 import ConfirmedFuneralDetails from "../Screens/Admin/Funeral/ConfirmedFuneralDetails";
 
-import BaptismList from "../Screens/Admin/Baptism/BaptismList";
-
-
 import ministryCategory from "../Screens/Admin/Ministries/CreateMinistry";
 import ministryList from "../Screens/Admin/Ministries/MinistryList";
 
@@ -31,36 +28,34 @@ import Forms from "../Screens/Admin/Forms";
 import resourceCategory from "../Screens/Admin/Resource/resourceCategory";
 import CreatePostResource from "../Screens/Admin/Resource/CreatePostResource";
 
-
 import CreateMemberYear from "../Screens/Admin/Members/CreateMemberYear";
 import Members from "../Screens/Admin/Members/Members";
 import MemberList from "../Screens/Admin/Members/MemberList";
 import MemberDetail from "../Screens/Admin/Members/MemberDetail";
+
+import BaptismList from "../Screens/Admin/Baptism/BaptismList";
+import BaptismDetails from "../Screens/Admin/Baptism/BaptismDetail";
 
 const Stack = createStackNavigator();
 
 const AdminNavigator = () => {
   return (
     <Stack.Navigator>
-
       <Stack.Screen
         name="Dashboard"
         component={Dashboard}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="Cards"
         component={Cards}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="Forms"
         component={Forms}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="AdminWedding"
         component={AdminWedding}
@@ -71,31 +66,26 @@ const AdminNavigator = () => {
         component={WeddingDetails}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="ConfirmedWedding"
         component={ConfirmedWedding}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="AdminAvailableDates"
         component={AdminAvailableDates}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="FuneralList"
         component={FuneralList}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="FuneralDetails"
         component={FuneralDetails}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
         name="ConfirmedFuneral"
         component={ConfirmedFuneral}
@@ -105,12 +95,6 @@ const AdminNavigator = () => {
        <Stack.Screen
         name="ConfirmedFuneralDetails"
         component={ConfirmedFuneralDetails}
-        options={{ headerShown: false }}
-      />
-
-      <Stack.Screen
-        name="BaptismList"
-        component={BaptismList}
         options={{ headerShown: false }}
       />
 
@@ -136,31 +120,26 @@ const AdminNavigator = () => {
         component={ministryList}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="CreateMemberYear"
         component={CreateMemberYear}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="Members"
         component={Members}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="MemberList"
         component={MemberList}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="MemberDetail"
         component={MemberDetail}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="announcementCategory"
         component={announcementCategory}
@@ -176,20 +155,28 @@ const AdminNavigator = () => {
         component={announcement}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="resourceCategory"
         component={resourceCategory}
         options={{ headerShown: true }}
       />
-
       <Stack.Screen
         name="CreatePostResource"
         component={CreatePostResource}
         options={{ headerShown: true }}
       />
-
-
+      
+      <Stack.Screen
+        name="BaptismList"
+        component={BaptismList}
+        options={{ headerShown: true }}
+      />
+      
+      <Stack.Screen
+        name="BaptismDetails"
+        component={BaptismDetails}
+        options={{ headerShown: true }}
+      />
 
     </Stack.Navigator>
   );

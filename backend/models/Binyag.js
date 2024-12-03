@@ -36,6 +36,24 @@ const BaptismSchema = new mongoose.Schema({
   confirmedAt: {
     type: Date,
   },
+  binyagStatus: {
+    type: String,
+      required: false,
+      default: 'Pending',
+      enum: ['Pending', 'Confirmed', 'Cancelled'], 
+  },
+  comments: [
+    {
+      priest: String,
+      scheduledDate: Date,
+      selectedComment: String,
+      additionalComment: String,
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 module.exports = mongoose.model('Baptism', BaptismSchema);

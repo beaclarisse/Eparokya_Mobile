@@ -216,7 +216,6 @@ exports.confirmWedding = async (req, res) => {
   res.status(200).json({ message: "Wedding confirmed" });
 };
 
-
 exports.declineWedding = async (req, res) => {
   const weddingId = req.params.weddingId;
   const wedding = await Wedding.findById(weddingId);
@@ -227,8 +226,6 @@ exports.declineWedding = async (req, res) => {
   await wedding.save();
   res.status(200).json({ message: "Wedding declined" });
 };
-
-
 
 exports.getConfirmedWeddings = async (req, res) => {
   try {
@@ -275,7 +272,6 @@ exports.addComment = async (req, res) => {
     res.status(500).send('Server error');
   }
 };
-
 
 //Dates
 
@@ -324,20 +320,27 @@ exports.removeAvailableDate = async (req, res) => {
   }
 };
 
-exports.getUserSubmittedForms = async (req, res) => {
+exports.getMySubmittedForms = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const userForms = await Wedding.find({ userId }).select(
-      'bride groom weddingDate weddingStatus attendees flowerGirl ringBearer'
-    );
+    const userId = req.user.id;  
+    console.log("Authenticated User ID:", userId);
 
-    if (!userForms || userForms.length === 0) {
-      return res.status(404).json({ message: 'You have not submitted any wedding forms.' });
+    const forms = await Wedding.find({ userId: userId });
+
+    if (!forms.length) {
+      return res.status(404).json({ message: "No forms found for this user." });
     }
 
-    res.status(200).json({ success: true, data: userForms });
+    res.status(200).json({ forms });
   } catch (error) {
-    console.error("Error fetching user's wedding forms:", error);
-    res.status(500).json({ success: false, error: error.message });
+    console.error("Error fetching submitted wedding forms:", error);
+    res.status(500).json({ message: "Failed to fetch submitted wedding forms." });
   }
 };
+
+
+
+
+
+
+

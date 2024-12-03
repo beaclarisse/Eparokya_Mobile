@@ -1,19 +1,21 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity, Image, ScrollView, View } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+  View,
+} from "react-native";
 import { Box } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 
-const Forms = () => {
+const UserForms = () => {
   const navigation = useNavigation();
 
   const cards = [
-    { route: "AdminWedding", image: require("../../assets/15.png") },
-    { route: "BaptismList", image: require("../../assets/16.png") },
-    { route: "FuneralList", image: require("../../assets/19.png") },
-    
-    { route: "ConfirmedWedding", image: require("../../assets/2.png") },
-    { route: "ConfirmedFuneral", image: require("../../assets/20.png") },
-
+    { route: "SubmittedWedding", image: require("../../assets/17.png") },
+    { route: "SubmittedFuneral", image: require("../../assets/18.png") },
+    { route: "SubmittedBaptism", image: require("../../assets/18.png") },
   ];
 
   return (
@@ -50,8 +52,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   card: {
-    width: "48%", 
-    aspectRatio: 1, 
+    width: "48%",
+    aspectRatio: 1,
     marginBottom: 15,
     borderRadius: 10,
     overflow: "hidden",
@@ -63,4 +65,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Forms;
+export default UserForms;

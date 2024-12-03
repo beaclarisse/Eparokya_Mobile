@@ -6,6 +6,8 @@ const { isAuthenticated, isAuthorized } = require('../middlewares/Auth');
 
 router.post('/create', funeralController.createFuneral);
 router.get('/confirmed', funeralController.getConfirmedFunerals);
+router.get('/mySubmittedForms', isAuthenticated, funeralController.getMySubmittedForms);
+
 router.get('/', funeralController.getFunerals);
 router.get('/:id', funeralController.getFuneralById);
 router.put('/update/:id', funeralController.updateFuneral);

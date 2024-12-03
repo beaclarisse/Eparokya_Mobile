@@ -40,7 +40,7 @@ router.post('/decline', WeddingFormController.declineWedding);
 router.post('/:weddingId/admin/addComment', WeddingFormController.addComment);
 
 
-router.get('/mySubmittedForms', isAuthenticated, WeddingFormController.getUserSubmittedForms);
+router.get('/mySubmittedForms', isAuthenticated, WeddingFormController.getMySubmittedForms);
 
 //WeddingDates
 router.get('/weddingDate', WeddingFormController.getAvailableDates);

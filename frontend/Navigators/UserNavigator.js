@@ -12,6 +12,12 @@ import WeddingForm3 from "../Screens/User/Wedding/WeddingForm3";
 import WeddingFormContainer from "../Screens/User/Wedding/WeddingFormContainer";
 
 
+import SubmittedForms from "../Screens/User/SubmittedForms";
+
+import SubmittedWedding from "../Screens/User/Wedding/SubmittedWedding";
+import SubmittedFuneral from "../Screens/User/Funeral/SubmittedFuneral";
+import SubmittedBaptism from "../Screens/User/Baptism/SubmittedBaptism";
+
 import BinyagForm from "../Screens/User/Baptism/BinyagForm";
 import FuneralForm from "../Screens/User/Funeral/FuneralForm";
 
@@ -83,6 +89,38 @@ const UserNavigator = (props) => {
       <Stack.Screen
         name="WeddingForm3"
         component={WeddingForm3}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedForms"
+        component={SubmittedForms}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedWedding"
+        component={SubmittedWedding}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedFuneral"
+        component={SubmittedFuneral}
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      <Stack.Screen
+        name="SubmittedBaptism"
+        component={SubmittedBaptism}
         options={{
           headerShown: false,
         }}

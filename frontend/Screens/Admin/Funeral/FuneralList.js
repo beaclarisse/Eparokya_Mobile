@@ -1,32 +1,42 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import axios from 'axios';
-import SyncStorage from 'sync-storage';
-import baseURL from '../../../assets/common/baseUrl';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import axios from "axios";
+import SyncStorage from "sync-storage";
+import baseURL from "../../../assets/common/baseUrl";
 
 const FuneralList = ({ navigation }) => {
   const [funeralList, setFuneralList] = useState([]);
   const [filteredFuneralList, setFilteredFuneralList] = useState([]);
-  const [error, setError] = useState('');
-  const [filter, setFilter] = useState('All');
+  const [error, setError] = useState("");
+  const [filter, setFilter] = useState("All");
 
   useEffect(() => {
     const fetchFunerals = async () => {
       try {
-        const token = await SyncStorage.get('jwt');
+        const token = await SyncStorage.get("jwt");
         if (!token) {
-          Alert.alert('Error', 'Token is missing. Please log in again.');
-          navigation.navigate('LoginPage');
+          Alert.alert("Error", "Token is missing. Please log in again.");
+          navigation.navigate("LoginPage");
           return;
         }
 
         const config = { headers: { Authorization: `Bearer ${token}` } };
         const response = await axios.get(`${baseURL}/funeral/`, config);
         setFuneralList(response.data);
-        setFilteredFuneralList(response.data); // Default to showing all funerals
+        setFilteredFuneralList(response.data);
       } catch (err) {
-        console.error('Error fetching funerals:', err.response ? err.response.data : err.message);
-        setError('Unable to fetch funerals. Please try again later.');
+        console.error(
+          "Error fetching funerals:",
+          err.response ? err.response.data : err.message
+        );
+        setError("Unable to fetch funerals. Please try again later.");
       }
     };
 
@@ -35,42 +45,54 @@ const FuneralList = ({ navigation }) => {
 
   const applyFilter = (status) => {
     setFilter(status);
-    if (status === 'All') {
+    if (status === "All") {
       setFilteredFuneralList(funeralList);
     } else {
-      const filtered = funeralList.filter((funeral) => funeral.funeralStatus === status);
+      const filtered = funeralList.filter(
+        (funeral) => funeral.funeralStatus === status
+      );
       setFilteredFuneralList(filtered);
     }
   };
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case 'Confirmed':
-        return styles.confirmedStatus;
-      case 'Pending':
-        return styles.pendingStatus;
-      case 'Declined':
-        return styles.declinedStatus;
-      default:
-        return styles.defaultStatus;
-    }
-  };
-
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item, index }) => (
     <TouchableOpacity
-      style={styles.itemContainer}
-      onPress={() => navigation.navigate('FuneralDetails', { funeralId: item._id })}
+      style={[
+        styles.card,
+        {
+          borderLeftColor:
+            item.funeralStatus === "Pending"
+              ? "#FFD700"
+              : item.funeralStatus === "Confirmed"
+              ? "#4CAF50"
+              : "#FF5722",
+        },
+      ]}
+      onPress={() => navigation.navigate("FuneralDetails", { funeralId: item._id })}
     >
-      <Text style={styles.name}>
-        {item.name.firstName} {item.name.middleName} {item.name.lastName} {item.name.suffix || ''}
-      </Text>
-      <Text>Gender: {item.gender}</Text>
-      <Text>Age: {item.age}</Text>
-      <Text>Funeral Date: {new Date(item.funeralDate).toLocaleDateString()}</Text>
-      <Text>Service Type: {item.serviceType}</Text>
-      <Text style={[styles.status, getStatusStyle(item.funeralStatus)]}>
-        Status: {item.funeralStatus}
-      </Text>
+      <View style={styles.statusContainer}>
+        <Text style={styles.statusText}>{item.funeralStatus}</Text>
+      </View>
+      <Text style={styles.cardHeader}>Record #{index + 1}</Text>
+      <View style={styles.cardContent}>
+        <Text>
+          <Text style={styles.label}>Name:</Text>{" "}
+          {`${item.name.firstName} ${item.name.middleName} ${item.name.lastName} ${item.name.suffix || ""}`}
+        </Text>
+        <Text>
+          <Text style={styles.label}>Gender:</Text> {item.gender}
+        </Text>
+        <Text>
+          <Text style={styles.label}>Age:</Text> {item.age}
+        </Text>
+        <Text>
+          <Text style={styles.label}>Funeral Date:</Text>{" "}
+          {new Date(item.funeralDate).toLocaleDateString()}
+        </Text>
+        <Text>
+          <Text style={styles.label}>Service Type:</Text> {item.serviceType}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 
@@ -79,14 +101,25 @@ const FuneralList = ({ navigation }) => {
       <Text style={styles.title}>Funeral List</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
+      {/* Filter Buttons */}
       <View style={styles.filterContainer}>
-        {['All', 'Confirmed', 'Pending', 'Declined'].map((status) => (
+        {["All", "Pending", "Confirmed", "Declined"].map((status) => (
           <TouchableOpacity
             key={status}
-            style={[styles.filterButton, filter === status && styles.activeFilterButton]}
+            style={[
+              styles.filterButton,
+              filter === status && styles.activeFilterButton,
+            ]}
             onPress={() => applyFilter(status)}
           >
-            <Text style={styles.filterText}>{status}</Text>
+            <Text
+              style={[
+                styles.filterText,
+                filter === status && styles.activeFilterText,
+              ]}
+            >
+              {status}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -98,7 +131,9 @@ const FuneralList = ({ navigation }) => {
           keyExtractor={(item) => item._id}
         />
       ) : (
-        <Text>No funeral records found for the selected filter.</Text>
+        <Text style={styles.emptyText}>
+          No funeral records found for the selected filter.
+        </Text>
       )}
     </View>
   );
@@ -107,60 +142,83 @@ const FuneralList = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#f9f9f9",
+    padding: 16,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontWeight: "bold",
+    color: "#154314",
+    textAlign: "center",
+    marginBottom: 16,
   },
   filterContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 16,
   },
   filterButton: {
     padding: 10,
     borderRadius: 5,
-    backgroundColor: '#ddd',
+    backgroundColor: "#ddd",
   },
   activeFilterButton: {
-    backgroundColor: '#1C5739',
+    backgroundColor: "#1C5739",
   },
   filterText: {
-    color: '#fff',
+    color: "#000",
   },
-  itemContainer: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    marginBottom: 10,
+  activeFilterText: {
+    color: "#fff",
   },
-  name: {
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderLeftWidth: 6,
+  },
+  cardHeader: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+    color: "#154314",
+    marginBottom: 8,
   },
-  status: {
-    marginTop: 5,
+  cardContent: {
+    marginLeft: 8,
+  },
+  label: {
+    fontWeight: "bold",
+    color: "#333",
+  },
+  statusContainer: {
+    padding: 8,
+    backgroundColor: "#E8F5E9",
+    borderRadius: 4,
+    marginBottom: 8,
+    alignSelf: "flex-start",
+  },
+  statusText: {
+    fontWeight: "bold",
+    color: "#154314",
     fontSize: 16,
-    fontWeight: 'bold',
+    
   },
-  confirmedStatus: {
-    color: 'green',
-  },
-  pendingStatus: {
-    color: 'orange',
-  },
-  declinedStatus: {
-    color: 'red',
-  },
-  defaultStatus: {
-    color: 'black',
+  emptyText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#666",
+    marginTop: 20,
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 20,
+    textAlign: "center",
   },
 });
 

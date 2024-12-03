@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Alert, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Alert,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { Card, Box, Heading, VStack } from "native-base";
 import axios from "axios";
 import baseURL from "../../../assets/common/baseUrl";
@@ -24,16 +32,12 @@ const AdminWedding = ({ navigation }) => {
         headers: { Authorization: `${token}` },
       });
 
-      console.log("Fetched wedding forms response:", response.data);
-
       if (response.data && Array.isArray(response.data)) {
         setWeddingForms(response.data);
       } else {
-        console.log("No data or unexpected format received:", response.data);
         setWeddingForms([]);
       }
     } catch (error) {
-      console.error("Error fetching wedding forms:", error.response?.data || error.message);
       Alert.alert("Error", "Unable to fetch wedding forms.");
     } finally {
       setLoading(false);
@@ -56,43 +60,46 @@ const AdminWedding = ({ navigation }) => {
   };
 
   const renderWeddingForm = ({ item }) => {
-    if (!item._id) return null;
-
     const { bride, groom, attendees, flowerGirl, ringBearer, weddingDate, weddingStatus } = item;
-
-    console.log("Rendering wedding form item:", item);
 
     const statusColor =
       weddingStatus === "Confirmed"
-        ? "green"
+        ? "#28a745"
         : weddingStatus === "Declined"
-          ? "red"
-          : "orange";
+        ? "#dc3545"
+        : "#ffc107";
 
     return (
       <TouchableOpacity onPress={() => handleCardPress(item)}>
-        <Card style={styles.card}>
+        <Card style={[styles.card, { borderLeftColor: statusColor }]}>
           <VStack space={2}>
-            <Heading size="md" style={[styles.nameText, { color: "black" }]}>
+            <Heading size="md" style={styles.cardHeader}>
               {bride && groom ? `${bride} & ${groom}` : "Names not available"}
             </Heading>
 
+            <View style={styles.cardContent}>
+              <Text style={styles.label}>
+                Wedding Date:{" "}
+                <Text style={styles.text}>
+                  {weddingDate ? new Date(weddingDate).toLocaleDateString() : "N/A"}
+                </Text>
+              </Text>
 
-            <Text style={styles.text}>
-              Wedding Date: {weddingDate ? new Date(weddingDate).toLocaleDateString() : "N/A"}
-            </Text>
+              <View style={styles.statusContainer}>
+                <Text style={[styles.statusText, { color: statusColor }]}>
+                  {weddingStatus || "N/A"}
+                </Text>
+              </View>
 
-            <Text style={[styles.text, { color: statusColor }]}>
-              Status: {weddingStatus || "N/A"}
-            </Text>
+              <Text style={styles.label}>
+                Attendees: <Text style={styles.text}>{attendees ?? "N/A"}</Text>
+              </Text>
 
-            <Text style={styles.text}>
-              Attendees: {attendees != null ? attendees : "N/A"}
-            </Text>
-
-            <Text style={styles.text}>
-              Flower Girl: {flowerGirl || "N/A"} | Ring Bearer: {ringBearer || "N/A"}
-            </Text>
+              <Text style={styles.label}>
+                Flower Girl: <Text style={styles.text}>{flowerGirl || "N/A"}</Text> | Ring Bearer:{" "}
+                <Text style={styles.text}>{ringBearer || "N/A"}</Text>
+              </Text>
+            </View>
           </VStack>
         </Card>
       </TouchableOpacity>
@@ -101,24 +108,32 @@ const AdminWedding = ({ navigation }) => {
 
   return (
     <Box style={styles.container}>
-      <ScrollView horizontal={true} style={styles.imageRow} contentContainerStyle={styles.imageContentContainer}></ScrollView>
-
       <Heading style={styles.heading}>Submitted Wedding Forms</Heading>
 
       <View style={styles.filterContainer}>
-        {['All', 'Confirmed', 'Pending', 'Declined'].map((status) => (
+        {["All", "Confirmed", "Pending", "Declined"].map((status) => (
           <TouchableOpacity
             key={status}
-            style={[styles.filterButton, filteredStatus === status && styles.activeFilterButton]}
+            style={[
+              styles.filterButton,
+              filteredStatus === status && styles.activeFilterButton,
+            ]}
             onPress={() => setFilteredStatus(status)}
           >
-            <Text style={styles.filterText}>{status}</Text>
+            <Text
+              style={[
+                styles.filterText,
+                filteredStatus === status && styles.activeFilterText,
+              ]}
+            >
+              {status}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
 
       {loading ? (
-        <Text style={styles.text}>Loading...</Text>
+        <Text style={styles.emptyText}>Loading...</Text>
       ) : (
         <FlatList
           data={filterWeddingForms(filteredStatus)}
@@ -133,27 +148,20 @@ const AdminWedding = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#b3cf99",
-    padding: 10,
+    backgroundColor: "#f9f9f9",
+    padding: 16,
   },
-  card: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    elevation: 2,
-    height: 180,
-  },
-  text: {
-    color: "black",
-  },
-  nameText: {
-    color: "black",
+  heading: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#154314",
+    textAlign: "center",
+    marginBottom: 16,
   },
   filterContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
+    justifyContent: "space-around",
+    marginBottom: 16,
   },
   filterButton: {
     padding: 10,
@@ -164,15 +172,57 @@ const styles = StyleSheet.create({
     backgroundColor: "#1C5739",
   },
   filterText: {
+    color: "#000",
+  },
+  activeFilterText: {
     color: "#fff",
   },
-  heading: {
-    marginBottom: 10,
-    fontSize: 24,
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 16,
+    marginVertical: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    borderLeftWidth: 6,
+  },
+  cardHeader: {
+    fontSize: 18,
     fontWeight: "bold",
-    color: "black",
+    color: "#154314",
+    marginBottom: 8,
+  },
+  cardContent: {
+    marginLeft: 8,
+  },
+  label: {
+    fontWeight: "bold",
+    color: "#333",
+  },
+  statusContainer: {
+    marginTop: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    backgroundColor: "#e8f5e9",
+    borderRadius: 4,
+    alignSelf: "flex-start",
+  },
+  statusText: {
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  text: {
+    color: "#555",
+  },
+  emptyText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#666",
+    marginTop: 20,
   },
 });
-
 
 export default AdminWedding;

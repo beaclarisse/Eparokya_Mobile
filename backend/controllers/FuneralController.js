@@ -138,7 +138,6 @@ exports.updateFuneral = async (req, res) => {
     }
 };
 
-
 exports.deleteFuneral = async (req, res) => {
     try {
         const funeralId = req.params.id;
@@ -320,9 +319,28 @@ exports.getConfirmedFunerals = async (req, res) => {
       console.error('Error fetching confirmed funerals:', error);
       res.status(500).json({ error: 'Failed to fetch confirmed funerals' });
     }
+};
+
+exports.getMySubmittedForms = async (req, res) => {
+    try {
+      const userId = req.user.id;  
+      console.log("Authenticated User ID:", userId);
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ message: "Invalid User ID" });
+      }
+      const forms = await Funeral.find({ userId: userId });
+  
+      if (!forms.length) {
+        return res.status(404).json({ message: "No forms found for this user." });
+      }
+      res.status(200).json({ forms });
+    } catch (error) {
+      console.error("Error fetching submitted funeral forms:", error);
+      res.status(500).json({ message: "Failed to fetch submitted funeral forms." });
+    }
   };
-
-
+  
+  
 
 
 
