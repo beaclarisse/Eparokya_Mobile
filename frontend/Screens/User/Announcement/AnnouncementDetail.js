@@ -1,179 +1,292 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
-import baseURL from "../../../assets/common/baseUrl";
-import SyncStorage from 'sync-storage';
 import { MaterialIcons } from '@expo/vector-icons';
-import Toast from 'react-native-toast-message'; // Import Toast
+import axios from 'axios';
+import Toast from 'react-native-toast-message';
+import SyncStorage from 'sync-storage';
+import baseURL from '../../../assets/common/baseUrl';
 
-const AnnouncementDetail = ({ route }) => {
-  const navigation = useNavigation(); // Hook to use navigation
+const AnnouncementDetail = ({ route, navigation }) => {
   const { announcementId } = route.params;
+
   const [announcement, setAnnouncement] = useState(null);
-  const [error, setError] = useState('');
+  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
+  const [replyText, setReplyText] = useState('');
+  const [currentCommentId, setCurrentCommentId] = useState(null);
 
   useEffect(() => {
-    const fetchAnnouncement = async () => {
+    const fetchAnnouncementData = async () => {
+      setLoading(true);
       try {
-        const response = await axios.get(`${baseURL}/announcement/${announcementId}`);
-        setAnnouncement(response.data);
-        setLoading(false);
-      } catch (err) {
-        setError('Failed to fetch announcement');
+        const announcementResponse = await axios.get(`${baseURL}/announcement/${announcementId}`);
+        setAnnouncement(announcementResponse.data);
+  
+        const commentsResponse = await axios.get(`${baseURL}/announcement/comments/${announcementId}`);
+        console.log('Fetched Comments:', commentsResponse.data.data); // Log data to check replies
+        setComments(commentsResponse.data.data);
+      } catch (error) {
+        console.error('Error fetching announcement and comments:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Unable to fetch announcement details. Please try again later.',
+        });
+      } finally {
         setLoading(false);
       }
     };
-
-    fetchAnnouncement();
+  
+    fetchAnnouncementData();
   }, [announcementId]);
 
-  const handleLike = async () => {
-    const token = await SyncStorage.get("jwt");
+  const handleAction = async (url, method, body = null, successMessage, errorMessage) => {
+    const token = SyncStorage.get('jwt');
     if (!token) {
-      console.error('No token found');
+      Toast.show({ type: 'error', text1: 'Login Required', text2: 'Please log in to perform this action.' });
       return;
     }
 
     try {
-      await axios.put(
-        `${baseURL}/announcement/like/${announcementId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setAnnouncement(prevAnnouncement => ({ ...prevAnnouncement, likes: prevAnnouncement.likes + 1 }));
-    } catch (err) {
-      console.error('Error liking announcement:', err);
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios[method](url, body, config);
+      return response.data;
+    } catch (error) {
+      console.error(errorMessage, error);
+      Toast.show({ type: 'error', text1: 'Error', text2: errorMessage });
+      throw error;
     }
+  };
+
+  const handleLike = async () => {
+    try {
+      const data = await handleAction(
+        `${baseURL}/announcement/like/${announcementId}`,
+        'put',
+        null,
+        'Like status updated!',
+        'Unable to update like status.'
+      );
+      setAnnouncement((prev) => ({ ...prev, likedBy: data.likedBy }));
+    } catch { }
   };
 
   const handleComment = async () => {
-    const token = await SyncStorage.get("jwt");
-    if (!token) {
-      console.error('No token found');
+    if (!commentText.trim()) {
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Comment cannot be empty.' });
       return;
     }
 
     try {
-      const response = await axios.post(
-        `${baseURL}/announcement/comment/${announcementId}`,
+      const data = await handleAction(
+        `${baseURL}/AnnouncementComment/comment/${announcementId}`,
+        'post',
         { text: commentText },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        'Comment Added!',
+        'Unable to add comment.'
       );
-      setAnnouncement(prevAnnouncement => ({
-        ...prevAnnouncement,
-        comments: [...prevAnnouncement.comments, response.data]
-      }));
-
-      Toast.show({
-        type: 'success',
-        position: 'top',
-        text1: 'Comment Added!',
-        text2: 'Your comment was successfully posted.',
-        visibilityTime: 3000, 
-        autoHide: true,
-        topOffset: 50, 
-      });
+      setComments((prev) => [...prev, data]);
       setCommentText('');
+    } catch { }
+  };
+
+  const handleReply = async () => {
+    if (!replyText.trim()) {
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Reply cannot be empty.' });
+      return;
+    }
+
+    try {
+      const data = await handleAction(
+        `${baseURL}/AnnouncementComment/comment/reply/${currentCommentId}`,
+        'post',
+        { text: replyText },
+        'Reply Added!',
+        'Unable to add reply.'
+      );
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment._id === currentCommentId
+            ? { ...comment, replies: [...(comment.replies || []), data.data] }
+            : comment
+        )
+      );
+
+      setReplyText('');
+      setCurrentCommentId(null);
     } catch (error) {
-      console.error("Error posting comment:", error);
+      console.error('Error adding reply:', error);
     }
   };
 
+  const fetchCommentsWithReplies = async () => {
+    try {
+      const response = await axios.get(`${baseURL}/announcement/comments/${announcementId}`);
+      console.log('Fetched Comments with Replies:', response.data.data); 
+      setComments(response.data.data);
+    } catch (error) {
+      console.error('Error fetching comments with replies:', error);
+    }
+  };
+
+
+  const handleLikeToggle = async (commentId, isLiked) => {
+    try {
+      const url = `${baseURL}/AnnouncementComment/comment/${isLiked ? 'unlike' : 'like'}/${commentId}`;
+      const response = await axios.post(url);
+      const updatedComment = response.data.data;
+
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment._id === updatedComment._id ? updatedComment : comment
+        )
+      );
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
+  };
+
+
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
   }
 
   return (
     <ScrollView style={styles.container}>
+      {/* Back Button */}
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
         <MaterialIcons name="arrow-back" size={24} color="black" />
         <Text style={styles.backButtonText}>Back</Text>
       </TouchableOpacity>
-      {error ? (
-        <Text>{error}</Text>
+
+      {/* Announcement Details */}
+      <Text style={styles.title}>{announcement?.name || 'No Title Available'}</Text>
+      <Text>{announcement?.description || 'No Description Available'}</Text>
+      <Text>{announcement?.richDescription || 'No Details Available'}</Text>
+      <Text>Tags: {announcement?.tags?.join(', ') || 'No Tags'}</Text>
+
+      {announcement?.image ? (
+        <Image source={{ uri: announcement.image }} style={styles.image} />
       ) : (
-        <View>
-          <Text style={styles.title}>{announcement.name}</Text>
-          <Text>{announcement.description}</Text>
-          {announcement.image && <Image source={{ uri: announcement.image }} style={styles.image} />}
-          {announcement.video && <Text>Video: {announcement.video}</Text>}
-          {announcement.user && (
-            <View style={styles.userContainer}>
-              <Image source={{ uri: announcement.user.profilePicture }} style={styles.userImage} />
-              <Text style={styles.userName}>{announcement.user.name}</Text>
-            </View>
-          )}
+        <Text>No Image Available</Text>
+      )}
+
+      {/* Like Interaction */}
+      <View style={styles.interactionContainer}>
+        <TouchableOpacity onPress={handleLike}>
+          <MaterialIcons
+            name="thumb-up"
+            size={24}
+            color={announcement?.likedBy?.includes(SyncStorage.get('userId')) ? 'green' : 'gray'}
+          />
+        </TouchableOpacity>
+        <Text>{announcement?.likedBy?.length || 0}</Text>
+      </View>
+
+      {/* Comments and Replies */}
+      {comments?.map((comment) => (
+        <View key={comment._id} style={styles.comment}>
+          {/* Comment Header */}
+          <View style={styles.commentHeader}>
+            <Text style={styles.commentUser}>{comment.user?.name || 'Anonymous'}:</Text>
+            <Text>{new Date(comment.dateCreated).toLocaleString()}</Text>
+          </View>
+
+          {/* Comment Text */}
+          <Text style={styles.commentText}>{comment.text}</Text>
+
+          {/* Comment Interaction */}
           <View style={styles.interactionContainer}>
-            <TouchableOpacity onPress={handleLike}>
+            <TouchableOpacity onPress={() => handleLikeToggle(comment._id)}>
               <MaterialIcons
                 name="thumb-up"
-                size={24}
-                color={announcement.liked ? 'green' : 'gray'}
+                size={20}
+                color={comment.likedBy?.includes(SyncStorage.get('userId')) ? 'green' : 'gray'}
               />
             </TouchableOpacity>
-            <Text style={styles.countText}>{announcement.likes}</Text>
-            <MaterialIcons name="comment" size={24} color="gray" style={styles.commentIcon} />
-            <Text style={styles.countText}>{announcement.comments.length}</Text>
+            <Text>{comment.likedBy?.length || 0}</Text>
           </View>
-          <TextInput
-            value={commentText}
-            onChangeText={setCommentText}
-            placeholder="Add a comment..."
-            style={styles.commentInput}
-          />
-          <TouchableOpacity onPress={handleComment} style={styles.commentButton}>
-            <Text style={styles.commentButtonText}>Submit</Text>
-          </TouchableOpacity>
-          {announcement.comments.map((comment, index) => (
-            <View key={index} style={styles.comment}>
-              {comment.user && (
-                <View style={styles.commentUserContainer}>
-                  <Text style={styles.commentUserName}>{comment.user.name}:</Text>
-                  <Text style={styles.commentText}>{comment.text}</Text>
-                  <Text style={styles.commentDate}>
-                    {new Date(comment.dateCreated).toLocaleString() || 'Invalid Date'}
-                  </Text>
-                </View>
-              )}
+
+          {/* Replies */}
+          {comment.replies?.length > 0 && (
+            <View style={styles.repliesContainer}>
+              {comment.replies.map((reply) => {
+                console.log('Reply:', reply); // Debugging
+                return (
+                  <View key={reply._id} style={styles.reply}>
+                    <View style={styles.replyHeader}>
+                      <Text style={styles.replyUser}>{reply.user?.name || 'Anonymous'}:</Text>
+                      <Text>{new Date(reply.dateCreated).toLocaleString()}</Text>
+                    </View>
+                    <Text style={styles.replyText}>{reply.text}</Text>
+                  </View>
+                );
+              })}
             </View>
-          ))}
+          )}
+
+
+          {/* Reply Input */}
+          {currentCommentId === comment._id && (
+            <View style={styles.replyInputContainer}>
+              <TextInput
+                value={replyText}
+                onChangeText={setReplyText}
+                placeholder="Add a reply"
+                style={styles.input}
+              />
+              <TouchableOpacity onPress={handleReply}>
+                <Text style={styles.postButton}>Post Reply</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Reply Button */}
+          <TouchableOpacity onPress={() => setCurrentCommentId(comment._id)}>
+            <Text style={styles.replyButton}>Reply</Text>
+          </TouchableOpacity>
         </View>
-      )}
+      ))}
+
+      {/* Add a New Comment */}
+      <TextInput
+        value={commentText}
+        onChangeText={setCommentText}
+        placeholder="Add a comment"
+        style={styles.input}
+      />
+      <TouchableOpacity onPress={handleComment}>
+        <Text style={styles.postButton}>Post Comment</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 10 },
-  backButton: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
-  backButtonText: { marginLeft: 5, fontSize: 16, color: 'black' },
-  title: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
-  image: { width: '100%', height: 200, borderRadius: 8, marginBottom: 10 },
-  userContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
-  userImage: { width: 40, height: 40, borderRadius: 20, marginRight: 10 },
-  userName: { fontSize: 16, fontWeight: 'bold' },
-  interactionContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
-  countText: { marginLeft: 5, fontSize: 16, color: 'black' },
-  commentIcon: { marginLeft: 20 },
-  commentInput: { borderColor: '#ddd', borderWidth: 1, padding: 8, borderRadius: 5, marginTop: 10 },
-  commentButton: { backgroundColor: '#007BFF', padding: 10, borderRadius: 5, marginTop: 10 },
-  commentButtonText: { color: '#fff', textAlign: 'center' },
-  comment: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#ddd' },
-  commentUserContainer: { marginBottom: 5 },
-  commentUserName: { fontWeight: 'bold', fontSize: 16 },
-  commentText: { fontSize: 14, marginTop: 5 },
-  commentDate: { fontSize: 12, color: '#888', marginTop: 5 },
+  container: { flex: 1, padding: 16 },
+  loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  title: { fontSize: 24, fontWeight: 'bold' },
+  interactionContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
+  input: { borderWidth: 1, padding: 8, marginVertical: 8, borderRadius: 4 },
+  comment: { borderBottomWidth: 1, paddingVertical: 8, marginBottom: 8 },
+  reply: { paddingLeft: 16, fontSize: 14, color: 'gray', marginVertical: 4 },
+  commentHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+  commentUser: { fontWeight: 'bold' },
+  commentText: { marginVertical: 4 },
+  replyUser: { fontWeight: 'bold', fontSize: 14 },
+  replyButton: { color: 'blue', marginTop: 4 },
+  commentInputContainer: { marginTop: 16 },
+  postButton: { color: 'blue', marginTop: 8 },
+  backButton: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
+  backButtonText: { marginLeft: 8, fontSize: 16 },
+  image: { width: '100%', height: 200, marginVertical: 16 },
 });
 
 export default AnnouncementDetail;
+
+

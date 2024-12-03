@@ -19,15 +19,21 @@ app.use("/public/uploads", express.static(__dirname + "/public/uploads"));
 
 const usersRoutes = require("./routes/user");
 const weddingRoutes = require("./routes/wedding");
-const ministryCatgeoryRoutes = require("./routes/ministryCategory");
-const announcementCatgeoryRoutes = require("./routes/Announcement/announcementCategory");
-const announcementRoutes = require("./routes/Announcement/announcement");
-const memberYearBatchRoutes = require("./routes/Members/memberYearBatchCategory");
-const memberRoutes = require("./routes/Members/members");
-const resourceCategoryRoutes = require("./routes/Resource/ResourceCategory");
-const postResourceRoutes = require("./routes/Resource/postResource");
 const BinyagRoutes = require("./routes/Binyag")
 const FuneralRoutes = require("./routes/funeral")
+
+
+const announcementCatgeoryRoutes = require("./routes/Announcement/announcementCategory");
+const announcementRoutes = require("./routes/Announcement/announcement");
+const announcementCommentRoutes = require("./routes/Announcement/AnnouncementComment");
+
+const ministryCatgeoryRoutes = require("./routes/ministryCategory");
+const memberYearBatchRoutes = require("./routes/Members/memberYearBatchCategory");
+const memberRoutes = require("./routes/Members/members");
+
+const resourceCategoryRoutes = require("./routes/Resource/ResourceCategory");
+const postResourceRoutes = require("./routes/Resource/postResource");
+
 
 
 app.use(`/api/v1/users`, usersRoutes);
@@ -35,6 +41,7 @@ app.use(`/api/v1/wedding`, weddingRoutes);
 app.use(`/api/v1/ministryCategory`, ministryCatgeoryRoutes);
 app.use(`/api/v1/announcementCategory`, announcementCatgeoryRoutes);
 app.use(`/api/v1/announcement`, announcementRoutes);
+app.use(`/api/v1/AnnouncementComment`, announcementCommentRoutes);
 app.use(`/api/v1/memberYear`, memberYearBatchRoutes);
 app.use(`/api/v1/member`, memberRoutes);
 app.use(`/api/v1/resourceCategory`, resourceCategoryRoutes);

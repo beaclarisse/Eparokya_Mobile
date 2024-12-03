@@ -36,6 +36,7 @@ const AnnouncementPage = ({ navigation }) => {
     const fetchAnnouncements = async () => {
       try {
         const response = await axios.get(`${baseURL}/announcement/`);
+        console.log(response.data);  
         setAnnouncements(response.data);
         setFilteredAnnouncements(response.data);
       } catch (err) {
@@ -43,6 +44,7 @@ const AnnouncementPage = ({ navigation }) => {
         console.log('Error:', err);
       }
     };
+
 
     fetchCategories();
     fetchAnnouncements();
@@ -133,15 +135,7 @@ const AnnouncementPage = ({ navigation }) => {
           {/* Announcements */}
           <FlatList
             nestedScrollEnabled
-            data={
-              selectedCategory
-                ? filteredAnnouncements.filter(
-                    (announcement) =>
-                      announcement.announcementCategory &&
-                      announcement.announcementCategory._id === selectedCategory
-                  )
-                : filteredAnnouncements
-            }
+            data={announcements}  // Use the full list of announcements, without filtering
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.card}
@@ -156,7 +150,6 @@ const AnnouncementPage = ({ navigation }) => {
                 <Text>{item.description || 'No description available'}</Text>
                 {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
                 {item.video && <Text style={styles.media}>Video: {item.video}</Text>}
-
                 <View style={styles.interactionContainer}>
                   <TouchableOpacity onPress={() => handleLike(item._id)}>
                     <MaterialIcons
@@ -187,6 +180,7 @@ const AnnouncementPage = ({ navigation }) => {
             )}
             keyExtractor={(item) => item._id}
           />
+
         </>
       )}
       <Toast />

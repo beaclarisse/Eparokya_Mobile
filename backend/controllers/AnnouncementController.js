@@ -1,4 +1,4 @@
-const { Announcement } = require('../models/Announcements/announcement');
+const { Announcement, Comment, Reply } = require('../models/Announcements/announcement');
 const { User } = require('../models/user');
 const cloudinary = require('cloudinary').v2;
 const mongoose = require('mongoose');
@@ -42,40 +42,85 @@ exports.createAnnouncement = async (req, res) => {
 };
 
 
-exports.getAnnouncements = async (req, res) => {
+exports.getAllAnnouncements = async (req, res) => {
     try {
-        const announcements = await Announcement.find()
-            .populate('comments.user', 'name')
-            .exec();
-
-        console.log(announcements);
-        return res.status(200).json(announcements);
+      const announcements = await Announcement.find()
+        .populate({
+          path: 'comments', 
+          populate: [
+            {
+              path: 'replies', 
+              model: 'Reply', 
+              populate: {
+                path: 'user', 
+                select: 'name', 
+              },
+            },
+            {
+              path: 'user', 
+              select: 'name', 
+            },
+          ],
+        });
+  
+      if (!announcements || announcements.length === 0) {
+        return res.status(404).json({ message: 'No announcements found' });
+      }
+  
+      res.status(200).json(announcements);
     } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({ message: 'Server error' });
+      console.error('Error fetching announcements:', error);
+      res.status(500).json({ message: 'Error fetching announcements' });
     }
-};
-
-
-
+  };
+  
 exports.getAnnouncementById = async (req, res) => {
+    try {
+      const announcement = await Announcement.findById(req.params.announcementId)
+        .populate({
+          path: 'comments',
+          populate: [
+            {
+              path: 'replies',
+              model: 'Reply',  
+              populate: {
+                path: 'user', 
+                select: 'name', 
+              },
+            },
+            {
+              path: 'user',
+              select: 'name', 
+            },
+          ],
+        });
+  
+      if (!announcement) {
+        return res.status(404).json({ message: 'Announcement not found' });
+      }
+  
+      res.status(200).json(announcement);
+    } catch (error) {
+      console.error('Error fetching announcement:', error);
+      res.status(500).json({ message: 'Error fetching announcement' });
+    }
+  };
+  
+exports.getCommentsByAnnouncementId = async (req, res) => {
     const { announcementId } = req.params;
 
     try {
-        const announcement = await Announcement.findById(announcementId)
-            .populate('announcementCategory')
-            .populate('comments.user', 'name')
-            .populate('likedBy', 'name')
-            .exec();
+        const comments = await Comment.find({ announcement: announcementId })
+            .populate('user', 'name') 
+            .populate({
+                path: 'replies',
+                populate: { path: 'user', select: 'name' }, 
+            });
 
-        if (!announcement) {
-            return res.status(404).json({ message: 'Announcement not found' });
-        }
-
-        return res.status(200).json(announcement);
+        res.status(200).json({ data: comments });
     } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({ message: 'Server error' });
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ message: 'Failed to fetch comments', error });
     }
 };
 
@@ -118,54 +163,6 @@ exports.deleteAnnouncement = async (req, res) => {
         res.status(200).json({ message: 'Announcement deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Error deleting announcement', details: error.message });
-    }
-};
-
-
-exports.updateComment = async (req, res) => {
-    try {
-        const { text } = req.body;
-        const { announcementId, commentId } = req.params;
-
-        const announcement = await Announcement.findById(announcementId);
-        if (!announcement) {
-            return res.status(404).json({ error: 'Announcement not found' });
-        }
-
-        const comment = announcement.comments.id(commentId);
-        if (!comment) {
-            return res.status(404).json({ error: 'Comment not found' });
-        }
-
-        comment.text = text;
-        await announcement.save();
-
-        res.status(200).json(announcement);
-    } catch (error) {
-        res.status(500).json({ error: 'Error updating comment', details: error.message });
-    }
-};
-
-exports.deleteComment = async (req, res) => {
-    try {
-        const { announcementId, commentId } = req.params;
-
-        const announcement = await Announcement.findById(announcementId);
-        if (!announcement) {
-            return res.status(404).json({ error: 'Announcement not found' });
-        }
-
-        const comment = announcement.comments.id(commentId);
-        if (!comment) {
-            return res.status(404).json({ error: 'Comment not found' });
-        }
-
-        comment.remove();
-        await announcement.save();
-
-        res.status(200).json({ message: 'Comment deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Error deleting comment', details: error.message });
     }
 };
 
@@ -216,57 +213,62 @@ exports.unlikeAnnouncement = async (req, res) => {
 };
 
 //wor
-exports.addComment = async (req, res) => {
-    const { announcementId } = req.params;
-    const { text } = req.body;
+// exports.addComment = async (req, res) => {
+//     const { announcementId } = req.params;
+//     const { text } = req.body;
   
-    const token = req.header('Authorization').replace('Bearer ', '');
+//     const token = req.header('Authorization').replace('Bearer ', '');
   
-    if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
+//     if (!token) {
+//       return res.status(401).json({ message: 'Authentication required' });
+//     }
   
-    try {
-      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-      const userId = decodedToken.id;
+//     try {
+//       const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+//       const userId = decodedToken.id;
   
-      const announcement = await Announcement.findById(announcementId);
-      if (!announcement) {
-        return res.status(404).json({ message: 'Announcement not found' });
-      }
+//       const announcement = await Announcement.findById(announcementId);
+//       if (!announcement) {
+//         return res.status(404).json({ message: 'Announcement not found' });
+//       }
   
-      const newComment = {
-        user: userId,
-        text,
-        dateCreated: new Date(),
-      };
+//       const newComment = {
+//         user: userId,
+//         text,
+//         dateCreated: new Date(),
+//       };
   
-      // Add the new comment to the announcement
-      announcement.comments.push(newComment);
-      await announcement.save();
+//       // Add the new comment to the announcement
+//       announcement.comments.push(newComment);
+//       await announcement.save();
   
-      // Return the updated announcement with the new comment
-      res.status(201).json({ updatedAnnouncement: announcement });
-    } catch (error) {
-      console.error("Error posting comment:", error);
-      res.status(500).json({ message: 'Error posting comment' });
-    }
-  };
+//       // Return the updated announcement with the new comment
+//       res.status(201).json({ updatedAnnouncement: announcement });
+//     } catch (error) {
+//       console.error("Error posting comment:", error);
+//       res.status(500).json({ message: 'Error posting comment' });
+//     }
+//   };
+
+//test if working
+
 
 exports.getAnnouncementComments = async (req, res) => {
     const { announcementId } = req.params;
 
     try {
-        const announcement = await Announcement.findById(announcementId).populate('comments.user', 'name');
-        if (!announcement) {
-            return res.status(404).json({ message: 'Announcement not found' });
-        }
-        return res.status(200).json({ comments: announcement.comments });
+        const comments = await Comment.find({ announcement: announcementId })
+            .populate('user', 'name') // Populate user details
+            .sort({ dateCreated: -1 }); // Sort by newest first
+
+        if (!comments) return res.status(404).json({ message: 'Comments not found' });
+
+        res.status(200).json({ comments });
     } catch (error) {
-        console.error('Error:', error);
-        return res.status(500).json({ message: 'Server error' });
+        console.error('Error fetching comments:', error);
+        res.status(500).json({ message: 'Error fetching comments' });
     }
 };
 
-
+  
 

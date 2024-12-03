@@ -12,14 +12,14 @@ router.post('/create', upload.fields([
     { name: 'video', maxCount: 1 }
 ]), announcementController.createAnnouncement);
 
-router.get('/', announcementController.getAnnouncements);
+router.get('/', announcementController.getAllAnnouncements);
+
 router.get('/:announcementId', announcementController.getAnnouncementById );
+
+router.get('/comments/:announcementId', announcementController.getCommentsByAnnouncementId);
+
 router.put('/update/:id', announcementController.updateAnnouncement );
 router.delete('/delete/:id', announcementController.deleteAnnouncement);
-
-router.post('/comment/:announcementId', isAuthenticated, announcementController.addComment);
-router.put('/announcementId/comment/update/:commentId', isAuthenticated, announcementController.updateComment);
-router.delete('/announcementId/comment/delete/:commentId', isAuthenticated, announcementController.deleteComment);
 
 router.put('/like/:announcementId', isAuthenticated, announcementController.likeAnnouncement);
 router.post('/unlike/announcementId', announcementController.unlikeAnnouncement);
