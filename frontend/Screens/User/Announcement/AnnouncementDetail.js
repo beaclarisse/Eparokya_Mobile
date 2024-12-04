@@ -14,8 +14,7 @@ const AnnouncementDetail = ({ route, navigation }) => {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
-  const [replyText, setReplyText] = useState('');
-  const [currentCommentId, setCurrentCommentId] = useState(null);
+  const [replyTexts, setReplyTexts] = useState({}); // store reply texts by comment ID
 
   const fetchAnnouncementAndComments = async () => {
     setLoading(true);
@@ -84,6 +83,9 @@ const AnnouncementDetail = ({ route, navigation }) => {
   };
 
   const handleReply = async (commentId) => {
+    const replyText = replyTexts[commentId];
+    if (!replyText) return;
+
     try {
       const response = await handleAction(
         `${baseURL}/AnnouncementComment/comment/reply/${commentId}`,
@@ -99,13 +101,8 @@ const AnnouncementDetail = ({ route, navigation }) => {
             : comment
         )
       );
-      setReplyText('');
-      setCurrentCommentId(null);
+      setReplyTexts((prev) => ({ ...prev, [commentId]: '' }));
     } catch { }
-  };
-
-  const toggleReplyInput = (commentId) => {
-    setCurrentCommentId((prev) => (prev === commentId ? null : commentId));
   };
 
   const handleLikeToggle = async (commentId) => {
@@ -173,10 +170,12 @@ const AnnouncementDetail = ({ route, navigation }) => {
         <View key={comment._id} style={styles.comment}>
           <View style={styles.commentHeader}>
             <Text style={styles.commentUser}>{comment.user?.name || 'Anonymous'}:</Text>
-            <Text>{new Date(comment.dateCreated).toLocaleString()}</Text>
+            <Text style={styles.commentDate}>{new Date(comment.dateCreated).toLocaleString()}</Text>
           </View>
           <Text style={styles.commentText}>{comment.text}</Text>
-          <View style={styles.interactionContainer}>
+
+          <View style={styles.commentActions}>
+            <Text style={styles.replies}>{comment.replies?.length || 0} Replies</Text>
             <TouchableOpacity onPress={() => handleLikeToggle(comment._id)}>
               <MaterialIcons
                 name="thumb-up"
@@ -184,41 +183,50 @@ const AnnouncementDetail = ({ route, navigation }) => {
                 color={comment.likedBy?.includes(SyncStorage.get('userId')) ? 'green' : 'gray'}
               />
             </TouchableOpacity>
-            <Text>{comment.likedBy?.length || 0}</Text>
+            <Text>{comment.likedBy?.length || 0} Likes</Text>
           </View>
-          {comment.replies?.map((reply) => (
-            <View key={reply._id} style={styles.reply}>
-              <Text style={styles.replyUser}>{reply.user?.name || 'Anonymous'}:</Text>
-              <Text>{reply.text}</Text>
-            </View>
-          ))}
-          {currentCommentId === comment._id && (
+
+          <TouchableOpacity
+            onPress={() => {
+              const currentReplyText = replyTexts[comment._id] || '';
+              setReplyTexts((prev) => ({ ...prev, [comment._id]: currentReplyText }));
+            }}>
+            <Text style={styles.replyButton}> Add Reply</Text>
+          </TouchableOpacity>
+
+          {replyTexts[comment._id] !== undefined && (
             <View style={styles.replyInputContainer}>
               <TextInput
-                value={replyText}
-                onChangeText={setReplyText}
+                value={replyTexts[comment._id]}
+                onChangeText={(text) => setReplyTexts((prev) => ({ ...prev, [comment._id]: text }))}
                 placeholder="Add a reply"
                 style={styles.input}
               />
               <TouchableOpacity onPress={() => handleReply(comment._id)}>
-                <Text style={styles.postButton}>Post Reply</Text>
+                <Text style={styles.postButton}>Submit</Text>
               </TouchableOpacity>
             </View>
           )}
-          <TouchableOpacity onPress={() => toggleReplyInput(comment._id)}>
-            <Text style={styles.replyButton}>Reply</Text>
-          </TouchableOpacity>
+
+          {/* Displaying replies */}
+          {comment.replies?.map((reply) => (
+            <View key={reply._id} style={styles.reply}>
+              <Text style={styles.replyUser}>{reply.user?.name || 'Anonymous'}:</Text>
+              <Text style={styles.replyText}>{reply.text}</Text>
+            </View>
+          ))}
         </View>
       ))}
 
+      {/* Leave a comment section */}
       <TextInput
         value={commentText}
         onChangeText={setCommentText}
-        placeholder="Add a comment"
+        placeholder="Leave a comment"
         style={styles.input}
       />
-      <TouchableOpacity onPress={handleComment}>
-        <Text style={styles.postButton}>Post Comment</Text>
+      <TouchableOpacity onPress={handleComment} style={styles.submitButton}>
+        <Text style={styles.submitButtonText}>Submit Comment</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -231,19 +239,23 @@ const styles = StyleSheet.create({
   interactionContainer: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
   input: { borderWidth: 1, padding: 8, marginVertical: 8, borderRadius: 4 },
   comment: { borderBottomWidth: 1, paddingVertical: 8, marginBottom: 8 },
-  reply: { paddingLeft: 16, fontSize: 14, color: 'gray', marginVertical: 4 },
   commentHeader: { flexDirection: 'row', justifyContent: 'space-between' },
   commentUser: { fontWeight: 'bold' },
+  commentDate: { color: 'gray' },
   commentText: { marginVertical: 4 },
-  replyUser: { fontWeight: 'bold', fontSize: 14 },
-  replyButton: { color: 'blue', marginTop: 4 },
-  commentInputContainer: { marginTop: 16 },
-  postButton: { color: 'blue', marginTop: 8 },
+  commentActions: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 8 },
+  replies: { color: '#1C5739' },
+  replyButton: { color: '#1C5739', marginTop: 4 },
+  replyInputContainer: { marginTop: 16 },
+  reply: { marginLeft: 16, marginTop: 8 },
+  replyUser: { fontWeight: 'bold' },
+  replyText: { color: 'black' },
+  postButton: { color: '#1C5739', marginTop: 8 },
+  submitButton: { backgroundColor: '#1C5739', padding: 10, borderRadius: 4, marginTop: 10 },
+  submitButtonText: { color: 'white', textAlign: 'center', fontWeight: 'bold' },
   backButton: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   backButtonText: { marginLeft: 8, fontSize: 16 },
   image: { width: '100%', height: 200, marginVertical: 16 },
 });
 
 export default AnnouncementDetail;
-
-

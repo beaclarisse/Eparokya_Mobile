@@ -103,7 +103,7 @@ const FuneralList = ({ navigation }) => {
 
       {/* Filter Buttons */}
       <View style={styles.filterContainer}>
-        {["All", "Pending", "Confirmed", "Declined"].map((status) => (
+        {["All", "Pending", "Confirmed", "Cancelled"].map((status) => (
           <TouchableOpacity
             key={status}
             style={[

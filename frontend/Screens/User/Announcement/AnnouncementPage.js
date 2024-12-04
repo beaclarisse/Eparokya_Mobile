@@ -14,6 +14,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import baseURL from '../../../assets/common/baseUrl';
 import SyncStorage from 'sync-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const AnnouncementPage = ({ navigation }) => {
   const [announcements, setAnnouncements] = useState([]);
@@ -45,6 +46,8 @@ const AnnouncementPage = ({ navigation }) => {
     fetchCategories();
     fetchAnnouncements();
   }, []);
+
+
 
   useEffect(() => {
     if (searchQuery) {
@@ -78,6 +81,10 @@ const AnnouncementPage = ({ navigation }) => {
       console.error('Unable to update like status:', error);
       Toast.show({ type: 'error', text1: 'Error', text2: 'Unable to update like status.' });
     }
+  };
+
+  const handleCardPress = (item) => {
+    navigation.navigate("AnnouncementDetail", { announcementId: item._id });
   };
 
   return (
@@ -118,9 +125,9 @@ const AnnouncementPage = ({ navigation }) => {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={styles.card}
-            onPress={() => handleNavigateToDetail(item._id)}
-          >
+          style={styles.card}
+          onPress={() => handleCardPress(item)}
+        >
             <Text style={styles.title}>{item.name || 'No Title Available'}</Text>
             <Text>{item.description || 'No Description Available'}</Text>
             {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
