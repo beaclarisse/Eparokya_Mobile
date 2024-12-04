@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 // Reply Schema
 const replySchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     text: { type: String, required: true },
     likedBy: { type: [mongoose.Schema.Types.ObjectId], ref: 'User', default: [] },
     dateCreated: { type: Date, default: Date.now },
@@ -16,7 +17,6 @@ replySchema.set('toJSON', {
     virtuals: true,
 });
 
-// Register Reply model
 const Reply = mongoose.model('Reply', replySchema);
 
 // Comment Schema
@@ -37,7 +37,6 @@ commentSchema.set('toJSON', {
     virtuals: true,
 });
 
-// Register Comment model
 const Comment = mongoose.model('Comment', commentSchema);
 
 // Announcement Schema
@@ -66,7 +65,6 @@ announcementSchema.set('toJSON', {
     virtuals: true,
 });
 
-// Register Announcement model
 const Announcement = mongoose.model('Announcement', announcementSchema);
 
 module.exports = { Announcement, Comment, Reply };

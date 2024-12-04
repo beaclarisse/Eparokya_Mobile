@@ -19,7 +19,6 @@ const AnnouncementPage = ({ navigation }) => {
   const [announcements, setAnnouncements] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
 
@@ -36,15 +35,12 @@ const AnnouncementPage = ({ navigation }) => {
     const fetchAnnouncements = async () => {
       try {
         const response = await axios.get(`${baseURL}/announcement/`);
-        console.log(response.data);  
         setAnnouncements(response.data);
         setFilteredAnnouncements(response.data);
       } catch (err) {
-        setError('Failed to fetch announcements.');
-        console.log('Error:', err);
+        console.error('Failed to fetch announcements:', err);
       }
     };
-
 
     fetchCategories();
     fetchAnnouncements();
@@ -95,94 +91,92 @@ const AnnouncementPage = ({ navigation }) => {
   };
 
   return (
-    <ScrollView nestedScrollEnabled style={styles.container}>
-      {error ? (
-        <Text>{error}</Text>
-      ) : (
-        <>
-          {/* Search Bar */}
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search by title..."
-            value={searchQuery}
-            onChangeText={(text) => setSearchQuery(text)}
-          />
+    <ScrollView style={styles.container}>
+      <View style={styles.header}>
+        <Image source={require('../../../assets/WelcomeHomePage_EParokya.png')} style={styles.headerBackground} />
+        <View style={styles.userInfo}>
+        </View>
+      </View>
 
-          {/* Categories */}
-          <ScrollView
-            horizontal
-            nestedScrollEnabled
-            showsHorizontalScrollIndicator={false}
-            style={styles.categoryContainer}
+
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search"
+          placeholderTextColor="#2f4f2f" 
+          value={searchQuery}
+          onChangeText={(text) => setSearchQuery(text)}
+        />
+        <TouchableOpacity style={styles.searchIconContainer}>
+          <MaterialIcons name="search" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
+
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryContainer}
+      >
+        {categories.map((category) => (
+          <TouchableOpacity
+            key={category._id}
+            style={[
+              styles.categoryIcon,
+              selectedCategory === category._id && styles.selectedCategory,
+            ]}
+            onPress={() => setSelectedCategory(category._id)}
           >
-            {categories.map((category) => (
-              <TouchableOpacity
-                key={category._id}
-                style={[
-                  styles.categoryIcon,
-                  selectedCategory === category._id && styles.selectedCategory,
-                ]}
-                onPress={() => setSelectedCategory(category._id)}
-              >
-                {category.image && (
-                  <Image source={{ uri: category.image }} style={styles.categoryImage} />
-                )}
-                <Text style={styles.categoryText}>{category.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+            <Image
+              source={{
+                uri: category.image || 'https://via.placeholder.com/50',
+              }}
+              style={styles.categoryImage}
+            />
+            <Text style={styles.categoryText}>{category.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
 
-          {/* Announcements */}
-          <FlatList
-            nestedScrollEnabled
-            data={announcements}  // Use the full list of announcements, without filtering
-            renderItem={({ item }) => (
+      <FlatList
+        data={filteredAnnouncements}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() =>
+              navigation.navigate('Profile', {
+                screen: 'AnnouncementDetail',
+                params: { announcementId: item._id },
+              })
+            }
+          >
+            <Text style={styles.title}>{item.name || 'No title available'}</Text>
+            <Text>{item.description || 'No description available'}</Text>
+            {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
+            <View style={styles.interactionContainer}>
+              <TouchableOpacity onPress={() => handleLike(item._id)}>
+                <MaterialIcons
+                  name="thumb-up"
+                  size={24}
+                  color={item.liked ? 'green' : 'gray'}
+                />
+              </TouchableOpacity>
+              <Text style={styles.countText}>{item.likes || 0}</Text>
               <TouchableOpacity
-                style={styles.card}
                 onPress={() =>
-                  navigation.navigate('Profile', {
-                    screen: 'AnnouncementDetail',
-                    params: { announcementId: item._id },
-                  })
+                  navigation.navigate('AnnouncementDetail', { announcementId: item._id })
                 }
               >
-                <Text style={styles.title}>{item.name || 'No title available'}</Text>
-                <Text>{item.description || 'No description available'}</Text>
-                {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
-                {item.video && <Text style={styles.media}>Video: {item.video}</Text>}
-                <View style={styles.interactionContainer}>
-                  <TouchableOpacity onPress={() => handleLike(item._id)}>
-                    <MaterialIcons
-                      name="thumb-up"
-                      size={24}
-                      color={item.liked ? 'green' : 'gray'}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.countText}>{item.likes || 0}</Text>
-
-                  <TouchableOpacity
-                    onPress={() =>
-                      navigation.navigate('AnnouncementDetail', { announcementId: item._id })
-                    }
-                  >
-                    <MaterialIcons
-                      name="comment"
-                      size={24}
-                      color="gray"
-                      style={styles.commentIcon}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.countText}>
-                    {item.comments ? item.comments.length : 0}
-                  </Text>
-                </View>
+                <MaterialIcons name="comment" size={24} color="gray" />
               </TouchableOpacity>
-            )}
-            keyExtractor={(item) => item._id}
-          />
-
-        </>
-      )}
+              <Text style={styles.countText}>
+                {item.comments ? item.comments.length : 0}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(item) => item._id}
+      />
       <Toast />
     </ScrollView>
   );
@@ -191,64 +185,75 @@ const AnnouncementPage = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
+    backgroundColor: '#f8f8f8',
+  },
+  header: {
+    height: 200,
+    position: 'relative',
+  },
+  headerBackground: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  userInfo: {
+    position: 'absolute',
+    bottom: 10,
+    left: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  welcomeText: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold',
   },
   searchInput: {
-    borderColor: '#ddd',
-    borderWidth: 1,
+    margin: 10,
     padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
     borderRadius: 8,
-    marginBottom: 10,
-    fontSize: 16,
+    backgroundColor: 'white',
   },
   categoryContainer: {
     flexDirection: 'row',
-    marginBottom: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 10,
+    marginHorizontal: 10,
   },
   categoryIcon: {
     alignItems: 'center',
     marginHorizontal: 10,
-    backgroundColor: '#FFF',
-    padding: 8,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#DDD',
-  },
-  selectedCategory: {
-    backgroundColor: '#FFB400',
   },
   categoryImage: {
     width: 50,
     height: 50,
-    borderRadius: 8,
-    marginBottom: 5,
+    borderRadius: 25,
   },
   categoryText: {
     fontSize: 12,
     textAlign: 'center',
   },
   card: {
-    marginBottom: 20,
+    backgroundColor: '#b3cf99',
     padding: 15,
+    margin: 10,
     borderRadius: 10,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
   },
   media: {
     width: '100%',
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 10,
+    height: 150,
+    borderRadius: 10,
+    marginTop: 10,
   },
   interactionContainer: {
     flexDirection: 'row',
@@ -257,11 +262,32 @@ const styles = StyleSheet.create({
   },
   countText: {
     marginLeft: 5,
-    fontSize: 16,
-    color: 'black',
+    fontSize: 14,
   },
-  commentIcon: {
-    marginLeft: 20,
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#b3cf99',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    marginTop:20,
+    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#2f4f2f',
+    marginRight: 10,
+  },
+  searchIconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

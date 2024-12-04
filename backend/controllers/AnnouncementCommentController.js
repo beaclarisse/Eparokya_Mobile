@@ -4,7 +4,15 @@ const jwt = require('jsonwebtoken');
 exports.addComment = async (req, res) => {
     const { announcementId } = req.params;
     const { text } = req.body;
-    const userId = req.user.id;
+    const userId = req.user?.id; 
+
+    if (!text || text.trim() === '') {
+        return res.status(400).json({ message: 'Comment text cannot be empty.' });
+    }
+
+    if (!announcementId) {
+        return res.status(400).json({ message: 'Announcement ID is required.' });
+    }
 
     try {
         const comment = new Comment({
@@ -14,20 +22,31 @@ exports.addComment = async (req, res) => {
         });
 
         await comment.save();
-        await Announcement.findByIdAndUpdate(announcementId, {
-            $push: { comments: comment._id },
-            $inc: { commentsCount: 1 },
-        });
 
-        res.status(201).json({ message: 'Comment added successfully', data: comment });
+        await Announcement.findByIdAndUpdate(
+            announcementId,
+            {
+                $push: { comments: comment._id },
+                $inc: { commentsCount: 1 },
+            },
+            { new: true } 
+        );
+
+        const populatedComment = await comment.populate('user', 'name');
+
+        res.status(201).json({ 
+            message: 'Comment added successfully', 
+            data: populatedComment 
+        });
     } catch (error) {
         console.error('Error adding comment:', error);
         res.status(500).json({ message: 'Failed to add comment', error });
     }
 };
 
+
 exports.addReply = async (req, res) => {
-    const { announcementId } = req.params; 
+    const { commentId } = req.params;
     const { text } = req.body;
     const userId = req.user?.id;
 
@@ -38,7 +57,8 @@ exports.addReply = async (req, res) => {
         });
 
         await reply.save();
-        await Comment.findByIdAndUpdate(announcementId, { $push: { replies: reply._id } });
+
+        await Comment.findByIdAndUpdate(commentId, { $push: { replies: reply._id } });
 
         res.status(201).json({ message: 'Reply added successfully', data: reply });
     } catch (error) {
@@ -47,10 +67,10 @@ exports.addReply = async (req, res) => {
     }
 };
 
-exports.updateCommentOrReply = async (req, res) => {
-    const { id } = req.params; // ID can be commentId or replyId
-    const { text, type } = req.body; // Type determines 'comment' or 'reply'
 
+exports.updateCommentOrReply = async (req, res) => {
+    const { id } = req.params;
+    const { text, type } = req.body; 
     try {
         const model = type === 'reply' ? Reply : Comment;
         const entity = await model.findByIdAndUpdate(id, { text }, { new: true });
@@ -67,8 +87,8 @@ exports.updateCommentOrReply = async (req, res) => {
 };
 
 exports.deleteCommentOrReply = async (req, res) => {
-    const { id } = req.params; // ID can be commentId or replyId
-    const { type, parentId } = req.body; // Parent ID is the comment ID if deleting a reply
+    const { id } = req.params; 
+    const { type, parentId } = req.body; 
 
     try {
         const model = type === 'reply' ? Reply : Comment;
@@ -77,12 +97,9 @@ exports.deleteCommentOrReply = async (req, res) => {
         if (!entity) {
             return res.status(404).json({ message: `${type} not found` });
         }
-
-        // Update parent entity if type is 'reply'
         if (type === 'reply') {
             await Comment.findByIdAndUpdate(parentId, { $pull: { replies: id } });
         } else {
-            // If deleting a comment, decrement the comment count in the announcement
             await Announcement.findByIdAndUpdate(entity.announcement, { $inc: { commentsCount: -1 } });
         }
 
@@ -93,7 +110,6 @@ exports.deleteCommentOrReply = async (req, res) => {
     }
 };
 
-
 exports.getCommentsWithReplies = async (req, res) => {
     const { announcementId } = req.params;
 
@@ -101,8 +117,8 @@ exports.getCommentsWithReplies = async (req, res) => {
         const comments = await Comment.find({ announcement: announcementId })
             .populate('user', 'name') 
             .populate({
-                path: 'replies', 
-                populate: { path: 'user', select: 'name' }, 
+                path: 'replies',
+                populate: { path: 'user', select: 'name' },
             });
 
         res.status(200).json({ data: comments });
@@ -112,15 +128,16 @@ exports.getCommentsWithReplies = async (req, res) => {
     }
 };
 
-
-
 exports.likeComment = async (req, res) => {
     const { commentId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.id; 
+
+    if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
 
     try {
         const comment = await Comment.findById(commentId);
-
         if (!comment) {
             return res.status(404).json({ message: 'Comment not found' });
         }
@@ -128,6 +145,7 @@ exports.likeComment = async (req, res) => {
         if (comment.likedBy.includes(userId)) {
             return res.status(400).json({ message: 'You have already liked this comment' });
         }
+
         comment.likedBy.push(userId);
         await comment.save();
 
@@ -137,6 +155,7 @@ exports.likeComment = async (req, res) => {
         res.status(500).json({ message: 'Failed to like comment', error });
     }
 };
+
 
 exports.unlikeComment = async (req, res) => {
     const { commentId } = req.params;

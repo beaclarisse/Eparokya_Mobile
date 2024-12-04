@@ -10,7 +10,6 @@ router.put('/announcementId/comment/update/:commentId', isAuthenticated, Announc
 router.delete('/announcementId/comment/delete/:commentId', isAuthenticated, AnnouncementCommentController.deleteCommentOrReply);
 
 router.get('/:announcementId/comments', AnnouncementCommentController.getCommentsWithReplies);
-
 router.get('/comments/:announcementId', AnnouncementCommentController.getCommentsWithReplies);
 
 router.post('/comment/like/:commentId', isAuthenticated, AnnouncementCommentController.likeComment);
