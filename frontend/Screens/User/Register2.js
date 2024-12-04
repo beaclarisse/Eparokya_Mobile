@@ -9,7 +9,7 @@ import axios from "axios";
 import baseURL from "../../assets/common/baseUrl";
 import Toast from "react-native-toast-message";
 import { MaterialIcons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";  
+import * as ImagePicker from "expo-image-picker";
 import RNPickerSelect from 'react-native-picker-select';
 
 var { height, width } = Dimensions.get("window");
@@ -23,15 +23,16 @@ const Register2 = () => {
   const [country, setCountry] = useState("");
   const [preference, setPreference] = useState("They/Them");
   const [error, setError] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null); 
-  const [ministryCategory, setMinistryCategories] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [ministryCategory, setMinistryCategories] = useState([]);
+  const [selectedMinistryCategory, setSelectedMinistryCategory] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
 
   const { email, name, password } = route.params;
 
-  const defaultImage = "https://rb.gy/hnb4yc";  
+  const defaultImage = "https://rb.gy/hnb4yc";
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -42,7 +43,7 @@ const Register2 = () => {
     });
 
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);  
+      setSelectedImage(result.assets[0].uri);
     }
   };
 
@@ -55,7 +56,7 @@ const Register2 = () => {
     });
 
     if (!result.canceled) {
-    console.log("Image selected:", result.assets[0].uri);
+      console.log("Image selected:", result.assets[0].uri);
       setSelectedImage(result.assets[0].uri);
     }
     setModalVisible(false);
@@ -86,7 +87,8 @@ const Register2 = () => {
       barangay === "" ||
       zip === "" ||
       city === "" ||
-      country === ""
+      country === "" ||
+      !selectedMinistryCategory 
     ) {
       setError("Please fill in the form correctly");
       return;
@@ -104,12 +106,13 @@ const Register2 = () => {
     formData.append('city', city);
     formData.append('country', country);
     formData.append('preference', preference);
+    formData.append('ministryCategory', selectedMinistryCategory);
 
     if (selectedImage) {
       formData.append('image', {
         uri: selectedImage,
         type: 'image/jpeg',
-        name: 'image.jpg', 
+        name: 'image.jpg',
       });
     }
 
@@ -145,14 +148,20 @@ const Register2 = () => {
   };
 
   useEffect(() => {
-    axios.get(`${baseURL}/ministryCategory`) 
-        .then(response => {
-            setMinistryCategories(response.data);
-        })
-        .catch(error => {
-            console.error('Error fetching ministry categories:', error);
-        });
-}, []);
+    axios
+      .get(`${baseURL}/ministryCategory/`)
+      .then((response) => {
+        console.log("Fetched Categories:", response.data);
+        setMinistryCategories(response.data || []);
+      })
+      .catch((error) => {
+        console.error("Fetch Error:", error);
+        setMinistryCategories([]);
+      });
+  }, []);
+
+
+
 
   return (
     <KeyboardAwareScrollView
@@ -240,12 +249,13 @@ const Register2 = () => {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Ministry</Text>
           <RNPickerSelect
-            onValueChange={(value) => setMinistryCategories(value)}
-            items={ministryCategory.map(category => ({
-                label: category.name,
-                value: category._id,
+            onValueChange={(value) => setSelectedMinistryCategory(value)} 
+            items={(ministryCategory || []).map((category) => ({
+              label: category.name,
+              value: category._id,
             }))}
-            placeholder={{ label: 'Select Ministry Category if Part of the Ministry', value: null }}
+            placeholder={{ label: "Select Ministry Category if Part of the Ministry", value: null }}
+            style={pickerSelectStyles}
           />
         </View>
 
@@ -379,7 +389,7 @@ const pickerSelectStyles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 4,
     color: 'black',
-    paddingRight: 30, 
+    paddingRight: 30,
     width: "100%",
   },
   inputAndroid: {

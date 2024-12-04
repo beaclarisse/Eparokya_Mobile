@@ -58,35 +58,25 @@ const AnnouncementPage = ({ navigation }) => {
   }, [searchQuery, announcements]);
 
   const handleLike = async (announcementId) => {
-    const token = await SyncStorage.get('jwt');
+    const token = SyncStorage.get('jwt');
     if (!token) {
-      console.error('No token found');
+      Toast.show({ type: 'error', text1: 'Login Required', text2: 'Please log in to perform this action.' });
       return;
     }
 
-    const announcement = announcements.find((item) => item._id === announcementId);
-    const isLiked = announcement && announcement.liked;
-
     try {
-      await axios.put(
-        `${baseURL}/announcement/like/${announcementId}`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setAnnouncements((prevAnnouncements) =>
-        prevAnnouncements.map((item) =>
-          item._id === announcementId
-            ? { ...item, likes: isLiked ? item.likes - 1 : item.likes + 1, liked: !isLiked }
-            : item
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios.put(`${baseURL}/announcement/like/${announcementId}`, null, config);
+      setAnnouncements((prev) =>
+        prev.map((announcement) =>
+          announcement._id === announcementId
+            ? { ...announcement, likedBy: response.data.likedBy }
+            : announcement
         )
       );
     } catch (error) {
-      console.error('Error liking announcement:', error);
+      console.error('Unable to update like status:', error);
+      Toast.show({ type: 'error', text1: 'Error', text2: 'Unable to update like status.' });
     }
   };
 
@@ -94,16 +84,14 @@ const AnnouncementPage = ({ navigation }) => {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Image source={require('../../../assets/WelcomeHomePage_EParokya.png')} style={styles.headerBackground} />
-        <View style={styles.userInfo}>
-        </View>
+        <View style={styles.userInfo}></View>
       </View>
-
 
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Search"
-          placeholderTextColor="#2f4f2f" 
+          placeholderTextColor="#2f4f2f"
           value={searchQuery}
           onChangeText={(text) => setSearchQuery(text)}
         />
@@ -112,71 +100,53 @@ const AnnouncementPage = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryContainer}
-      >
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
         {categories.map((category) => (
           <TouchableOpacity
             key={category._id}
-            style={[
-              styles.categoryIcon,
-              selectedCategory === category._id && styles.selectedCategory,
-            ]}
+            style={[styles.categoryIcon, selectedCategory === category._id && styles.selectedCategory]}
             onPress={() => setSelectedCategory(category._id)}
           >
-            <Image
-              source={{
-                uri: category.image || 'https://via.placeholder.com/50',
-              }}
-              style={styles.categoryImage}
-            />
+            <Image source={{ uri: category.image || 'https://via.placeholder.com/50' }} style={styles.categoryImage} />
             <Text style={styles.categoryText}>{category.name}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
 
       <FlatList
-        data={filteredAnnouncements}
+        data={announcements}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={styles.card}
-            onPress={() =>
-              navigation.navigate('Profile', {
-                screen: 'AnnouncementDetail',
-                params: { announcementId: item._id },
-              })
-            }
+            onPress={() => handleNavigateToDetail(item._id)}
           >
-            <Text style={styles.title}>{item.name || 'No title available'}</Text>
-            <Text>{item.description || 'No description available'}</Text>
+            <Text style={styles.title}>{item.name || 'No Title Available'}</Text>
+            <Text>{item.description || 'No Description Available'}</Text>
             {item.image && <Image source={{ uri: item.image }} style={styles.media} />}
+
+            {/* Like and Comments Count */}
             <View style={styles.interactionContainer}>
               <TouchableOpacity onPress={() => handleLike(item._id)}>
                 <MaterialIcons
                   name="thumb-up"
                   size={24}
-                  color={item.liked ? 'green' : 'gray'}
+                  color={item.likedBy?.includes(SyncStorage.get('userId')) ? 'green' : 'gray'}
                 />
               </TouchableOpacity>
-              <Text style={styles.countText}>{item.likes || 0}</Text>
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate('AnnouncementDetail', { announcementId: item._id })
-                }
-              >
+              <Text style={styles.countText}>{item.likedBy?.length || 0}</Text>
+
+              {/* Comments Count */}
+              <TouchableOpacity onPress={() => handleNavigateToDetail(item._id)}>
                 <MaterialIcons name="comment" size={24} color="gray" />
               </TouchableOpacity>
-              <Text style={styles.countText}>
-                {item.comments ? item.comments.length : 0}
-              </Text>
+              <Text style={styles.countText}>{item.comments?.length || 0}</Text>
             </View>
           </TouchableOpacity>
         )}
-        keyExtractor={(item) => item._id}
       />
+
+
       <Toast />
     </ScrollView>
   );
@@ -271,7 +241,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 5,
-    marginTop:20,
+    marginTop: 20,
     marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

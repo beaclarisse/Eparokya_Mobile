@@ -5,7 +5,6 @@ import {
   ScrollView,
   Image,
   StyleSheet,
-  Modal,
   TouchableOpacity,
 } from "react-native";
 import { Container } from "native-base";
@@ -23,36 +22,10 @@ const UserProfile = ({ navigation }) => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const dispatch = useDispatch();
 
   const defaultImage = "https://rb.gy/hnb4yc";
-
-  // const getProfile = async () => {
-  //   const token = await SyncStorage.get("jwt");
-  //   if (!token) {
-  //     setIsAuthenticated(false);
-  //     navigation.navigate("Login");
-  //     return;
-  //   }
-  //   try {
-  //     const config = {
-  //       headers: {
-  //         Authorization: `${token}`,
-  //       },
-  //     };
-  //     const { data } = await axios.get(`${baseURL}/users/profile`, config);
-  //     setUserProfile(data.user);
-  //   } catch (error) {
-  //     console.error(error);
-  //     setIsAuthenticated(false);
-  //     navigation.navigate("Login");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
 
   const getProfile = async () => {
     const token = await SyncStorage.get("jwt");
@@ -78,7 +51,7 @@ const UserProfile = ({ navigation }) => {
       setLoading(false);
     }
   };
-  
+
   useFocusEffect(
     useCallback(() => {
       setIsAuthenticated(true);
@@ -98,80 +71,84 @@ const UserProfile = ({ navigation }) => {
     }
   };
 
-
-
   return (
     <FormContainer>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <>
-          <View style={styles.profileSection}>
-            {selectedImage ? (
-              <Image
-                source={{ uri: selectedImage }}
-                style={styles.profileImage}
-              />
-            ) : (
-              <Image
-                source={{ uri: userProfile?.image || defaultImage }}
-                style={styles.profileImage}
-              />
-            )}
-            <View style={styles.nameContainer}>
-              <Text style={styles.profileName}>{userProfile?.name}</Text>
-              <Text style={styles.joinedLabel}>
-                Joined: {userProfile?.createdAt?.slice(0, 10)}
-              </Text>
-            </View>
-          </View>
-  
-          {/* User Info */}
-          <View style={styles.infoContainer}>
-            <MaterialIcons name="email" size={24} color="#333" />
-            <Text style={styles.infoText}>{userProfile?.email}</Text>
-          </View>
-          <View style={styles.infoContainer}>
-            <MaterialIcons name="phone" size={24} color="#333" />
-            <Text style={styles.infoText}>{userProfile?.phone}</Text>
-          </View>
-          <View style={styles.infoContainer}>
-            <MaterialIcons name="info" size={24} color="#333" />
-            <Text style={styles.infoText}>{userProfile?.age}</Text>
-          </View>
-          <View style={styles.infoContainer}>
-            <MaterialIcons name="info" size={24} color="#333" />
-            <Text style={styles.infoText}>{userProfile?.preference}</Text>
-          </View>
-          <View style={styles.infoContainer}>
-            <MaterialIcons name="home" size={24} color="#333" />
-            <Text style={styles.infoText}>
-              {userProfile?.city}, {userProfile?.barangay}, {userProfile?.zip},{" "}
-              {userProfile?.country}
+        <View style={styles.profileSection}>
+          {selectedImage ? (
+            <Image
+              source={{ uri: selectedImage }}
+              style={styles.profileImage}
+            />
+          ) : (
+            <Image
+              source={{ uri: userProfile?.image || defaultImage }}
+              style={styles.profileImage}
+            />
+          )}
+          <View style={styles.nameContainer}>
+            <Text style={styles.profileName}>{userProfile?.name}</Text>
+            <Text style={styles.joinedLabel}>
+              Joined: {userProfile?.createdAt?.slice(0, 10)}
             </Text>
           </View>
-  
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("UpdateProfile")}
-              style={styles.actionButton}
-            >
-              <MaterialIcons name="app-registration" size={24} color="white" />
-            </TouchableOpacity>
+        </View>
 
-            <TouchableOpacity
-              onPress={() => navigation.navigate("SubmittedForms")}
-              style={styles.actionButton}
-            >
-              <MaterialIcons name="app-registration" size={24} color="white" />
-            </TouchableOpacity>
-  
-            <TouchableOpacity
-              onPress={handleLogout}
-              style={styles.actionButton}
-            >
-              <MaterialIcons name="logout" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-        </>
+        {/* User Info */}
+        <View style={styles.infoContainer}>
+          <MaterialIcons name="email" size={24} color="#333" />
+          <Text style={styles.infoText}>{userProfile?.email}</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <MaterialIcons name="phone" size={24} color="#333" />
+          <Text style={styles.infoText}>{userProfile?.phone}</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <MaterialIcons name="info" size={24} color="#333" />
+          <Text style={styles.infoText}>{userProfile?.age}</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <MaterialIcons name="info" size={24} color="#333" />
+          <Text style={styles.infoText}>{userProfile?.preference}</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <MaterialIcons name="home" size={24} color="#333" />
+          <Text style={styles.infoText}>
+            {userProfile?.city}, {userProfile?.barangay}, {userProfile?.zip},{" "}
+            {userProfile?.country}
+          </Text>
+        </View>
+
+        {/* Display Ministry Category */}
+        <View style={styles.infoContainer}>
+          <MaterialIcons name="group" size={24} color="#333" />
+          <Text style={styles.infoText}>
+            {userProfile?.ministryCategory?.name || "No ministry category assigned"}
+          </Text>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("UpdateProfile")}
+            style={styles.actionButton}
+          >
+            <MaterialIcons name="app-registration" size={24} color="white" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate("SubmittedForms")}
+            style={styles.actionButton}
+          >
+            <MaterialIcons name="app-registration" size={24} color="white" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleLogout}
+            style={styles.actionButton}
+          >
+            <MaterialIcons name="logout" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </FormContainer>
   );
@@ -221,19 +198,6 @@ const styles = StyleSheet.create({
     color: "#333",
     fontSize: 16,
   },
-  changeProfileButton: {
-    backgroundColor: "#154314",
-    width: "90%",
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  changeProfileText: {
-    color: "white",
-    fontFamily: "Roboto",
-    fontSize: 16,
-  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -247,38 +211,6 @@ const styles = StyleSheet.create({
     width: "30%",
     alignItems: "center",
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "80%",
-    padding: 20,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 20,
-    fontWeight: "bold",
-  },
-  modalButton: {
-    marginVertical: 10,
-    padding: 10,
-    backgroundColor: "#154314",
-    borderRadius: 5,
-    width: "100%",
-    alignItems: "center",
-  },
-  modalButtonText: {
-    color: "white",
-  },
-  modalCloseButton: { 
-    marginTop: 20,
-    padding: 10,
-  }
 });
 
 export default UserProfile;

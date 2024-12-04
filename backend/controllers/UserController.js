@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const MinistryCategory = require('../models/ministryCategory');
 const sendToken = require('../routes/jwtToken');
 const cloudinary = require('../config/cloudinary');
 const fs = require('fs');
@@ -32,23 +33,21 @@ exports.register = async (req, res) => {
     console.log(req.file); 
 
     try {
-        const { name, email, password, age, preference, phone, barangay, zip } = req.body;
+        const { name, email, password, age, preference, phone, barangay, zip, ministryCategory } = req.body;
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ error: 'Email already exists' });
         }
-
         let imageUrl = '';
         if (req.file) {
             imageUrl = req.file.path; 
         }
 
-        const category = await ministryCategory.findById(ministryCategory);
+        const category = await MinistryCategory.findById(ministryCategory);
         if (!category) {
             return res.status(400).json({ error: 'Invalid ministry category' });
         }
-
         const user = new User({
             name,
             email,
@@ -74,7 +73,7 @@ exports.register = async (req, res) => {
     }
 };
 
-  
+
 exports.login = async (req, res) => {
 
     try {
@@ -124,13 +123,17 @@ exports.Logout = async (req, res, next) => {
 
 exports.Profile = async (req, res, next) => {
     // console.log(req.header('authorization'))
-    const user = await User.findById(req.user.id);
-
-    res.status(200).json({
-        success: true,
-        user
-    })
-}
+    try {
+        const user = await User.findById(req.user.id).populate("ministryCategory");
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        res.json({ user });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Server error" });
+      }
+    };
 
 exports.UpdateProfile = async (req, res, next) => {
     try {
