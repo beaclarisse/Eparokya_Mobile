@@ -4,8 +4,8 @@
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -32,7 +32,6 @@
     "expo-image-picker": "~15.0.7",
     "expo-location": "^17.0.1",
     "expo-media-library": "^16.0.5",
-    "expo-permissions": "^14.4.0",
     "expo-status-bar": "~1.12.1",
     "js-base64": "^3.7.7",
     "jwt-decode": "^4.0.0",
