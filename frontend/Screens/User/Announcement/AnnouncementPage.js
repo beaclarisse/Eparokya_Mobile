@@ -22,6 +22,7 @@ const AnnouncementPage = ({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredAnnouncements, setFilteredAnnouncements] = useState([]);
+  const [autocompleteSuggestions, setAutocompleteSuggestions] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -50,15 +51,23 @@ const AnnouncementPage = ({ navigation }) => {
 
 
   useEffect(() => {
+    let filteredData = announcements;
     if (searchQuery) {
-      const searchResults = announcements.filter((announcement) =>
+      filteredData = filteredData.filter((announcement) =>
         announcement.name?.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredAnnouncements(searchResults);
+      setAutocompleteSuggestions(filteredData);  
     } else {
-      setFilteredAnnouncements(announcements);
+      setAutocompleteSuggestions([]);  
     }
-  }, [searchQuery, announcements]);
+
+    if (selectedCategory) {
+      filteredData = filteredData.filter(
+        (announcement) => announcement.category?._id === selectedCategory
+      );
+    }
+    setFilteredAnnouncements(filteredData);
+  }, [searchQuery, selectedCategory, announcements]);
 
   const handleLike = async (announcementId) => {
     const token = SyncStorage.get('jwt');
@@ -87,6 +96,10 @@ const AnnouncementPage = ({ navigation }) => {
     navigation.navigate("AnnouncementDetail", { announcementId: item._id });
   };
 
+  const handleSearchInputChange = (text) => {
+    setSearchQuery(text);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -100,12 +113,30 @@ const AnnouncementPage = ({ navigation }) => {
           placeholder="Search"
           placeholderTextColor="#2f4f2f"
           value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
+          onChangeText={handleSearchInputChange}
         />
         <TouchableOpacity style={styles.searchIconContainer}>
           <MaterialIcons name="search" size={24} color="black" />
         </TouchableOpacity>
       </View>
+
+      {autocompleteSuggestions.length > 0 && searchQuery && (
+        <View style={styles.autocompleteSuggestions}>
+          {autocompleteSuggestions.map((item) => (
+            <TouchableOpacity
+              key={item._id}
+              onPress={() => {
+                setSearchQuery(item.name); 
+                handleCardPress(item); 
+              }}
+              style={styles.suggestionItem}
+            >
+              <Text>{item.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
         {categories.map((category) => (
